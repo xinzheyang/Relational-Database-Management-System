@@ -27,4 +27,11 @@ public class ScanOperator extends Operator {
 
 	}
 
+	@Override
+	public void dump() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+
 }
