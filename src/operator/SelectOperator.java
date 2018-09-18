@@ -1,7 +1,9 @@
 /**
  * 
  */
-package database;
+package operator;
+
+import database.Tuple;
 
 /**
  * @author sitianchen

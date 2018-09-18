@@ -1,9 +1,11 @@
 /**
  * 
  */
-package database;
+package operator;
 
 import java.util.*;
+
+import database.Tuple;
 
 /**
  * @author xinzheyang
@@ -11,8 +13,6 @@ import java.util.*;
  */
 public abstract class Operator {
 	
-	public ArrayList<Tuple> relation;
-	public int ptr;
 	/**
 	 * @return
 	 */

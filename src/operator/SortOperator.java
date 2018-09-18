@@ -1,25 +1,18 @@
 /**
  * 
  */
-package database;
+package operator;
 
-import java.util.*;
+import database.Tuple;
 
 /**
  * @author sitianchen
  *
  */
-public class ScanOperator extends Operator {
-	
-	/* Upon initialization, opens up a file scan on the appropriate data file
-	 * data file.
-	 */
-	public ScanOperator() {
-		
-	}
+public class SortOperator extends Operator {
 
-	/* Reads the next line from the file that stores the base table and 
-	 * returns the next tuple.
+	/* (non-Javadoc)
+	 * @see database.Operator#getNextTuple()
 	 */
 	@Override
 	public Tuple getNextTuple() {
@@ -36,11 +29,13 @@ public class ScanOperator extends Operator {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see database.Operator#dump()
+	 */
 	@Override
 	public void dump() {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
 
 }
