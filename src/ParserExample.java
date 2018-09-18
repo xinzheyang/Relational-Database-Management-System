@@ -1,6 +1,7 @@
 import java.io.FileReader;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 
 /**
@@ -21,7 +22,12 @@ public class ParserExample {
 			while ((statement = parser.Statement()) != null) {
 				System.out.println("Read statement: " + statement);
 				Select select = (Select) statement;
-				System.out.println("Select body is " + select.getSelectBody());
+				PlainSelect body = (PlainSelect) select.getSelectBody();
+				System.out.println("Select body is " + body);
+				System.out.println("From item is " + body.getFromItem());
+				System.out.println("Joins : " + body.getJoins());
+				System.out.println("Where : " + body.getWhere());
+				System.out.println(" " + body.getDistinct());
 			}
 		} catch (Exception e) {
 			System.err.println("Exception occurred during parsing");
