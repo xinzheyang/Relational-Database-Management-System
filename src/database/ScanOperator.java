@@ -3,14 +3,23 @@
  */
 package database;
 
+import java.util.*;
+
 /**
  * @author sitianchen
  *
  */
 public class ScanOperator extends Operator {
+	
+	/* Upon initialization, opens up a file scan on the appropriate data file
+	 * data file.
+	 */
+	public ScanOperator() {
+		
+	}
 
-	/* (non-Javadoc)
-	 * @see database.Operator#getNextTuple()
+	/* Reads the next line from the file that stores the base table and 
+	 * returns the next tuple.
 	 */
 	@Override
 	public Tuple getNextTuple() {
