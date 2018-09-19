@@ -10,6 +10,9 @@ import database.Tuple;
  *
  */
 public class JoinOperator extends Operator {
+	
+	public Operator leftChild; //left child operator of where the source for getNextTuple() comes from.
+	public Operator rightChild; //right child operator of where the source for getNextTuple() comes from.
 
 	/* (non-Javadoc)
 	 * @see database.Operator#getNextTuple()

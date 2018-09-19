@@ -10,6 +10,8 @@ import database.Tuple;
  *
  */
 public class SelectOperator extends Operator {
+	
+	public Operator childOp; //child operator of where the source for getNextTuple() comes from.
 
 	/* Grabs the next tuple from the scan and check if that tuple passes the 
 	 * selection condition, and if so output it. If the tuple doesn’t pass 

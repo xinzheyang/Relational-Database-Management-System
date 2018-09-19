@@ -17,10 +17,10 @@ public class Parser {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		String dir_in = args[0];
-		String dir_out = args[1];
-		String db_dir = dir_in + File.separator + "db";
-		String q_file = dir_in + File.separator + "queries.sql";
+		String dirIn = args[0];
+		String dirOut = args[1];
+		String dbDir = dirIn + File.separator + "db";
+		String qFile = dirIn + File.separator + "queries.sql";
 		
 	}
 
