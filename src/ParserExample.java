@@ -20,6 +20,7 @@ public class ParserExample {
 			CCJSqlParser parser = new CCJSqlParser(new FileReader(queriesFile));
 			Statement statement;
 			while ((statement = parser.Statement()) != null) {
+//				statement.accept(statementVisitor);
 				System.out.println("Read statement: " + statement);
 				Select select = (Select) statement;
 				PlainSelect body = (PlainSelect) select.getSelectBody();
