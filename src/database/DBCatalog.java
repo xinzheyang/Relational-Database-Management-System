@@ -18,7 +18,8 @@ public class DBCatalog {
 	private HashMap<String, String[]> tableMap; //
 //	private HashMap<String, String> locMap; //do we need this when all table files are in the same dir?
 	private static String locDir;
-	private static DBCatalog catalog = new DBCatalog(); //singleton object for global reference
+	
+	private static DBCatalog catalog = null; //singleton object for global reference
 	
 	/* A private Constructor prevents any other class
 	 * from instantiating a DBCatalog object.
@@ -31,6 +32,9 @@ public class DBCatalog {
 	 * of the class.
 	 */
 	public static DBCatalog getCatalog() {
+		if (catalog == null) {
+			catalog = new DBCatalog();
+		}
 		return catalog;
 	}
 	
