@@ -25,6 +25,7 @@ public class ParserExample {
 				Select select = (Select) statement;
 				PlainSelect body = (PlainSelect) select.getSelectBody();
 				System.out.println("Select body is " + body);
+				System.out.println("Select item is " + body.getSelectItems());
 				System.out.println("From item is " + body.getFromItem());
 				System.out.println("Joins : " + body.getJoins());
 				System.out.println("Where : " + body.getWhere());
