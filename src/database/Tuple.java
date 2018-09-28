@@ -9,4 +9,8 @@ package database;
  */
 public class Tuple {
 	
+	public Tuple() {
+		
+	}
+	
 }

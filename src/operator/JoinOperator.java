@@ -4,6 +4,8 @@
 package operator;
 
 import database.Tuple;
+import visitor.EvaluateExpVisitor;
+import net.sf.jsqlparser.expression.Expression;
 
 /**
  * @author sitianchen
@@ -13,6 +15,7 @@ public class JoinOperator extends Operator {
 	
 	public Operator leftChild; //left child operator of where the source for getNextTuple() comes from.
 	public Operator rightChild; //right child operator of where the source for getNextTuple() comes from.
+	public Expression joinCondition;
 
 	/* (non-Javadoc)
 	 * @see database.Operator#getNextTuple()
@@ -20,6 +23,14 @@ public class JoinOperator extends Operator {
 	@Override
 	public Tuple getNextTuple() {
 		// TODO Auto-generated method stub
+		EvaluateExpVisitor eval = new EvaluateExpVisitor();
+		this.joinCondition.accept(eval);
+		boolean result = eval.getReturnBoolValue();
+//		Tuple tup_left = leftChild.getNextTuple();
+//		while (tup_left != null) {
+//			
+//		}
+			
 		return null;
 	}
 
