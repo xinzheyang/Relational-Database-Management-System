@@ -69,6 +69,7 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	}
 
 	/* (non-Javadoc)
+	 * (don't know what should be done for this one)
 	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.NullValue)
 	 */
 	@Override
@@ -353,7 +354,8 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(Column tableColumn) {
 		// TODO Auto-generated method stub
-
+		assert tableColumn.getTable().equals(currTuple.getTable());
+		this.returnLongValue = (long) currTuple.getColumnValue(tableColumn.getColumnName());
 	}
 
 	/* (non-Javadoc)

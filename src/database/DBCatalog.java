@@ -15,7 +15,7 @@ import java.util.*;
  */
 public class DBCatalog {
 	
-	private HashMap<String, String[]> tableMap; //
+	private static HashMap<String, String[]> tableMap; //
 //	private HashMap<String, String> locMap; //do we need this when all table files are in the same dir?
 	private static String locDir;
 	
@@ -36,6 +36,10 @@ public class DBCatalog {
 			catalog = new DBCatalog();
 		}
 		return catalog;
+	}
+	
+	public static String[] getTableColumns(String tableName) {
+		return tableMap.get(tableName);
 	}
 	
 	public static String getTableLoc(String tableName) {
