@@ -1,5 +1,8 @@
 import java.io.FileReader;
+
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.parser.CCJSqlParser;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
@@ -27,8 +30,14 @@ public class ParserExample {
 				System.out.println("Select body is " + body);
 				System.out.println("Select item is " + body.getSelectItems());
 				System.out.println("From item is " + body.getFromItem());
+				System.out.println("Table alias is " + body.getFromItem().getAlias());
 				System.out.println("Joins : " + body.getJoins());
 				System.out.println("Where : " + body.getWhere());
+				if (body.getWhere() instanceof MinorThan) {
+					System.out.println("Left expression : " + ((MinorThan) body.getWhere()).getLeftExpression());
+					System.out.println("Left expression Column : " + ((Column) ((MinorThan) body.getWhere()).getLeftExpression()).getColumnName());
+					System.out.println("Left expression Table Schema : " + ((Column) ((MinorThan) body.getWhere()).getLeftExpression()).getTable().getAlias());
+				}
 				System.out.println(" " + body.getDistinct());
 			}
 		} catch (Exception e) {
