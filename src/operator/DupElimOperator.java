@@ -33,7 +33,7 @@ public class DupElimOperator extends Operator {
 	 * @see database.Operator#dump()
 	 */
 	@Override
-	public void dump() {
+	public void dump(String fileOut) {
 		// TODO Auto-generated method stub
 
 	}
