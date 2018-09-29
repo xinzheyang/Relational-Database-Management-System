@@ -27,6 +27,7 @@ public class SelectOperator extends Operator {
 		childOp = op;
 		ex = exp;
 		visitor = new EvaluateExpVisitor();
+		columnIndexMap = new HashMap<String, Integer>(childOp.getColumnIndexMap()); //same col index map as child operator
 	}
 	
 	/* Get the input parameter's mapped index in columnIndexMap.
@@ -48,6 +49,7 @@ public class SelectOperator extends Operator {
 		Tuple curr;
 		while((curr = childOp.getNextTuple()) != null) {
 			visitor.setCurrTuple(curr);
+			visitor.setOperator(this);
 //			visitor.visit(curr);
 			ex.accept(visitor);
 			if(visitor.getReturnBoolValue() == true) {

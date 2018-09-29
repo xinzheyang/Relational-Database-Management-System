@@ -28,6 +28,10 @@ public abstract class Operator {
 		return columnIndexMap.get(colName);
 	}
 	
+	public HashMap<String, Integer> getColumnIndexMap() {
+		return columnIndexMap;
+	}
+	
 	/**
 	 * @return
 	 */

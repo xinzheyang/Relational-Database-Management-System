@@ -1,9 +1,10 @@
 # DatabasePrac
 TODO:
 - Parser (using statement visitor, etc.)
-- Scan Operator Completion and testing
+<!--- Scan Operator Completion and testing-->
 - Tuple structure optimization
 - Query plan
+- ColumnIndexMap initialization for all operators in constructors
 
                                                    _oo0oo_
                                                   o8888888o
