@@ -1,12 +1,18 @@
+import java.awt.print.Printable;
 import java.io.FileReader;
+
 
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
-
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
+import java.util.List;
 /**
  * Example class for getting started with JSQLParser. Reads SQL statements from
  * a file and prints them to screen; then extracts SelectBody from each query
@@ -28,16 +34,29 @@ public class ParserExample {
 				Select select = (Select) statement;
 				PlainSelect body = (PlainSelect) select.getSelectBody();
 				System.out.println("Select body is " + body);
-				System.out.println("Select item is " + body.getSelectItems());
+				
+				List<SelectItem> listofitems = body.getSelectItems();
+				System.out.println("Selects item is " + listofitems);
+				for(SelectItem item : listofitems) {
+					if (item instanceof AllColumns) {
+						System.out.println("===========allclomns");
+					}
+					if (item instanceof AllTableColumns) {
+						System.out.println("============alltableclomns");
+					}
+					if (item instanceof SelectExpressionItem) {
+						System.out.println("==============SelectExpressionItem");
+					}
+				}
 				System.out.println("From item is " + body.getFromItem());
 				System.out.println("Table alias is " + body.getFromItem().getAlias());
 				System.out.println("Joins : " + body.getJoins());
 				System.out.println("Where : " + body.getWhere());
-				if (body.getWhere() instanceof MinorThan) {
-					System.out.println("Left expression : " + ((MinorThan) body.getWhere()).getLeftExpression());
-					System.out.println("Left expression Column : " + ((Column) ((MinorThan) body.getWhere()).getLeftExpression()).getColumnName());
-					System.out.println("Left expression Table Schema : " + ((Column) ((MinorThan) body.getWhere()).getLeftExpression()).getTable().getAlias());
-				}
+//				if (body.getWhere() instanceof MinorThan) {
+//					System.out.println("Left expression : " + ((MinorThan) body.getWhere()).getLeftExpression());
+//					System.out.println("Left expression Column : " + ((Column) ((MinorThan) body.getWhere()).getLeftExpression()).getColumnName());
+//					System.out.println("Left expression Table Schema : " + ((Column) ((MinorThan) body.getWhere()).getLeftExpression()).getTable().getAlias());
+//				}
 				System.out.println(" " + body.getDistinct());
 			}
 		} catch (Exception e) {

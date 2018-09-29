@@ -22,8 +22,6 @@ public class QueryPlan {
 	}
 	public Operator buildQueryPlan() {
 		Operator operator;
-		if (body.getDistinct() != null) {
-			operator = new DupElimOperator();
-		}
+		
 	}
 }

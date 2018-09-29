@@ -16,22 +16,21 @@ import operator.Operator;
  *
  */
 public class QueryParser {
-//	private final String queriesFile;
-//	
-//	public QueryParser(String fname) {
-//		queriesFile = fname;
-//	}
-//	
-//	public void parse() {
-//		
-//	}
-	public static void parse(String queriesFile) {
+	private final String queriesFile;
+	
+	public QueryParser(String fname) {
+		queriesFile = fname;
+	}
+	
+	public void parse() {
 		try {
 			CCJSqlParser parser = new CCJSqlParser(new FileReader(queriesFile));
 			Statement statement;
 			while ((statement = parser.Statement()) != null) {
-				Operator operator = QueryPlan.buildQueryPlan(statement);
-				
+				Select select = (Select) statement;
+				PlainSelect body = (PlainSelect) select.getSelectBody();
+				body.getFromItem();
+				body.getSelectItems();
 //				statement.accept(statementVisitor);
 //				System.out.println("Read statement: " + statement);
 //				Select select = (Select) statement;

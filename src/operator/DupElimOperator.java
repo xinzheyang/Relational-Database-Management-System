@@ -10,7 +10,11 @@ import database.Tuple;
  *
  */
 public class DupElimOperator extends Operator {
-	public Operator childOp; //child operator of where the source for getNextTuple() comes from.
+	public SortOperator childOp; //child operator of where the source for getNextTuple() comes from.
+	
+	public DupElimOperator(SortOperator child) {
+		childOp = child;
+	}
 	/* (non-Javadoc)
 	 * @see database.Operator#getNextTuple()
 	 */
