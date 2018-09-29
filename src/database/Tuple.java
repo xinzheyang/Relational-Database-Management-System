@@ -34,6 +34,11 @@ public class Tuple {
 			colValues[i] = Integer.parseInt(columnValuesStr[i]);
 		}
 	}
+	
+	public int getColumnValue(int colIndex) {
+		assert colIndex < colValues.length;
+		return colValues[colIndex];
+	}
 
 	/* Overloading constructor for join operator (merging two tuples together).
 	 */

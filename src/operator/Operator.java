@@ -17,6 +17,17 @@ import database.Tuple;
  */
 public abstract class Operator {
 	
+	
+	protected HashMap<String, Integer> columnIndexMap;
+	
+	
+	/* Get the input parameter's mapped index in columnIndexMap.
+	 * 
+	 */
+	public int getColumnIndex(String colName) {
+		return columnIndexMap.get(colName);
+	}
+	
 	/**
 	 * @return
 	 */

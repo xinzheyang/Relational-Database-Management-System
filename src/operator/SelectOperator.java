@@ -21,13 +21,20 @@ public class SelectOperator extends Operator {
 	public Operator childOp; //child operator of where the source for getNextTuple() comes from.
 	public Expression ex;
 	public EvaluateExpVisitor visitor;
-	private HashMap<String, Integer> columnIndexMap;
+//	private HashMap<String, Integer> columnIndexMap;
 
 	public SelectOperator(Operator op, Expression exp) {
 		childOp = op;
 		ex = exp;
 		visitor = new EvaluateExpVisitor();
 	}
+	
+	/* Get the input parameter's mapped index in columnIndexMap.
+	 * 
+	 */
+//	public int getColumnIndex(String colName) {
+//		return columnIndexMap.get(colName);
+//	}
 
 	/* Grabs the next tuple from the scan and check if that tuple passes the
 	 * selection condition, and if so output it. If the tuple doesn’t pass

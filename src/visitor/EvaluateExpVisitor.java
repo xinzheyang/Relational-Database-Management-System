@@ -334,6 +334,8 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(Column tableColumn) {
 		// TODO Auto-generated method stub
+		int colIndex = op.getColumnIndex(tableColumn.toString());
+		returnLongValue = currTuple.getColumnValue(colIndex);
 //		assert tableColumn.getTable().equals(currTuple.getTable());
 //		this.returnLongValue = (long) currTuple.getColumnValue(tableColumn.getColumnName());
 	}
