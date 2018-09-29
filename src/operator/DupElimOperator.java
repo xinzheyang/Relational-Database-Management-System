@@ -1,7 +1,9 @@
 /**
- * 
+ *
  */
 package operator;
+
+import java.util.HashMap;
 
 import database.Tuple;
 
@@ -11,7 +13,7 @@ import database.Tuple;
  */
 public class DupElimOperator extends Operator {
 	public SortOperator childOp; //child operator of where the source for getNextTuple() comes from.
-	
+
 	public DupElimOperator(SortOperator child) {
 		childOp = child;
 	}

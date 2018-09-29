@@ -45,6 +45,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import operator.Operator;
 
 /**
  * @author sitianchen
@@ -54,7 +55,8 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	
 	private boolean returnBoolValue; //final value of the evaluated expression, if a boolean expression
 	private long returnLongValue; //final value of the evaluated expression, for LongValue or Column
-	public Tuple currTuple;
+	private Tuple currTuple;
+	private Operator op;
 	
 	public boolean getReturnBoolValue() {
 		return this.returnBoolValue;
@@ -66,6 +68,10 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	
 	public void setCurrTuple(Tuple tup) {
 		this.currTuple = tup;
+	}
+	
+	public void setOperator(Operator op) {
+		this.op = op;
 	}
 
 	/* (non-Javadoc)
@@ -328,6 +334,8 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(Column tableColumn) {
 		// TODO Auto-generated method stub
+		int colIndex = op.getColumnIndex(tableColumn.toString());
+		returnLongValue = currTuple.getColumnValue(colIndex);
 //		assert tableColumn.getTable().equals(currTuple.getTable());
 //		this.returnLongValue = (long) currTuple.getColumnValue(tableColumn.getColumnName());
 	}

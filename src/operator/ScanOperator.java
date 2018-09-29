@@ -19,15 +19,22 @@ import database.Tuple;
  *
  */
 public class ScanOperator extends Operator {
-
+	
 	private String tb;
 	private BufferedReader f;
+//	private HashMap<String, Integer> columnIndexMap;
 	/* Upon initialization, opens up a file scan on the appropriate data file
 	 * data file.
 	 */
 	public ScanOperator(String tableName) throws FileNotFoundException {
 		tb = tableName;
 		f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tb)));
+		columnIndexMap = new HashMap<String, Integer>();
+		String[] schemaColNames = DBCatalog.getTableColumns(tb);
+		for(int i = 0; i < schemaColNames.length; i++) {
+			columnIndexMap.put(schemaColNames[i], i);
+		}
+			
 	}
 
 	/* Reads the next line from the file that stores the base table and 
@@ -42,7 +49,7 @@ public class ScanOperator extends Operator {
 			//			String values = f.readLine();
 			String values;
 			if((values=f.readLine()) != null) {
-				return new Tuple(values,this.tb);
+				return new Tuple(values);
 			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -68,45 +75,11 @@ public class ScanOperator extends Operator {
 			e.printStackTrace();
 		}
 	}
-
-	@Override
-	public void dump(String fileOut) {
-		// TODO Auto-generated method stub
-		BufferedWriter bw = null;
-		try {
-			//	 String mycontent = "This String would be written" +
-			//	    " to the specified File";
-			//Specify the file name and path here
-			File file = new File(fileOut);
-
-			/* This logic will make sure that the file 
-			 * gets created if it is not present at the
-			 * specified location*/
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-
-			FileWriter fw = new FileWriter(file);
-			bw = new BufferedWriter(fw);
-			Tuple tup;
-			while((tup=getNextTuple()) != null) {
-				bw.write(tup.toString());
-				bw.newLine();
-			}
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-		finally
-		{ 
-			try{
-				if(bw!=null)
-					bw.close();
-			}catch(Exception ex){
-				System.out.println("Error in closing the BufferedWriter"+ex);
-			}
-		}
-
-	}
+//
+//	@Override
+//	public void dump(String fileOut) {
+//		super.dump(fileOut);
+//	}
 
 
 }

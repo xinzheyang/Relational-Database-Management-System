@@ -3,6 +3,8 @@
  */
 package operator;
 
+import java.util.HashMap;
+
 import database.Tuple;
 import visitor.EvaluateExpVisitor;
 import net.sf.jsqlparser.expression.Expression;
