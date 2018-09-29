@@ -35,7 +35,7 @@ public class SelectOperator extends Operator {
 	}
 
 	@Override
-	public void dump() {
+	public void dump(String fileOut) {
 		// TODO Auto-generated method stub
 		
 	}
