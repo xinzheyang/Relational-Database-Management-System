@@ -43,7 +43,7 @@ public class ScanOperator extends Operator {
 			//			String values = f.readLine();
 			String values;
 			if((values=f.readLine()) != null) {
-				return new Tuple(values,this.tb);
+				return new Tuple(values);
 			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
