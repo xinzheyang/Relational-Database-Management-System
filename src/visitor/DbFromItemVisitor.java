@@ -11,7 +11,7 @@ import net.sf.jsqlparser.statement.select.SubSelect;
  * @author sitianchen
  *
  */
-public class DbFromItemVisitor implements FromItemVisitor {
+public class DBFromItemVisitor implements FromItemVisitor {
 
 	@Override
 	public void visit(Table tableName) {

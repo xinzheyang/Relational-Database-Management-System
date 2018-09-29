@@ -10,6 +10,7 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import operator.Operator;
+import visitor.DBStatementVisitor;
 
 /**
  * @author sitianchen
@@ -27,10 +28,13 @@ public class QueryParser {
 			CCJSqlParser parser = new CCJSqlParser(new FileReader(queriesFile));
 			Statement statement;
 			while ((statement = parser.Statement()) != null) {
-				Select select = (Select) statement;
-				PlainSelect body = (PlainSelect) select.getSelectBody();
-				body.getFromItem();
-				body.getSelectItems();
+				DBStatementVisitor dbStatementVisitor = new DBStatementVisitor();
+				statement.accept(dbStatementVisitor);
+//				Select select = (Select) statement;
+//				statement.accept(statementVisitor);
+//				PlainSelect body = (PlainSelect) select.getSelectBody();
+//				body.getFromItem();
+//				body.getSelectItems();
 //				statement.accept(statementVisitor);
 //				System.out.println("Read statement: " + statement);
 //				Select select = (Select) statement;

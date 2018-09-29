@@ -17,7 +17,7 @@ import net.sf.jsqlparser.statement.update.Update;;
  * @author sitianchen
  *
  */
-public class DbStatementVisitor implements StatementVisitor{
+public class DBStatementVisitor implements StatementVisitor{
 	//add fields
 	@Override
 	public void visit(Select select) {

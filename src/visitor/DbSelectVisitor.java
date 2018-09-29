@@ -11,7 +11,7 @@ import net.sf.jsqlparser.statement.select.Union;
  * @author sitianchen
  *
  */
-public class DbSelectVisitor implements SelectVisitor {
+public class DBSelectVisitor implements SelectVisitor {
 
 	@Override
 	public void visit(PlainSelect plainSelect) {
