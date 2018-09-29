@@ -83,7 +83,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(Function function) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 
 	}
@@ -93,7 +92,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(InverseExpression inverseExpression) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -102,7 +100,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(JdbcParameter jdbcParameter) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 
 	}
@@ -112,7 +109,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(DoubleValue doubleValue) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 
 	}
@@ -122,7 +118,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(LongValue longValue) {
-		// TODO Auto-generated method stub
 		this.returnLongValue = longValue.getValue();
 	}
 
@@ -131,7 +126,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(DateValue dateValue) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -140,7 +134,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(TimeValue timeValue) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -149,7 +142,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(TimestampValue timestampValue) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -158,7 +150,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(Parenthesis parenthesis) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -167,7 +158,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(StringValue stringValue) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -176,7 +166,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(Addition addition) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -185,7 +174,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(Division division) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -194,7 +182,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(Multiplication multiplication) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -203,7 +190,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(Subtraction subtraction) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -212,7 +198,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(AndExpression andExpression) {
-		// TODO Auto-generated method stub
 		andExpression.getLeftExpression().accept(this);
 		boolean leftValue = this.getReturnBoolValue();
 		andExpression.getRightExpression().accept(this);
@@ -225,7 +210,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(OrExpression orExpression) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -234,7 +218,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(Between between) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -243,7 +226,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(EqualsTo equalsTo) {
-		// TODO Auto-generated method stub
 		equalsTo.getLeftExpression().accept(this);
 		long leftValue = this.getReturnLongValue();
 		equalsTo.getRightExpression().accept(this);
@@ -256,7 +238,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(GreaterThan greaterThan) {
-		// TODO Auto-generated method stub
 		greaterThan.getLeftExpression().accept(this);
 		long leftValue = this.getReturnLongValue();
 		greaterThan.getRightExpression().accept(this);
@@ -270,7 +251,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(GreaterThanEquals greaterThanEquals) {
-		// TODO Auto-generated method stub
 		greaterThanEquals.getLeftExpression().accept(this);
 		long leftValue = this.getReturnLongValue();
 		greaterThanEquals.getRightExpression().accept(this);
@@ -283,7 +263,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(InExpression inExpression) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -292,7 +271,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(IsNullExpression isNullExpression) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -301,7 +279,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(LikeExpression likeExpression) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -310,7 +287,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(MinorThan minorThan) {
-		// TODO Auto-generated method stub
 		minorThan.getLeftExpression().accept(this);
 		long leftValue = this.getReturnLongValue();
 		minorThan.getRightExpression().accept(this);
@@ -324,7 +300,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(MinorThanEquals minorThanEquals) {
-		// TODO Auto-generated method stub
 		minorThanEquals.getLeftExpression().accept(this);
 		long leftValue = this.getReturnLongValue();
 		minorThanEquals.getRightExpression().accept(this);
@@ -338,7 +313,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(NotEqualsTo notEqualsTo) {
-		// TODO Auto-generated method stub
 		// NOT SURE about isNot()
 		notEqualsTo.getLeftExpression().accept(this);
 		long leftValue = this.getReturnLongValue();
@@ -363,7 +337,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(SubSelect subSelect) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -372,7 +345,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(CaseExpression caseExpression) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -381,7 +353,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(WhenClause whenClause) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -390,7 +361,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(ExistsExpression existsExpression) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -399,7 +369,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(AllComparisonExpression allComparisonExpression) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -408,7 +377,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(AnyComparisonExpression anyComparisonExpression) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -417,7 +385,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(Concat concat) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -426,7 +393,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(Matches matches) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -435,7 +401,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(BitwiseAnd bitwiseAnd) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -444,7 +409,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(BitwiseOr bitwiseOr) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 
@@ -453,7 +417,6 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(BitwiseXor bitwiseXor) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("not supported");
 	}
 

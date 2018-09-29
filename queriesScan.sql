@@ -1,4 +1,6 @@
 SELECT * FROM Sailors;
+SELECT * FROM Reserves;
+SELECT * FROM Boats;
 -- SELECT Sailors.A FROM Sailors;
 -- SELECT S.A FROM Sailors S;
 -- SELECT * FROM Sailors S WHERE S.A < 3;

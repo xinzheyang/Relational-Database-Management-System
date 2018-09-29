@@ -39,6 +39,7 @@ public class ScanMain {
 				String tableName = ((Table) body.getFromItem()).getName();
 				ScanOperator scan = new ScanOperator(tableName);
 				scan.dump("query" + count);
+				count++;
 			}
 
 		} catch (Exception e) {
