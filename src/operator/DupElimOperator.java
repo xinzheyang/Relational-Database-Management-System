@@ -10,7 +10,7 @@ import database.Tuple;
  *
  */
 public class DupElimOperator extends Operator {
-
+	public Operator childOp; //child operator of where the source for getNextTuple() comes from.
 	/* (non-Javadoc)
 	 * @see database.Operator#getNextTuple()
 	 */

@@ -22,6 +22,7 @@ public class Tuple {
 	 */
 	public Tuple(String tupleString, Table table) {
 		this.table = table;
+		// key = column name, value = value
 		this.tupleData = new HashMap<String, Integer>();
 		
 		String[] columnNames = DBCatalog.getTableColumns(table.getName());

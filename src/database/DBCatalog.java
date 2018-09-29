@@ -25,7 +25,8 @@ public class DBCatalog {
 	 * from instantiating a DBCatalog object.
 	 */
 	private DBCatalog() {
-		this.tableMap = new HashMap<String, String[]>();
+		//key=table name, value=col names array
+		DBCatalog.tableMap = new HashMap<String, String[]>();
 	}
 	
 	/* Static get instance method, gets the singleton instance

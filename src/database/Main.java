@@ -10,7 +10,7 @@ import java.io.IOException;
  * @author sitianchen
  *
  */
-public class Parser {
+public class Main {
 	
 
 	/**
