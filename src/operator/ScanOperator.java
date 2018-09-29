@@ -19,11 +19,13 @@ import database.Tuple;
 public class ScanOperator extends Operator {
 	
 	private String tb;
+	private BufferedReader f;
 	/* Upon initialization, opens up a file scan on the appropriate data file
 	 * data file.
 	 */
-	public ScanOperator(String tableName) {
+	public ScanOperator(String tableName) throws FileNotFoundException {
 		tb = tableName;
+		f = new BufferedReader(new FileReader(this.tb));
 	}
 
 	/* Reads the next line from the file that stores the base table and 
@@ -34,13 +36,13 @@ public class ScanOperator extends Operator {
 		// TODO Auto-generated method stub
 		
 		try {
-			BufferedReader f = new BufferedReader(new FileReader(this.tb));
 //			String[] cols = DBCatalog.getTableColumns(this.tb);
 //			String values = f.readLine();
 			String values;
 			if((values=f.readLine()) != null) {
 				return new Tuple(values,this.tb);
 			}
+			return null;
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			System.out.println("fail to read table file");
@@ -57,7 +59,12 @@ public class ScanOperator extends Operator {
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
-
+		try {
+			f = new BufferedReader(new FileReader(this.tb));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
