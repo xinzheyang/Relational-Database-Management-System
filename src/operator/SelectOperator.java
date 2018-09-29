@@ -58,11 +58,11 @@ public class SelectOperator extends Operator {
 		// TODO Auto-generated method stub
 		childOp.reset();
 	}
-
-	@Override
-	public void dump(String fileOut) {
-		// TODO Auto-generated method stub
-
-	}
+//
+//	@Override
+//	public void dump(String fileOut) {
+//		// TODO Auto-generated method stub
+//		super.dump(fileOut);
+//	}
 
 }
