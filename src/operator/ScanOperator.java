@@ -91,6 +91,7 @@ public class ScanOperator extends Operator {
 			Tuple tup;
 			while((tup=getNextTuple()) != null) {
 				bw.write(tup.toString());
+				bw.newLine();
 			}
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
