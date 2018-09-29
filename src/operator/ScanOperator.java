@@ -23,6 +23,7 @@ public class ScanOperator extends Operator {
 	private String tb;
 	private BufferedReader f;
 //	private HashMap<String, Integer> columnIndexMap;
+	
 	/* Upon initialization, opens up a file scan on the appropriate data file
 	 * data file.
 	 */
@@ -32,7 +33,7 @@ public class ScanOperator extends Operator {
 		columnIndexMap = new HashMap<String, Integer>();
 		String[] schemaColNames = DBCatalog.getTableColumns(tb);
 		for(int i = 0; i < schemaColNames.length; i++) {
-			columnIndexMap.put(schemaColNames[i], i);
+			columnIndexMap.put((tb + "." + schemaColNames[i]), i);
 		}
 			
 	}
