@@ -25,6 +25,7 @@ public class DBCatalog {
 	 * from instantiating a DBCatalog object.
 	 */
 	private DBCatalog() {
+		//key=table name, value=col names array
 		tableMap = new HashMap<String, String[]>();
 	}
 	
