@@ -1,4 +1,10 @@
 # DatabasePrac
+TODO:
+- Parser (using statement visitor, etc.)
+- Scan Operator Completion and testing
+- Tuple structure optimization
+- Query plan
+
                                                    _oo0oo_
                                                   o8888888o
                                                   88" . "88
