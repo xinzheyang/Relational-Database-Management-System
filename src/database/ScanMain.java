@@ -18,7 +18,7 @@ import operator.ScanOperator;
  *
  */
 public class ScanMain {
-	private static String queriesFile = "queries.sql";
+	private static String queriesFile = "queriesScan.sql";
 	private static String dbDir = "db";
 	/**
 	 * @param args
