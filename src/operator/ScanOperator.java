@@ -19,9 +19,10 @@ import database.Tuple;
  *
  */
 public class ScanOperator extends Operator {
-
+	
 	private String tb;
 	private BufferedReader f;
+	private HashMap<String, Integer> columnIndexMap;
 	/* Upon initialization, opens up a file scan on the appropriate data file
 	 * data file.
 	 */

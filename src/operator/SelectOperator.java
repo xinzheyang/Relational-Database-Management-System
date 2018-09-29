@@ -3,6 +3,8 @@
  */
 package operator;
 
+import java.util.HashMap;
+
 import database.Tuple;
 
 /**
@@ -12,6 +14,7 @@ import database.Tuple;
 public class SelectOperator extends Operator {
 	
 	public Operator childOp; //child operator of where the source for getNextTuple() comes from.
+	private HashMap<String, Integer> columnIndexMap;
 
 	/* Grabs the next tuple from the scan and check if that tuple passes the 
 	 * selection condition, and if so output it. If the tuple doesn’t pass 
