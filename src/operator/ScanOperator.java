@@ -27,7 +27,7 @@ public class ScanOperator extends Operator {
 	 */
 	public ScanOperator(String tableName) throws FileNotFoundException {
 		tb = tableName;
-		f = new BufferedReader(new FileReader(this.tb));
+		f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tb)));
 	}
 
 	/* Reads the next line from the file that stores the base table and 
