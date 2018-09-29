@@ -11,14 +11,19 @@ import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.replace.Replace;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.truncate.Truncate;
-import net.sf.jsqlparser.statement.update.Update;;
+import net.sf.jsqlparser.statement.update.Update;
+import operator.Operator;;
 
 /**
  * @author sitianchen
  *
  */
 public class DBStatementVisitor implements StatementVisitor{
-	//add fields
+	private Operator operator = null;
+
+    public Operator getOp() {
+        return operator;
+    }
 	@Override
 	public void visit(Select select) {
 		// TODO Auto-generated method stub
@@ -29,43 +34,43 @@ public class DBStatementVisitor implements StatementVisitor{
 
 	@Override
 	public void visit(Delete delete) {
-		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("not supported");
 		
 	}
 
 	@Override
 	public void visit(Update update) {
-		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("not supported");
 		
 	}
 
 	@Override
 	public void visit(Insert insert) {
-		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("not supported");
 		
 	}
 
 	@Override
 	public void visit(Replace replace) {
-		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("not supported");
 		
 	}
 
 	@Override
 	public void visit(Drop drop) {
-		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("not supported");
 		
 	}
 
 	@Override
 	public void visit(Truncate truncate) {
-		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("not supported");
 		
 	}
 
 	@Override
 	public void visit(CreateTable createTable) {
-		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("not supported");
 		
 	}
 
