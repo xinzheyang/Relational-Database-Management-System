@@ -3,7 +3,9 @@
  */
 package database;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 import net.sf.jsqlparser.schema.Table;
 
@@ -49,6 +51,17 @@ public class Tuple {
 	 */
 	public Integer getColumnValue(String columnName) {
 		return tupleData.get(columnName);
+	}
+	
+	public String toString() {
+		StringBuilder res = new StringBuilder();
+		Collection<Integer> values = tupleData.values();
+//		String result = values.stream().collect(Collectors.joining(", "));
+		for(Integer v:values) {
+			res.append(v+",");
+		}
+		res.deleteCharAt(res.length()-1);
+		return res.toString();
 	}
 	
 //	public Table getTable() {
