@@ -3,6 +3,8 @@
  */
 package operator;
 
+import java.util.HashMap;
+
 import database.Tuple;
 import visitor.EvaluateExpVisitor;
 import net.sf.jsqlparser.expression.Expression;
@@ -16,6 +18,7 @@ public class JoinOperator extends Operator {
 	public Operator leftChild; //left child operator of where the source for getNextTuple() comes from.
 	public Operator rightChild; //right child operator of where the source for getNextTuple() comes from.
 	public Expression joinCondition;
+	private HashMap<String, Integer> columnIndexMap;
 
 	/* (non-Javadoc)
 	 * @see database.Operator#getNextTuple()

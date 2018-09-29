@@ -3,6 +3,8 @@
  */
 package operator;
 
+import java.util.HashMap;
+
 import database.Tuple;
 
 /**
@@ -11,6 +13,7 @@ import database.Tuple;
  */
 public class DupElimOperator extends Operator {
 	public Operator childOp; //child operator of where the source for getNextTuple() comes from.
+	private HashMap<String, Integer> columnIndexMap;
 	/* (non-Javadoc)
 	 * @see database.Operator#getNextTuple()
 	 */
