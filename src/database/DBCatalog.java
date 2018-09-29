@@ -18,14 +18,14 @@ public class DBCatalog {
 	private static HashMap<String, String[]> tableMap; //
 //	private HashMap<String, String> locMap; //do we need this when all table files are in the same dir?
 	private static String locDir;
-	
+	private static String outputDir; //path to the directory where the output files to be written are
 	private static DBCatalog catalog = null; //singleton object for global reference
 	
 	/* A private Constructor prevents any other class
 	 * from instantiating a DBCatalog object.
 	 */
 	private DBCatalog() {
-		this.tableMap = new HashMap<String, String[]>();
+		tableMap = new HashMap<String, String[]>();
 	}
 	
 	/* Static get instance method, gets the singleton instance
@@ -44,6 +44,10 @@ public class DBCatalog {
 	
 	public static String getTableLoc(String tableName) {
 		return locDir + File.separator + tableName;
+	}
+	
+	public static String getOutputDir() {
+		return outputDir;
 	}
 	
 	/* Parses in schema information by reading the schema file in the directory path specified.
