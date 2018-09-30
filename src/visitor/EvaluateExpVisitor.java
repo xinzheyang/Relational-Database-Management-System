@@ -80,7 +80,7 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(NullValue nullValue) {
-		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("not supported");
 
 	}
 
