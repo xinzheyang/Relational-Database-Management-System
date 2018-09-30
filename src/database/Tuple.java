@@ -40,12 +40,20 @@ public class Tuple {
 		return colValues[colIndex];
 	}
 
-	/* Overloading constructor for join operator (merging two tuples together).
-	 */
-	public Tuple(Tuple tup1, Tuple tup2) {
+//	/* Overloading constructor for join operator (merging two tuples together).
+//	 */
+//	public Tuple(Tuple tup1, Tuple tup2) {
+//
+//	}
 
+	public Tuple merge(Tuple tuple2) {
+//		this.colValues = ArrayUtils.addAll(first, second);
+		int[] newarr = new int[colValues.length + tuple2.colValues.length];
+		System.arraycopy(colValues, 0, newarr, 0, colValues.length);
+		System.arraycopy(tuple2.colValues, 0, newarr, colValues.length, tuple2.colValues.length);
+		this.colValues = newarr;
+		return this;
 	}
-
 	/* Overloading constructor for project operator.
 	 */
 	public Tuple(Tuple tup) {
