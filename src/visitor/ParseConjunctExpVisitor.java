@@ -4,9 +4,13 @@
 package visitor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Stack;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
+import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.CaseExpression;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
@@ -47,6 +51,7 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import operator.Operator;
 
 /**
  * @author sitianchen
@@ -55,22 +60,102 @@ import net.sf.jsqlparser.statement.select.SubSelect;
  */
 public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	
-	private Expression[] indepExps;
-	private ArrayList<ArrayList<Table>> tablesInvolved;
+	private Stack<String> tbStack; //stack keeping record of tables last involved
+	private HashMap<String[], Expression> joinMap; //mapping tables referenced --> Join Condition
+	private HashMap<String, Expression> selectMap; //mapping tables referenced --> Select Condition
+//	private Operator root; //nearest top root operator of the current expression involved
+	private boolean alwaysFalse; //checker for a false constant boolean conjunct in the where clause - if one of the 
+	//conjunct is false, the where clause is always false
 	
-	public Expression[] getIndepExps() {
-		return indepExps;
+//	public Operator getOperator() {
+//		return root;
+//	}
+//	
+//	public void setOperator(Operator op) {
+//		this.root = op;
+//	}
+	
+	public HashMap<String[], Expression> getJoinMap() {
+		return joinMap;
 	}
 	
-	public ArrayList<ArrayList<Table>> getTablesInvolved() {
-		return tablesInvolved;
+	public HashMap<String, Expression> getSelectMap() {
+		return selectMap;
+	}
+	
+	public Expression getJoinCondition(String tb1, String tb2) {
+		String[] key = new String[2];
+		key[0] = tb1;
+		key[1] = tb2;
+		Arrays.sort(key);
+		return joinMap.get(key);
+	}
+	
+	public Expression getSelectCondition(String tb) {
+		return selectMap.get(tb);
+	}
+	
+	public void visitBinExp(BinaryExpression binExp) {
+		binExp.getLeftExpression().accept(this);
+		binExp.getRightExpression().accept(this);
+	}
+	
+	public boolean isAlwaysFalse() {
+		return alwaysFalse;
+	}
+	
+	/* Visits operator that's one of =, ! =, <, >, <=, >=.
+	 */
+	public void visitOp(Expression op) {
+		String tb1 = "";
+		String tb2 = "";
+		if (!tbStack.isEmpty()) {
+			tb1 = tbStack.pop();
+			if (!tbStack.isEmpty()) {
+				tb2 = tbStack.pop();
+			}
+		}
+		if (tb1 != "" && tb2 != "") { //Join Condition
+			String[] key = new String[2];
+			key[0] = tb1;
+			key[1] = tb2;
+			Arrays.sort(key);
+			if (!joinMap.containsKey(key)) {
+				joinMap.put(key, op);
+			}
+			else {
+				Expression newExp = new AndExpression(joinMap.get(key), op);
+				joinMap.put(key, newExp);
+			}
+		} 
+		else if (tb1 != "" || tb2 != "") { //Select Condition
+			String key = tb1 != "" ? tb1 : tb2;
+			if (!selectMap.containsKey(key)) {
+				selectMap.put(key, op);
+			}
+			else {
+				Expression newExp = new AndExpression(selectMap.get(key), op);
+				selectMap.put(key, newExp);
+			}
+		}
+		else { //neither select of join, both sides should be long values
+			try {
+				EvaluateExpVisitor eval = new EvaluateExpVisitor();
+				op.accept(eval);
+				if (!eval.getReturnBoolValue()) { //if, after evaluation the result is false
+					alwaysFalse = true; //where condition always false
+				}
+				//if is true, simply ignore the expression
+			}
+			catch(Exception e) {
+				System.out.println("This try block should never fail.");
+			}
+		}
 	}
 
 	@Override
 	public void visit(NullValue nullValue) {
-		// everything empty
-		tablesInvolved = new ArrayList<ArrayList<Table>>();
-		indepExps = new Expression[0];
+		throw new UnsupportedOperationException("not supported");
 	}
 
 	@Override
@@ -95,11 +180,8 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visit(LongValue longValue) {
-		// TODO Auto-generated method stub
-		tablesInvolved = new ArrayList<ArrayList<Table>>();
-		indepExps = new Expression[1];
-		indepExps[0] = longValue;
-		
+		//no-op, since no table referenced
+		return;
 	}
 
 	@Override
@@ -152,24 +234,8 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	}
 
 	@Override
-	public void visit(AndExpression andExpression) {
-	    andExpression.getRightExpression().accept(this);
-	    Expression[] rightExps = indepExps;
-	    ArrayList<ArrayList<Table>> rightTables = tablesInvolved;
-	    
-	    andExpression.getLeftExpression().accept(this);
-		Expression[] leftExps = indepExps;
-		ArrayList<ArrayList<Table>> leftTables = tablesInvolved;
-	    
-	    indepExps = new Expression[leftExps.length + rightExps.length];
-	    System.arraycopy(leftExps, 0, indepExps, 0, leftExps.length);
-	    System.arraycopy(rightExps, 0, indepExps, leftExps.length, rightExps.length);
-	    //concatenate left and right expression arrays
-	    for (ArrayList<Table> tbs : rightTables) {
-	    	leftTables.add(tbs);
-	    }
-	    tablesInvolved = leftTables;
-	    //concatenate left and right tables
+	public void visit(AndExpression andExpression) {    
+	    visitBinExp(andExpression);
 	    
 	}
 
@@ -187,52 +253,18 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visit(EqualsTo equalsTo) {
-		equalsTo.getRightExpression().accept(this);
-		ArrayList<ArrayList<Table>> rightTables = tablesInvolved;
-		assert rightTables.size() == 1;
-		equalsTo.getLeftExpression().accept(this);
-		ArrayList<ArrayList<Table>> leftTables = tablesInvolved;
-		assert leftTables.size() == 1;
-		indepExps = new Expression[1];
-		indepExps[0] = equalsTo;
-		for (Table tb : rightTables.get(0)) {
-			leftTables.get(0).add(tb);
-		}
-		tablesInvolved = leftTables;
+		visitOp(equalsTo);
 	}
 
 	@Override
 	public void visit(GreaterThan greaterThan) {
-		// TODO Auto-generated method stub
-		greaterThan.getRightExpression().accept(this);
-		ArrayList<ArrayList<Table>> rightTables = tablesInvolved;
-		assert rightTables.size() == 1;
-		greaterThan.getLeftExpression().accept(this);
-		ArrayList<ArrayList<Table>> leftTables = tablesInvolved;
-		assert leftTables.size() == 1;
-		indepExps = new Expression[1];
-		indepExps[0] = greaterThan;
-		for (Table tb : rightTables.get(0)) {
-			leftTables.get(0).add(tb);
-		}
-		tablesInvolved = leftTables;
+		visitOp(greaterThan);
 	}
 
 	@Override
 	public void visit(GreaterThanEquals greaterThanEquals) {
-		// TODO Auto-generated method stub
-		greaterThanEquals.getRightExpression().accept(this);
-		ArrayList<ArrayList<Table>> rightTables = tablesInvolved;
-		assert rightTables.size() == 1;
-		greaterThanEquals.getLeftExpression().accept(this);
-		ArrayList<ArrayList<Table>> leftTables = tablesInvolved;
-		assert leftTables.size() == 1;
-		indepExps = new Expression[1];
-		indepExps[0] = greaterThanEquals;
-		for (Table tb : rightTables.get(0)) {
-			leftTables.get(0).add(tb);
-		}
-		tablesInvolved = leftTables;
+		visitOp(greaterThanEquals);
+
 	}
 
 	@Override
@@ -255,66 +287,25 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visit(MinorThan minorThan) {
-		// TODO Auto-generated method stub
-		minorThan.getRightExpression().accept(this);
-		ArrayList<ArrayList<Table>> rightTables = tablesInvolved;
-		assert rightTables.size() == 1;
-		minorThan.getLeftExpression().accept(this);
-		ArrayList<ArrayList<Table>> leftTables = tablesInvolved;
-		assert leftTables.size() == 1;
-		indepExps = new Expression[1];
-		indepExps[0] = minorThan;
-		for (Table tb : rightTables.get(0)) {
-			leftTables.get(0).add(tb);
-		}
-		tablesInvolved = leftTables;
+		visitOp(minorThan);
+		
 	}
 
 	@Override
 	public void visit(MinorThanEquals minorThanEquals) {
-		// TODO Auto-generated method stub
-		minorThanEquals.getRightExpression().accept(this);
-		ArrayList<ArrayList<Table>> rightTables = tablesInvolved;
-		assert rightTables.size() == 1;
-		minorThanEquals.getLeftExpression().accept(this);
-		ArrayList<ArrayList<Table>> leftTables = tablesInvolved;
-		assert leftTables.size() == 1;
-		indepExps = new Expression[1];
-		indepExps[0] = minorThanEquals;
-		for (Table tb : rightTables.get(0)) {
-			leftTables.get(0).add(tb);
-		}
-		tablesInvolved = leftTables;
+		visitOp(minorThanEquals);
+		
 	}
 
 	@Override
 	public void visit(NotEqualsTo notEqualsTo) {
-		// TODO Auto-generated method stub
-		notEqualsTo.getRightExpression().accept(this);
-		ArrayList<ArrayList<Table>> rightTables = tablesInvolved;
-		assert rightTables.size() == 1;
-		notEqualsTo.getLeftExpression().accept(this);
-		ArrayList<ArrayList<Table>> leftTables = tablesInvolved;
-		assert leftTables.size() == 1;
-		indepExps = new Expression[1];
-		indepExps[0] = notEqualsTo;
-		for (Table tb : rightTables.get(0)) {
-			leftTables.get(0).add(tb);
-		}
-		tablesInvolved = leftTables;
+		visitOp(notEqualsTo);
 		
 	}
 
 	@Override
 	public void visit(Column tableColumn) {
-		// TODO Auto-generated method stub
-		Table curTable = tableColumn.getTable();
-		tablesInvolved = new ArrayList<ArrayList<Table>>();
-		ArrayList<Table> zeroth = new ArrayList<Table>();
-		zeroth.set(0, curTable);
-		tablesInvolved.set(0, zeroth);
-		indepExps = new Expression[1];
-		indepExps[0] = tableColumn;
+		this.tbStack.push(tableColumn.getTable().getName());
 	}
 
 	@Override

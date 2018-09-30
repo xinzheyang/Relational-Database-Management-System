@@ -37,6 +37,10 @@ public class ScanOperator extends Operator {
 		}
 			
 	}
+	
+	public String getTableName() {
+		return tb;
+	}
 
 	/* Reads the next line from the file that stores the base table and 
 	 * returns the next tuple.
@@ -70,7 +74,7 @@ public class ScanOperator extends Operator {
 	public void reset() {
 		// TODO Auto-generated method stub
 		try {
-			f = new BufferedReader(new FileReader(this.tb));
+			f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tb)));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
