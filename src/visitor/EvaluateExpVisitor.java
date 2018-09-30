@@ -54,20 +54,20 @@ import operator.Operator;
 public class EvaluateExpVisitor implements ExpressionVisitor {
 	
 	private boolean returnBoolValue; //final value of the evaluated expression, if a boolean expression
-	private long returnLongValue; //final value of the evaluated expression, for LongValue or Column
+	private int returnLongValue; //final value of the evaluated expression, for LongValue or Column
 	private Tuple currTuple;
 	private Operator op;
 	
 	public boolean getReturnBoolValue() {
-		return this.returnBoolValue;
+		return returnBoolValue;
 	}
 	
-	public long getReturnLongValue() {
-		return this.returnLongValue;
+	public int getReturnLongValue() {
+		return returnLongValue;
 	}
 	
 	public void setCurrTuple(Tuple tup) {
-		this.currTuple = tup;
+		currTuple = tup;
 	}
 	
 	public void setOperator(Operator op) {
@@ -124,7 +124,7 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(LongValue longValue) {
-		this.returnLongValue = longValue.getValue();
+		returnLongValue = (int) longValue.getValue();
 	}
 
 	/* (non-Javadoc)
@@ -205,10 +205,10 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(AndExpression andExpression) {
 		andExpression.getLeftExpression().accept(this);
-		boolean leftValue = this.getReturnBoolValue();
+		boolean leftValue = returnBoolValue;
 		andExpression.getRightExpression().accept(this);
-		boolean rightValue = this.getReturnBoolValue();
-		this.returnBoolValue = leftValue && rightValue;
+		boolean rightValue = returnBoolValue;
+		returnBoolValue = leftValue && rightValue;
 	}
 
 	/* (non-Javadoc)
@@ -233,10 +233,10 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(EqualsTo equalsTo) {
 		equalsTo.getLeftExpression().accept(this);
-		long leftValue = this.getReturnLongValue();
+		int leftValue = returnLongValue;
 		equalsTo.getRightExpression().accept(this);
-		long rightValue = this.getReturnLongValue();
-		this.returnBoolValue = leftValue == rightValue;
+		int rightValue = returnLongValue;
+		returnBoolValue = leftValue == rightValue;
 	}
 
 	/* (non-Javadoc)
@@ -245,10 +245,10 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(GreaterThan greaterThan) {
 		greaterThan.getLeftExpression().accept(this);
-		long leftValue = this.getReturnLongValue();
+		int leftValue = returnLongValue;
 		greaterThan.getRightExpression().accept(this);
-		long rightValue = this.getReturnLongValue();
-		this.returnBoolValue = leftValue > rightValue;
+		int rightValue = returnLongValue;
+		returnBoolValue = leftValue > rightValue;
 
 	}
 
@@ -258,10 +258,10 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(GreaterThanEquals greaterThanEquals) {
 		greaterThanEquals.getLeftExpression().accept(this);
-		long leftValue = this.getReturnLongValue();
+		int leftValue = returnLongValue;
 		greaterThanEquals.getRightExpression().accept(this);
-		long rightValue = this.getReturnLongValue();
-		this.returnBoolValue = leftValue >= rightValue;
+		int rightValue = returnLongValue;
+		returnBoolValue = leftValue >= rightValue;
 	}
 
 	/* (non-Javadoc)
@@ -294,10 +294,10 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(MinorThan minorThan) {
 		minorThan.getLeftExpression().accept(this);
-		long leftValue = this.getReturnLongValue();
+		int leftValue = returnLongValue;
 		minorThan.getRightExpression().accept(this);
-		long rightValue = this.getReturnLongValue();
-		this.returnBoolValue = leftValue < rightValue;
+		int rightValue = returnLongValue;
+		returnBoolValue = leftValue < rightValue;
 
 	}
 
@@ -307,10 +307,10 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(MinorThanEquals minorThanEquals) {
 		minorThanEquals.getLeftExpression().accept(this);
-		long leftValue = this.getReturnLongValue();
+		int leftValue = returnLongValue;
 		minorThanEquals.getRightExpression().accept(this);
-		long rightValue = this.getReturnLongValue();
-		this.returnBoolValue = leftValue <= rightValue;
+		int rightValue = returnLongValue;
+		returnBoolValue = leftValue <= rightValue;
 
 	}
 
@@ -321,10 +321,10 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	public void visit(NotEqualsTo notEqualsTo) {
 		// NOT SURE about isNot()
 		notEqualsTo.getLeftExpression().accept(this);
-		long leftValue = this.getReturnLongValue();
+		int leftValue = returnLongValue;
 		notEqualsTo.getRightExpression().accept(this);
-		long rightValue = this.getReturnLongValue();
-		this.returnBoolValue = leftValue != rightValue;
+		int rightValue = returnLongValue;
+		returnBoolValue = leftValue != rightValue;
 
 	}
 

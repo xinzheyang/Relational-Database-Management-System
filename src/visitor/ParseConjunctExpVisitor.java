@@ -68,8 +68,9 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visit(NullValue nullValue) {
-		// TODO Auto-generated method stub
-		
+		// everything empty
+		tablesInvolved = new ArrayList<ArrayList<Table>>();
+		indepExps = new Expression[0];
 	}
 
 	@Override
