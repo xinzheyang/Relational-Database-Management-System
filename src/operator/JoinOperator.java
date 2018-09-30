@@ -49,6 +49,7 @@ public class JoinOperator extends Operator {
 			while (rightTuple != null) {
 				//combine the two tuples and check if they pass the result;
 				Tuple combinedTuple = leftTuple.merge(rightTuple);
+				if(joinCondition == null) return combinedTuple;
 				visitor.setCurrTuple(combinedTuple);
 				visitor.setOperator(this);
 				joinCondition.accept(visitor);
