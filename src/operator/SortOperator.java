@@ -13,7 +13,7 @@ import database.Tuple;
  */
 public class SortOperator extends Operator {
 	
-	public Operator childOp; //child operator of where the source for getNextTuple() comes from.
+	private Operator childOp; //child operator of where the source for getNextTuple() comes from.
 //	private HashMap<String, Integer> columnIndexMap;
 
 	/* (non-Javadoc)
