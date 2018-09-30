@@ -9,6 +9,7 @@ import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.drop.Drop;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.replace.Replace;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.truncate.Truncate;
 import net.sf.jsqlparser.statement.update.Update;
@@ -26,9 +27,12 @@ public class DBStatementVisitor implements StatementVisitor{
     }
 	@Override
 	public void visit(Select select) {
-		// TODO Auto-generated method stub
-//		select.getSelectBody();
-//		select.getSelectBody().accept();;
+		PlainSelect body = (PlainSelect) select.getSelectBody();
+		DBSelectVisitor dbSelectVisitor = new DBSelectVisitor();
+		if (body != null) {
+			body.accept(dbSelectVisitor);
+			operator = dbSelectVisitor.getOp();
+		}
 		
 	}
 
