@@ -66,6 +66,7 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	private HashMap<String[], Expression> joinMap; //mapping tables referenced --> Join Condition
 	private HashMap<String[], Expression> selectMap; //mapping tables referenced --> Select Condition
 	private Operator root; //nearest top root operator of the current expression involved
+	private boolean alwaysFalse; //
 	
 	public Operator getOperator() {
 		return root;
@@ -78,6 +79,10 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	public void visitBinExp(BinaryExpression binExp) {
 		binExp.getLeftExpression().accept(this);
 		binExp.getRightExpression().accept(this);
+	}
+	
+	public boolean isAlwaysFalse() {
+		return alwaysFalse;
 	}
 	
 	/* Visits operator that's one of =, ! =, <, >, <=, >=.
@@ -120,9 +125,14 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 				selectMap.put(key, newExp);
 			}
 		}
-		else { //TODO
+		else { //TODO //neither select of join, both sides should be long values
 			try {
-				
+				EvaluateExpVisitor eval = new EvaluateExpVisitor();
+				op.accept(eval);
+				if (!eval.getReturnBoolValue()) { //if, after evaluation the result is false
+					alwaysFalse = true; //where condition always false
+				}
+				//if is true, simply ignore the expression
 			}
 			catch(Exception e) {
 				System.out.println("This try block should never fail.");
