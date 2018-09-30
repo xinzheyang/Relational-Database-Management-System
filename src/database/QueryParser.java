@@ -30,6 +30,7 @@ public class QueryParser {
 			while ((statement = parser.Statement()) != null) {
 				DBStatementVisitor dbStatementVisitor = new DBStatementVisitor();
 				statement.accept(dbStatementVisitor);
+				
 //				Select select = (Select) statement;
 //				statement.accept(statementVisitor);
 //				PlainSelect body = (PlainSelect) select.getSelectBody();

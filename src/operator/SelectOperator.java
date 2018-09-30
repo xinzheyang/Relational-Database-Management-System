@@ -18,10 +18,34 @@ import net.sf.jsqlparser.expression.Expression;
  */
 public class SelectOperator extends Operator {
 
-	public Operator childOp; //child operator of where the source for getNextTuple() comes from.
-	public Expression ex;
-	public EvaluateExpVisitor visitor;
+	private Operator childOp; //child operator of where the source for getNextTuple() comes from.
+	private Expression ex;
+	private EvaluateExpVisitor visitor;
 //	private HashMap<String, Integer> columnIndexMap;
+
+	public Operator getChildOp() {
+		return childOp;
+	}
+
+	public void setChildOp(Operator childOp) {
+		this.childOp = childOp;
+	}
+
+	public Expression getEx() {
+		return ex;
+	}
+
+	public void setEx(Expression ex) {
+		this.ex = ex;
+	}
+
+	public EvaluateExpVisitor getVisitor() {
+		return visitor;
+	}
+
+	public void setVisitor(EvaluateExpVisitor visitor) {
+		this.visitor = visitor;
+	}
 
 	public SelectOperator(Operator op, Expression exp) {
 		childOp = op;
