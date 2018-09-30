@@ -64,7 +64,7 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 //	private ArrayList<ArrayList<Table>> tablesInvolved;
 	private Stack<String> tbStack; //stack keeping record of tables last involved
 	private HashMap<String[], Expression> joinMap; //mapping tables referenced --> Join Condition
-	private HashMap<String[], Expression> selectMap; //mapping tables referenced --> Select Condition
+	private HashMap<String, Expression> selectMap; //mapping tables referenced --> Select Condition
 	private Operator root; //nearest top root operator of the current expression involved
 	private boolean alwaysFalse; //
 	
@@ -74,6 +74,26 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	
 	public void setOperator(Operator op) {
 		this.root = op;
+	}
+	
+	public HashMap<String[], Expression> getJoinMap() {
+		return joinMap;
+	}
+	
+	public HashMap<String, Expression> getSelectMap() {
+		return selectMap;
+	}
+	
+	public Expression getJoinCondition(String tb1, String tb2) {
+		String[] key = new String[2];
+		key[0] = tb1;
+		key[1] = tb2;
+		Arrays.sort(key);
+		return joinMap.get(key);
+	}
+	
+	public Expression getSelectCondition(String tb) {
+		return selectMap.get(tb);
 	}
 	
 	public void visitBinExp(BinaryExpression binExp) {
@@ -110,12 +130,12 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 			}
 		} 
 		else if (tb1 != "" || tb2 != "") { //Select Condition
-			String[] key = new String[1];
+			String key = "";
 			if (tb1 != "") {
-				key[0] = tb1;
+				key = tb1;
 			}
 			else {
-				key[0] = tb2;
+				key = tb2;
 			}
 			if (!selectMap.containsKey(key)) {
 				selectMap.put(key, op);
