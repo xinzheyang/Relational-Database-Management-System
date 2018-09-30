@@ -8,6 +8,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
+import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
@@ -37,27 +38,42 @@ public class ParserExample {
 				
 				List<SelectItem> listofitems = body.getSelectItems();
 				System.out.println("Selects item is " + listofitems);
-				for(SelectItem item : listofitems) {
-					if (item instanceof AllColumns) {
-						System.out.println("===========allclomns");
-					}
-					if (item instanceof AllTableColumns) {
-						System.out.println("============alltableclomns");
-					}
-					if (item instanceof SelectExpressionItem) {
-						System.out.println("==============SelectExpressionItem");
-					}
-				}
+//				for(SelectItem item : listofitems) {
+//					if (item instanceof AllColumns) {
+//						System.out.println("===========allclomns");
+//					}
+//					if (item instanceof AllTableColumns) {
+//						System.out.println("============alltableclomns");
+//					}
+//					if (item instanceof SelectExpressionItem) {
+//						System.out.println("==============SelectExpressionItem");
+//					}
+//				}
 				System.out.println("From item is " + body.getFromItem());
 				System.out.println("Table alias is " + body.getFromItem().getAlias());
 				System.out.println("Joins : " + body.getJoins());
+				List<Join> joins = body.getJoins();
+				if (joins != null) {
+					for (Join j:joins) {
+						System.out.println(j.getRightItem());
+					}
+				}
+				
 				System.out.println("Where : " + body.getWhere());
-//				if (body.getWhere() instanceof MinorThan) {
+				List<SelectItem> items = body.getSelectItems();
+				System.out.println("=================");
+				for (SelectItem item : items) {
+					if (item instanceof SelectExpressionItem) {
+						System.out.println(((SelectExpressionItem) item).getExpression());
+					}
+				}
+				System.out.println("=================");
 //					System.out.println("Left expression : " + ((MinorThan) body.getWhere()).getLeftExpression());
 //					System.out.println("Left expression Column : " + ((Column) ((MinorThan) body.getWhere()).getLeftExpression()).getColumnName());
 //					System.out.println("Left expression Table Schema : " + ((Column) ((MinorThan) body.getWhere()).getLeftExpression()).getTable().getAlias());
 //				}
 				System.out.println(" " + body.getDistinct());
+				System.out.println(body.getOrderByElements());
 			}
 		} catch (Exception e) {
 			System.err.println("Exception occurred during parsing");

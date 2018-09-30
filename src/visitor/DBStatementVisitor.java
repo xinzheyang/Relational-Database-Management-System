@@ -22,16 +22,21 @@ import operator.Operator;;
 public class DBStatementVisitor implements StatementVisitor{
 	private Operator operator = null;
 
-    public Operator getOp() {
-        return operator;
-    }
+	public Operator getOperator() {
+		return operator;
+	}
+
+	public void setOperator(Operator operator) {
+		this.operator = operator;
+	}
+
 	@Override
 	public void visit(Select select) {
 		PlainSelect body = (PlainSelect) select.getSelectBody();
 		DBSelectVisitor dbSelectVisitor = new DBSelectVisitor();
 		if (body != null) {
 			body.accept(dbSelectVisitor);
-			operator = dbSelectVisitor.getOp();
+			operator = dbSelectVisitor.getOperator();
 		}
 		
 	}
