@@ -63,17 +63,17 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	private Stack<String> tbStack; //stack keeping record of tables last involved
 	private HashMap<String[], Expression> joinMap; //mapping tables referenced --> Join Condition
 	private HashMap<String, Expression> selectMap; //mapping tables referenced --> Select Condition
-	private Operator root; //nearest top root operator of the current expression involved
+//	private Operator root; //nearest top root operator of the current expression involved
 	private boolean alwaysFalse; //checker for a false constant boolean conjunct in the where clause - if one of the 
 	//conjunct is false, the where clause is always false
 	
-	public Operator getOperator() {
-		return root;
-	}
-	
-	public void setOperator(Operator op) {
-		this.root = op;
-	}
+//	public Operator getOperator() {
+//		return root;
+//	}
+//	
+//	public void setOperator(Operator op) {
+//		this.root = op;
+//	}
 	
 	public HashMap<String[], Expression> getJoinMap() {
 		return joinMap;
