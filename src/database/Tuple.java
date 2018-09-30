@@ -4,6 +4,7 @@
 package database;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
@@ -17,7 +18,15 @@ import net.sf.jsqlparser.schema.Table;
 public class Tuple {
 //	private Table table;
 //	public HashMap<String,Integer> tupleData;
-	public int[] colValues;
+	private int[] colValues;
+	
+	public int[] getColValues() {
+		return colValues;
+	}
+
+	public void setColValues(int[] colValues) {
+		this.colValues = colValues;
+	}
 
 	/* Initialize an instance of the class with a tupleString (result from table file read) and
 	 * corresponding table. First get corresponding
@@ -80,5 +89,24 @@ public class Tuple {
 //	public Table getTable() {
 //		return this.table;
 //	}
+	private class TupleComparator implements Comparator<Tuple> 
+	{ 	
+		private int[] indexes;
+	    public TupleComparator(int[] arr) {
+	    	indexes=arr;
+	    }
+	    public int compare(Tuple a, Tuple b) 
+	    { 
+	        int i=0;
+	        while(i<indexes.length) {
+	        	if(a.getColumnValue(i) < b.getColumnValue(i)) return -1;
+	        	else if(a.getColumnValue(i) > b.getColumnValue(i)) return 1;
+	        	i++;
+	        }
+	        return 0;
+	    } 
+	} 
 
 }
+
+

@@ -3,7 +3,10 @@
  */
 package operator;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import database.Tuple;
 
@@ -14,14 +17,27 @@ import database.Tuple;
 public class SortOperator extends Operator {
 	
 	private Operator childOp; //child operator of where the source for getNextTuple() comes from.
-//	private HashMap<String, Integer> columnIndexMap;
-
+//	private HashMap<String, Integer> columnIndexMap
+	private int[] colIndexes;
+	private List<Tuple> allTuples=new ArrayList<>();
+	
+	public SortOperator(Operator op, String[] cols) {
+		childOp=op;
+		colNames=cols;
+		Tuple tuple;
+		while((tuple = childOp.getNextTuple()) != null) {
+			allTuples.add(tuple);
+		}
+		TupleComparator com = new TupleComparator() 
+		Collections.sort(allTuples,);
+		
+	}
 	/* (non-Javadoc)
 	 * @see database.Operator#getNextTuple()
 	 */
 	@Override
 	public Tuple getNextTuple() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
@@ -30,17 +46,7 @@ public class SortOperator extends Operator {
 	 */
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
-
-	}
-
-	/* (non-Javadoc)
-	 * @see database.Operator#dump()
-	 */
-	@Override
-	public void dump(String fileOut) {
-		// TODO Auto-generated method stub
-
+		childOp.reset();
 	}
 
 }

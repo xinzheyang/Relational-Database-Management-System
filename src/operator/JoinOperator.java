@@ -70,6 +70,8 @@ public class JoinOperator extends Operator {
 	 */
 	@Override
 	public void reset() {
-		
+		leftChild.reset();
+		rightChild.reset();
+		leftTuple = leftChild.getNextTuple();
 	}
 }
