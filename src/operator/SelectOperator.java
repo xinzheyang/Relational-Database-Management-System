@@ -69,14 +69,13 @@ public class SelectOperator extends Operator {
 	 */
 	@Override
 	public Tuple getNextTuple() {
-		// TODO Auto-generated method
 		Tuple curr;
 		while((curr = childOp.getNextTuple()) != null) {
 			visitor.setCurrTuple(curr);
 			visitor.setOperator(this);
 //			visitor.visit(curr);
 			ex.accept(visitor);
-			if(visitor.getReturnBoolValue() == true) {
+			if(visitor.getReturnBoolValue()) {
 				return curr;
 			}
 		}
@@ -88,7 +87,6 @@ public class SelectOperator extends Operator {
 	 */
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
 		childOp.reset();
 	}
 //

@@ -246,9 +246,12 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	public void visit(GreaterThan greaterThan) {
 		greaterThan.getLeftExpression().accept(this);
 		int leftValue = returnLongValue;
+//		System.out.println(leftValue);
 		greaterThan.getRightExpression().accept(this);
 		int rightValue = returnLongValue;
+//		System.out.println(rightValue);
 		returnBoolValue = leftValue > rightValue;
+//		System.out.println(returnBoolValue);
 
 	}
 
@@ -334,10 +337,8 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(Column tableColumn) {
 		// TODO Auto-generated method stub
-		int colIndex = op.getColumnIndex(tableColumn.toString());
+		int colIndex = op.getColumnIndex(tableColumn.getTable().getName() + "." + tableColumn.getColumnName());
 		returnLongValue = currTuple.getColumnValue(colIndex);
-//		assert tableColumn.getTable().equals(currTuple.getTable());
-//		this.returnLongValue = (long) currTuple.getColumnValue(tableColumn.getColumnName());
 	}
 
 	/* (non-Javadoc)
