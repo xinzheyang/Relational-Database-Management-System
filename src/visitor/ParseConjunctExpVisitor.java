@@ -129,13 +129,7 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 			}
 		} 
 		else if (tb1 != "" || tb2 != "") { //Select Condition
-			String key = "";
-			if (tb1 != "") {
-				key = tb1;
-			}
-			else {
-				key = tb2;
-			}
+			String key = tb1 != "" ? tb1 : tb2;
 			if (!selectMap.containsKey(key)) {
 				selectMap.put(key, op);
 			}
@@ -144,7 +138,7 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 				selectMap.put(key, newExp);
 			}
 		}
-		else { //TODO //neither select of join, both sides should be long values
+		else { //neither select of join, both sides should be long values
 			try {
 				EvaluateExpVisitor eval = new EvaluateExpVisitor();
 				op.accept(eval);
