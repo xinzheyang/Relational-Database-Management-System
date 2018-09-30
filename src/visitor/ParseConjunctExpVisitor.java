@@ -60,13 +60,12 @@ import operator.Operator;
  */
 public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	
-//	private Expression[] indepExps;
-//	private ArrayList<ArrayList<Table>> tablesInvolved;
 	private Stack<String> tbStack; //stack keeping record of tables last involved
 	private HashMap<String[], Expression> joinMap; //mapping tables referenced --> Join Condition
 	private HashMap<String, Expression> selectMap; //mapping tables referenced --> Select Condition
 	private Operator root; //nearest top root operator of the current expression involved
-	private boolean alwaysFalse; //
+	private boolean alwaysFalse; //checker for a false constant boolean conjunct in the where clause - if one of the 
+	//conjunct is false, the where clause is always false
 	
 	public Operator getOperator() {
 		return root;
