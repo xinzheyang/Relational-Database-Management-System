@@ -15,7 +15,7 @@ import visitor.DBStatementVisitor;
  *
  */
 public class QueryParser {
-	private final String queriesFile;
+	private String queriesFile;
 	
 	public QueryParser(String fname) {
 		queriesFile = fname;
@@ -25,10 +25,12 @@ public class QueryParser {
 		try {
 			CCJSqlParser parser = new CCJSqlParser(new FileReader(queriesFile));
 			Statement statement;
+			int count = 1;
 			while ((statement = parser.Statement()) != null) {
 				DBStatementVisitor dbStatementVisitor = new DBStatementVisitor();
 				statement.accept(dbStatementVisitor);
 				Operator operator = dbStatementVisitor.getOperator();
+				operator.dump("query" + count++);
 			}
 		} catch (Exception e) {
 			System.err.println("Exception occurred during parsing");
