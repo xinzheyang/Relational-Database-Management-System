@@ -21,6 +21,7 @@ import database.Tuple;
 public class ScanOperator extends Operator {
 	
 	private String tb;
+	private String alias;
 	private BufferedReader f;
 //	private HashMap<String, Integer> columnIndexMap;
 	
@@ -29,6 +30,7 @@ public class ScanOperator extends Operator {
 	 */
 	public ScanOperator(String tableName) throws FileNotFoundException {
 		tb = tableName;
+		alias = "";
 		f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tb)));
 		columnIndexMap = new HashMap<String, Integer>();
 		String[] schemaColNames = DBCatalog.getTableColumns(tb);
@@ -41,6 +43,7 @@ public class ScanOperator extends Operator {
 	 */
 	public ScanOperator(String tableName, String alias) throws FileNotFoundException {
 		tb = tableName;
+		this.alias = alias;
 		f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tableName)));
 		columnIndexMap = new HashMap<String, Integer>();
 		String[] schemaColNames = DBCatalog.getTableColumns(tableName);
@@ -49,7 +52,9 @@ public class ScanOperator extends Operator {
 		}
 			
 	}
-	
+	public String getAlias() {
+		return alias;
+	}
 	public String getTableName() {
 		return tb;
 	}

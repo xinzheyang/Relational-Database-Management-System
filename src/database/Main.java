@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package database;
 
@@ -11,11 +11,11 @@ import java.io.IOException;
  *
  */
 public class Main {
-	
+
 
 	/**
 	 * @param args
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
 		String dirIn = args[0];
