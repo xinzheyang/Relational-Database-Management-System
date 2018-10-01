@@ -108,14 +108,18 @@ public class DBSelectVisitor implements SelectVisitor {
 		List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
 		Expression expression = plainSelect.getWhere();
 		
-		ParseConjunctExpVisitor parseConjunctExpVisitor = new ParseConjunctExpVisitor();
-		expression.accept(parseConjunctExpVisitor);
+		if (expression != null) {
+			ParseConjunctExpVisitor parseConjunctExpVisitor = new ParseConjunctExpVisitor();
+			expression.accept(parseConjunctExpVisitor);
+			// A JOIN B JOIN C [A,B]:A.sid = B.sid, ..
+			joinMap = parseConjunctExpVisitor.getJoinMap();
+			
+			// SELECT * FROM A WHERE A.sid  A:A.sid = 1
+			selectMap = parseConjunctExpVisitor.getSelectMap();
+		}
 		
-		// A JOIN B JOIN C [A,B]:A.sid = B.sid, ..
-		joinMap = parseConjunctExpVisitor.getJoinMap();
 		
-		// SELECT * FROM A WHERE A.sid  A:A.sid = 1
-		selectMap = parseConjunctExpVisitor.getSelectMap();
+		
 		
 		scanOperator = buildScanFromItem(fromItem);
 		
