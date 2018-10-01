@@ -5,7 +5,9 @@ package visitor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Stack;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
@@ -61,7 +63,7 @@ import operator.Operator;
 public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	
 	private Stack<String> tbStack; //stack keeping record of tables last involved
-	private HashMap<String[], Expression> joinMap; //mapping tables referenced --> Join Condition
+	private HashMap<List<String>, Expression> joinMap; //mapping tables referenced --> Join Condition
 	private HashMap<String, Expression> selectMap; //mapping tables referenced --> Select Condition
 //	private Operator root; //nearest top root operator of the current expression involved
 	private boolean alwaysFalse; //checker for a false constant boolean conjunct in the where clause - if one of the 
@@ -69,7 +71,7 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	
 	public ParseConjunctExpVisitor() {
 		tbStack = new Stack<String>();
-		joinMap = new HashMap<String[], Expression>();
+		joinMap = new HashMap<List<String>, Expression>();
 		selectMap = new HashMap<String, Expression>();
 	}
 	
@@ -81,7 +83,7 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 //		this.root = op;
 //	}
 	
-	public HashMap<String[], Expression> getJoinMap() {
+	public HashMap<List<String>, Expression> getJoinMap() {
 		return joinMap;
 	}
 	
@@ -90,10 +92,10 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	}
 	
 	public Expression getJoinCondition(String tb1, String tb2) {
-		String[] key = new String[2];
-		key[0] = tb1;
-		key[1] = tb2;
-		Arrays.sort(key);
+		List<String> key = new ArrayList<String>();
+		key.add(tb1);
+		key.add(tb2);
+		Collections.sort(key);
 		return joinMap.get(key);
 	}
 	
@@ -123,10 +125,10 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 			}
 		}
 		if (tb1 != "" && tb2 != "") { //Join Condition
-			String[] key = new String[2];
-			key[0] = tb1;
-			key[1] = tb2;
-			Arrays.sort(key);
+			List<String> key = new ArrayList<String>();
+			key.add(tb1);
+			key.add(tb2);
+			Collections.sort(key);
 			if (!joinMap.containsKey(key)) {
 				joinMap.put(key, op);
 			}

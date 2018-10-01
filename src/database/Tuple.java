@@ -49,6 +49,12 @@ public class Tuple {
 		}
 	}
 	
+	/* Overloading constructor.
+	 */
+	public Tuple(int[] colValues) {
+		this.colValues = colValues;
+	}
+	
 	public int getColumnValue(int colIndex) {
 		assert colIndex < colValues.length;
 		return colValues[colIndex];
@@ -65,13 +71,8 @@ public class Tuple {
 		int[] newarr = new int[colValues.length + tuple2.colValues.length];
 		System.arraycopy(colValues, 0, newarr, 0, colValues.length);
 		System.arraycopy(tuple2.colValues, 0, newarr, colValues.length, tuple2.colValues.length);
-		this.colValues = newarr;
-		return this;
-	}
-	/* Overloading constructor for project operator.
-	 */
-	public Tuple(Tuple tup) {
-
+//		this.colValues = newarr;
+		return new Tuple(newarr);
 	}
 
 	/*  Get corresponding column value from column name.
