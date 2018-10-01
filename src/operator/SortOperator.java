@@ -51,8 +51,8 @@ public class SortOperator extends Operator {
 	 */
 	@Override
 	public Tuple getNextTuple() {
-		while(index < allTuples.size()) {
-			return allTuples.get(index);
+		if (index < allTuples.size()) {
+			return allTuples.get(index++);
 		}
 		return null;
 	}
