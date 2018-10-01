@@ -32,7 +32,6 @@ public class DBFromItemVisitor implements FromItemVisitor {
 			ScanOperator scanOperator = new ScanOperator(tableName.getName());
 			operator = scanOperator;
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

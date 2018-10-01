@@ -109,6 +109,7 @@ public class DBSelectVisitor implements SelectVisitor {
 		Expression expression = plainSelect.getWhere();
 		
 		ParseConjunctExpVisitor parseConjunctExpVisitor = new ParseConjunctExpVisitor();
+		expression.accept(parseConjunctExpVisitor);
 		
 		// A JOIN B JOIN C [A,B]:A.sid = B.sid, ..
 		joinMap = parseConjunctExpVisitor.getJoinMap();
