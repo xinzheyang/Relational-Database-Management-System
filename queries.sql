@@ -1,9 +1,10 @@
 SELECT * FROM Sailors;
 SELECT Sailors.A FROM Sailors;
-SELECT S.A, S.B FROM Sailors S;
-SELECT * FROM Sailors S WHERE S.A < 3;
-SELECT * FROM Sailors, Reserves WHERE Sailors.A = Reserves.G;
-SELECT * FROM Sailors S1, Sailors S2 WHERE S1.A < S2.A;
-SELECT DISTINCT R.G FROM Reserves R;
+-- SELECT S.A, S.B FROM Sailors S;
+-- SELECT * FROM Sailors S WHERE S.A < 3;
+SELECT * FROM Sailors WHERE Sailors.A = 1;
+-- SELECT * FROM Sailors, Reserves WHERE Sailors.A = Reserves.G;
+-- SELECT * FROM Sailors S1, Sailors S2 WHERE S1.A < S2.A;
+-- SELECT DISTINCT R.G FROM Reserves R;
 SELECT * FROM Sailors ORDER BY Sailors.B;
-Select * From Sailors ,Reserves, Haha;
+-- Select * From Sailors ,Reserves, Haha;

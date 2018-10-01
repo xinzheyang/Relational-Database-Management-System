@@ -67,6 +67,12 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	private boolean alwaysFalse; //checker for a false constant boolean conjunct in the where clause - if one of the 
 	//conjunct is false, the where clause is always false
 	
+	public ParseConjunctExpVisitor() {
+		tbStack = new Stack<String>();
+		joinMap = new HashMap<String[], Expression>();
+		selectMap = new HashMap<String, Expression>();
+	}
+	
 //	public Operator getOperator() {
 //		return root;
 //	}
@@ -106,7 +112,8 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	
 	/* Visits operator that's one of =, ! =, <, >, <=, >=.
 	 */
-	public void visitOp(Expression op) {
+	public void visitOp(BinaryExpression op) {
+		visitBinExp(op);
 		String tb1 = "";
 		String tb2 = "";
 		if (!tbStack.isEmpty()) {

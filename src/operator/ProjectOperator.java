@@ -20,6 +20,7 @@ public class ProjectOperator extends Operator {
 	public ProjectOperator(Operator op, String[] cols) {
 		childOp = op;
 		HashMap<String,Integer> map = new HashMap<>();
+		indices = new int[cols.length];
 		for(int i=0;i<cols.length;i++) {
 			map.put(cols[i], i);
 			indices[i] = childOp.getColumnIndexMap().get(cols[i]);

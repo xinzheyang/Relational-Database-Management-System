@@ -28,6 +28,7 @@ public class SortOperator extends Operator {
 		childOp=op;
 //		List<Integer> =new ArrayList<>();
 //		colIndexes = new int[cols.length];
+		columnIndexMap = new HashMap<String, Integer>(childOp.getColumnIndexMap()); //same col index map as child operator
 		for(int i=0;i<cols.length;i++) {
 			colIndexes.add(columnIndexMap.get(cols[i]));
 		}
@@ -36,7 +37,6 @@ public class SortOperator extends Operator {
 				colIndexes.add(i);
 			}
 		}
-		columnIndexMap = new HashMap<String, Integer>(childOp.getColumnIndexMap()); //same col index map as child operator
 		Tuple tuple;
 		while((tuple = childOp.getNextTuple()) != null) {
 			allTuples.add(tuple);
