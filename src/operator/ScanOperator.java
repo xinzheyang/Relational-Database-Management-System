@@ -37,11 +37,10 @@ public class ScanOperator extends Operator {
 		}
 			
 	}
-	/* Overloading constructor that enables aliases. Here we set this.tb directly to 
-	 * the alias
+	/* Overloading constructor that enables aliases. 
 	 */
 	public ScanOperator(String tableName, String alias) throws FileNotFoundException {
-		tb = alias;
+		tb = tableName;
 		f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tableName)));
 		columnIndexMap = new HashMap<String, Integer>();
 		String[] schemaColNames = DBCatalog.getTableColumns(tableName);
