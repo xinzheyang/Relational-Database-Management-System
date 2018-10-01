@@ -25,3 +25,5 @@ hs_err_pid*
 .project
 /bin/
 bin/.DS_Store
+.DS_Store
+src/.DS_Store
