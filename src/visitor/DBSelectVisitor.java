@@ -119,7 +119,6 @@ public class DBSelectVisitor implements SelectVisitor {
 		
 		
 		
-		
 		scanOperator = buildScanFromItem(fromItem);
 		
 		selectOperator = buildSelectFromScan(scanOperator);
