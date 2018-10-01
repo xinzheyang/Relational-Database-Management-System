@@ -148,7 +148,6 @@ public class DBSelectVisitor implements SelectVisitor {
 					SelectExpressionItem selectItem = (SelectExpressionItem) selectItems.get(i);
 					cols[i] = selectItem.getExpression().toString();
 				}
-			}
 			if (joinOperator == null) {
 				Operator childOp = selectOperator == null ? scanOperator : selectOperator;
 				projectOperator = new ProjectOperator(childOp, cols);
@@ -156,10 +155,12 @@ public class DBSelectVisitor implements SelectVisitor {
 			} else {
 				projectOperator = new ProjectOperator(joinOperator, cols);
 			}
+			}
+			
 		}
 		
 		
-		if (orderByElements != null & orderByElements.size() > 0) {
+		if (orderByElements != null && orderByElements.size() > 0) {
 			sortOperator = buildSort(orderByElements);
 		}
 		

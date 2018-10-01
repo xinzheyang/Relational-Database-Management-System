@@ -22,8 +22,9 @@ public class ProjectOperator extends Operator {
 		HashMap<String,Integer> map = new HashMap<>();
 		for(int i=0;i<cols.length;i++) {
 			map.put(cols[i], i);
-			indices[i] = columnIndexMap.get(cols[i]);
+			indices[i] = childOp.getColumnIndexMap().get(cols[i]);
 		}
+		columnIndexMap = map;
 	}
 	/* (non-Javadoc)
 	 * @see database.Operator#getNextTuple()

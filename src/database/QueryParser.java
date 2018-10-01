@@ -23,6 +23,7 @@ public class QueryParser {
 	
 	public void parse() {
 		try {
+			DBCatalog.getCatalog().parseSchema("db");
 			CCJSqlParser parser = new CCJSqlParser(new FileReader(queriesFile));
 			Statement statement;
 			int count = 1;
