@@ -1,7 +1,8 @@
 import java.awt.print.Printable;
 import java.io.FileReader;
 
-
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.schema.Column;
@@ -74,6 +75,8 @@ public class ParserExample {
 //				}
 				System.out.println(" " + body.getDistinct());
 				System.out.println(body.getOrderByElements());
+				Expression expression = new AndExpression(null, null);
+				System.out.println(expression);
 			}
 		} catch (Exception e) {
 			System.err.println("Exception occurred during parsing");

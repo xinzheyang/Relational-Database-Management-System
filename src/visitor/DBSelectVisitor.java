@@ -3,6 +3,7 @@
  */
 package visitor;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.FromItem;
@@ -38,7 +39,7 @@ public class DBSelectVisitor implements SelectVisitor {
     private SortOperator sortOperator;
     private DupElimOperator dupElimOperator;
     
-    private HashMap<String[], Expression> joinMap;
+    private ParseConjunctExpVisitor parseConjunctExpVisitor;
     private HashMap<String, Expression> selectMap;
 	public Operator getOperator() {
 		return operator;
@@ -109,10 +110,8 @@ public class DBSelectVisitor implements SelectVisitor {
 		Expression expression = plainSelect.getWhere();
 		
 		if (expression != null) {
-			ParseConjunctExpVisitor parseConjunctExpVisitor = new ParseConjunctExpVisitor();
+			parseConjunctExpVisitor = new ParseConjunctExpVisitor();
 			expression.accept(parseConjunctExpVisitor);
-			// A JOIN B JOIN C [A,B]:A.sid = B.sid, ..
-			joinMap = parseConjunctExpVisitor.getJoinMap();
 			
 			// SELECT * FROM A WHERE A.sid  A:A.sid = 1
 			selectMap = parseConjunctExpVisitor.getSelectMap();
@@ -125,18 +124,39 @@ public class DBSelectVisitor implements SelectVisitor {
 		
 		selectOperator = buildSelectFromScan(scanOperator);
 		
+		
 		if (joins != null && joins.size() > 0) {
 			JoinOperator left;
 			FromItem firstRightItem = joins.get(0).getRightItem();
-			if (selectOperator == null) {
-				left = new JoinOperator(scanOperator, buildScanSelectFromItem(firstRightItem));
+			ArrayList<FromItem> leftTable = new ArrayList<>();
+			Operator initLeftOp = selectOperator == null ? scanOperator : selectOperator;
+			
+			
+			if (parseConjunctExpVisitor != null && 
+					parseConjunctExpVisitor.getJoinCondition(fromItem.toString(), firstRightItem.toString()) != null) {
+				Expression condition = parseConjunctExpVisitor.getJoinCondition(fromItem.toString(), firstRightItem.toString());
+				left = new JoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem), condition);
 			} else {
-				left = new JoinOperator(selectOperator, buildScanSelectFromItem(firstRightItem));
+				left = new JoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem));
 			}
 			
+			leftTable.add(fromItem);
+			leftTable.add(firstRightItem);
+			
 			for (int i=1; i<joins.size(); i++) {
-				Operator newScanSelect = buildScanSelectFromItem(joins.get(i).getRightItem());
-				left = new JoinOperator(left, newScanSelect);
+				Expression condition = null;
+				FromItem rightItem = joins.get(i).getRightItem();
+				Operator newScanSelect = buildScanSelectFromItem(rightItem);
+				for (FromItem table:leftTable) {
+					if (parseConjunctExpVisitor != null && 
+							parseConjunctExpVisitor.getJoinCondition(table.toString(), rightItem.toString()) != null) {
+						Expression tempCondition = parseConjunctExpVisitor.getJoinCondition(table.toString(), rightItem.toString());
+						condition = condition == null ? tempCondition: new AndExpression(condition, tempCondition);
+						
+					}
+				}
+				left = condition == null ? new JoinOperator(left, newScanSelect) 
+						: new JoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem), condition);
 			}
 			joinOperator = left;
 		}
