@@ -3,6 +3,7 @@
  */
 package operator;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import database.Tuple;
@@ -25,9 +26,12 @@ public class DupElimOperator extends Operator {
 	@Override
 	public Tuple getNextTuple() {
 		Tuple curr = childOp.getNextTuple();
-		while(curr != null && curr.equals(prevDistinct)) {
-			curr = childOp.getNextTuple();
+		if (prevDistinct != null) {
+			while(curr != null && Arrays.equals(curr.getColValues(), prevDistinct.getColValues())) {
+				curr = childOp.getNextTuple();
+			}
 		}
+		prevDistinct = curr;
 		return curr;
 	}
 
