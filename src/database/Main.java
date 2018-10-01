@@ -18,13 +18,12 @@ public class Main {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		// TODO Auto-generated method stub
-//		String dirIn = args[0];
-//		String dirOut = args[1];
-//		String dbDir = dirIn + File.separator + "db";
-//		String qFile = dirIn + File.separator + "queries.sql";
-//		DBCatalog.getCatalog().parseSchema(dbDir);
-		QueryParser queryParser = new QueryParser("queries.sql");
+		String dirIn = args[0];
+		String dirOut = args[1];
+		String dbDir = dirIn + File.separator + "db";
+		String qFile = dirIn + File.separator + "queries.sql";
+		DBCatalog.getCatalog().parseSchema(dbDir);
+		QueryParser queryParser = new QueryParser(qFile, dirOut);
 		queryParser.parse();
 	}
 

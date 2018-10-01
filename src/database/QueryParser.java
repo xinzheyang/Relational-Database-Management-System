@@ -16,14 +16,13 @@ import visitor.DBStatementVisitor;
  */
 public class QueryParser {
 	private String queriesFile;
-	
-	public QueryParser(String fname) {
-		queriesFile = fname;
+	private String output;
+	public QueryParser(String in, String out) {
+		queriesFile = in;
 	}
 	
 	public void parse() {
 		try {
-			DBCatalog.getCatalog().parseSchema("db");
 			CCJSqlParser parser = new CCJSqlParser(new FileReader(queriesFile));
 			Statement statement;
 			int count = 1;
@@ -31,7 +30,7 @@ public class QueryParser {
 				DBStatementVisitor dbStatementVisitor = new DBStatementVisitor();
 				statement.accept(dbStatementVisitor);
 				Operator operator = dbStatementVisitor.getOperator();
-				operator.dump("query" + count++);
+				operator.dump(output + "query" + count++);
 			}
 		} catch (Exception e) {
 			System.err.println("Exception occurred during parsing");
