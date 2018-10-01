@@ -28,7 +28,9 @@ import java.util.List;
 
 /**
  * @author xinzheyang
- *
+ * An important visitor that builds the query plan for the database.
+ * It uses JSqlParser to extract all the elements and then builds the
+ * query plan in a bottom-up manner.
  */
 public class DBSelectVisitor implements SelectVisitor {
 	private Operator operator = null;
@@ -51,7 +53,7 @@ public class DBSelectVisitor implements SelectVisitor {
 	
 	/**
 	 * @param fromItem
-	 * @return
+	 * @return an scanOperator that builds from an FromItem
 	 */
 	private ScanOperator buildScanFromItem(FromItem fromItem) {
 		DBFromItemVisitor dbFromItemVisitor = new DBFromItemVisitor();
@@ -60,6 +62,10 @@ public class DBSelectVisitor implements SelectVisitor {
 		return scanOperator;
 	}
 	
+	/**
+	 * @param scanOperator
+	 * @return an selectOperator that builds from a scanOperator
+	 */
 	private SelectOperator buildSelectFromScan(ScanOperator scanOperator) {
 		SelectOperator selectOp = null;
 		if (selectMap != null && selectMap.size() > 0) {
@@ -71,6 +77,10 @@ public class DBSelectVisitor implements SelectVisitor {
 		return selectOp;
 	}
 	
+	/**
+	 * @param fromItem
+	 * @return builds a selectOperator from FromItem if possible, otherwise a scanOperator
+	 */
 	private Operator buildScanSelectFromItem(FromItem fromItem) {
 		ScanOperator scanOperator = buildScanFromItem(fromItem);
 		SelectOperator selectOperator = buildSelectFromScan(scanOperator);
@@ -82,6 +92,10 @@ public class DBSelectVisitor implements SelectVisitor {
 	}
 	
 	
+	/**
+	 * @param orderByElements
+	 * @return a sortOperator built from a list of OrderByElements, which follows the query plan structure
+	 */
 	private SortOperator buildSort(List<OrderByElement> orderByElements) {
 		SortOperator sortOperator = null;
 		String[] cols = new String[orderByElements.size()];
@@ -99,6 +113,11 @@ public class DBSelectVisitor implements SelectVisitor {
 		}
 		return sortOperator;
 	}
+	
+	
+	/* (non-Javadoc)
+	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public void visit(PlainSelect plainSelect) {

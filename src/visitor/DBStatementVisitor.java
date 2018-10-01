@@ -15,9 +15,12 @@ import net.sf.jsqlparser.statement.truncate.Truncate;
 import net.sf.jsqlparser.statement.update.Update;
 import operator.Operator;;
 
+
 /**
- * @author sitianchen
- *
+ * @author xinzheyang
+ * A visitor that implements the StatementVisitor.
+ * It only implements visit(Select) because other classes are not
+ * supported in this system.
  */
 public class DBStatementVisitor implements StatementVisitor{
 	private Operator operator = null;
@@ -30,6 +33,9 @@ public class DBStatementVisitor implements StatementVisitor{
 		this.operator = operator;
 	}
 
+	/* (non-Javadoc)
+	 * @see net.sf.jsqlparser.statement.StatementVisitor#visit(net.sf.jsqlparser.statement.select.Select)
+	 */
 	@Override
 	public void visit(Select select) {
 		PlainSelect body = (PlainSelect) select.getSelectBody();
