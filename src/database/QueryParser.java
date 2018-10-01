@@ -3,6 +3,7 @@
  */
 package database;
 
+import java.io.File;
 import java.io.FileReader;
 
 import net.sf.jsqlparser.parser.CCJSqlParser;
@@ -30,7 +31,18 @@ public class QueryParser {
 				DBStatementVisitor dbStatementVisitor = new DBStatementVisitor();
 				statement.accept(dbStatementVisitor);
 				Operator operator = dbStatementVisitor.getOperator();
-				operator.dump(output + "query" + count++);
+				if (operator == null) {
+					File file = new File(output + "query" + count++);
+
+					/* This logic will make sure that the file 
+					 * gets created if it is not present at the
+					 * specified location*/
+					if (!file.exists()) {
+						file.createNewFile();
+					}
+				} else {
+					operator.dump(output + "query" + count++);
+				}
 			}
 		} catch (Exception e) {
 			System.err.println("Exception occurred during parsing");

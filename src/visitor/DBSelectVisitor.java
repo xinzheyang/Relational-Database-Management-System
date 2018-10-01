@@ -134,7 +134,9 @@ public class DBSelectVisitor implements SelectVisitor {
 		if (expression != null) {
 			parseConjunctExpVisitor = new ParseConjunctExpVisitor();
 			expression.accept(parseConjunctExpVisitor);
-			
+			if (parseConjunctExpVisitor.isAlwaysFalse()) {
+				return;
+			}
 			// SELECT * FROM A WHERE A.sid  A:A.sid = 1
 			selectMap = parseConjunctExpVisitor.getSelectMap();
 		}
