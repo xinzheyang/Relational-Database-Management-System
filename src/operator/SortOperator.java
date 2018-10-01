@@ -4,7 +4,9 @@
 package operator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,18 +20,30 @@ public class SortOperator extends Operator {
 	
 	private Operator childOp; //child operator of where the source for getNextTuple() comes from.
 //	private HashMap<String, Integer> columnIndexMap
-	private int[] colIndexes;
+	private List<Integer> colIndexes=new ArrayList<>();
 	private List<Tuple> allTuples=new ArrayList<>();
+	private int index;
 	
 	public SortOperator(Operator op, String[] cols) {
 		childOp=op;
-		colNames=cols;
+//		List<Integer> =new ArrayList<>();
+//		colIndexes = new int[cols.length];
+		for(int i=0;i<cols.length;i++) {
+			colIndexes.add(columnIndexMap.get(cols[i]));
+		}
+		for(int i=0;i<columnIndexMap.size();i++) {
+			if(!colIndexes.contains(i)) {
+				colIndexes.add(i);
+			}
+		}
+		columnIndexMap = new HashMap<String, Integer>(childOp.getColumnIndexMap()); //same col index map as child operator
 		Tuple tuple;
 		while((tuple = childOp.getNextTuple()) != null) {
 			allTuples.add(tuple);
 		}
-		TupleComparator com = new TupleComparator() 
-		Collections.sort(allTuples,);
+		Comparator<Tuple> com = Tuple.getComparator(colIndexes);
+		Collections.sort(allTuples, com);
+		index=0;
 		
 	}
 	/* (non-Javadoc)
@@ -37,7 +51,9 @@ public class SortOperator extends Operator {
 	 */
 	@Override
 	public Tuple getNextTuple() {
-		
+		while(index < allTuples.size()) {
+			return allTuples.get(index);
+		}
 		return null;
 	}
 
@@ -47,6 +63,7 @@ public class SortOperator extends Operator {
 	@Override
 	public void reset() {
 		childOp.reset();
+		index=0;
 	}
 
 }
