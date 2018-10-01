@@ -70,6 +70,9 @@ public class DBSelectVisitor implements SelectVisitor {
 		SelectOperator selectOp = null;
 		if (selectMap != null && selectMap.size() > 0) {
 			String tableName = scanOperator.getTableName();
+			if (scanOperator.getAlias() != "") {
+				tableName = scanOperator.getAlias();
+			}
 			if (selectMap.containsKey(tableName)) {
 				selectOp = new SelectOperator(scanOperator, selectMap.get(tableName));
 			}
@@ -149,10 +152,11 @@ public class DBSelectVisitor implements SelectVisitor {
 			ArrayList<FromItem> leftTable = new ArrayList<>();
 			Operator initLeftOp = selectOperator == null ? scanOperator : selectOperator;
 			
-			
+			String fromItemReference = fromItem.getAlias() != null ? fromItem.getAlias() : fromItem.toString();
+			String fromRightItemReference = firstRightItem.getAlias() != null ? firstRightItem.getAlias() : firstRightItem.toString();
 			if (parseConjunctExpVisitor != null && 
-					parseConjunctExpVisitor.getJoinCondition(fromItem.toString(), firstRightItem.toString()) != null) {
-				Expression condition = parseConjunctExpVisitor.getJoinCondition(fromItem.toString(), firstRightItem.toString());
+					parseConjunctExpVisitor.getJoinCondition(fromItemReference, fromRightItemReference) != null) {
+				Expression condition = parseConjunctExpVisitor.getJoinCondition(fromItemReference, fromRightItemReference);
 				left = new JoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem), condition);
 			} else {
 				left = new JoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem));
@@ -166,9 +170,11 @@ public class DBSelectVisitor implements SelectVisitor {
 				FromItem rightItem = joins.get(i).getRightItem();
 				Operator newScanSelect = buildScanSelectFromItem(rightItem);
 				for (FromItem table:leftTable) {
+					String tableItemReference = table.getAlias() != null ? table.getAlias() : fromItem.toString();
+					String rightItemReference = rightItem.getAlias() != null ? rightItem.getAlias() : rightItem.toString();
 					if (parseConjunctExpVisitor != null && 
-							parseConjunctExpVisitor.getJoinCondition(table.toString(), rightItem.toString()) != null) {
-						Expression tempCondition = parseConjunctExpVisitor.getJoinCondition(table.toString(), rightItem.toString());
+							parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference) != null) {
+						Expression tempCondition = parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference);
 						condition = condition == null ? tempCondition: new AndExpression(condition, tempCondition);
 						
 					}

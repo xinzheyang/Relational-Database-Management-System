@@ -24,7 +24,7 @@ public class Main {
 //		String dbDir = dirIn + File.separator + "db";
 //		String qFile = dirIn + File.separator + "queries.sql";
 //		DBCatalog.getCatalog().parseSchema(dbDir);
-		QueryParser queryParser = new QueryParser("queries.sql");
+		QueryParser queryParser = new QueryParser("queries2.sql");
 		queryParser.parse();
 	}
 
