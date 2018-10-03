@@ -11,9 +11,12 @@ import net.sf.jsqlparser.statement.Statement;
 import operator.Operator;
 import visitor.DBStatementVisitor;
 
+
 /**
- * @author sitianchen
- *
+ * @author xinzheyang
+ * This class creates an instance of a query parser, which
+ * parses according to input and output files and using a 
+ * while loop to go over all the queries in the file
  */
 public class QueryParser {
 	private String queriesFile;
