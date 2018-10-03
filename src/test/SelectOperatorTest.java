@@ -20,7 +20,7 @@ import operator.*;
 
 /**
  * @author sitianchen
- *
+ * Several simple test cases for scan and select.
  */
 public class SelectOperatorTest {
 	

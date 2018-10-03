@@ -3,8 +3,10 @@
  */
 package database;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.statement.Statement;
@@ -37,6 +39,8 @@ public class QueryParser {
 				Operator operator = dbStatementVisitor.getOperator();
 				if (operator == null) {
 					File file = new File(output + File.separator + "query" + count++);
+					FileWriter fw = new FileWriter(file); //the instant the file is opened for writing, original
+					//contents are overwrite. We write nothing in this case since operator == null
 
 					/* This logic will make sure that the file 
 					 * gets created if it is not present at the
