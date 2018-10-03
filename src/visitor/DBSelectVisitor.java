@@ -119,7 +119,8 @@ public class DBSelectVisitor implements SelectVisitor {
 	
 	
 	/* (non-Javadoc)
-	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
+	 * This is the visit method that overrides SelectVisitor for PlainSelect type
+	 * It basically parses all the SQL elements and builds the query from bottom up
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
