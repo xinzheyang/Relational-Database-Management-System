@@ -47,7 +47,8 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import operator.Operator;
 
-/**
+/** An instance of the class evaluates an expression by recursively breaking 
+ * down the expression visiting its sub-expressions.
  * @author sitianchen
  *
  */
@@ -331,14 +332,18 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
+	/* First gets the corresponding index of the tableColumn in the current operator,
+	 * then accesses the corresponding value in the tuple by the index.
 	 */
 	@Override
 	public void visit(Column tableColumn) {
-		// TODO Auto-generated method stub
-		int colIndex = op.getColumnIndex(tableColumn.getTable().getName() + "." + tableColumn.getColumnName());
-		returnLongValue = currTuple.getColumnValue(colIndex);
+		try{
+			int colIndex = op.getColumnIndex(tableColumn.getTable().getName() + "." + tableColumn.getColumnName());
+			returnLongValue = currTuple.getColumnValue(colIndex);
+			
+		} catch(NullPointerException e) { 
+			System.out.println("column name non-existent, please check your input");
+		}
 	}
 
 	/* (non-Javadoc)
