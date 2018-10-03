@@ -134,8 +134,9 @@ public class DBSelectVisitor implements SelectVisitor {
 		if (expression != null) {
 			parseConjunctExpVisitor = new ParseConjunctExpVisitor();
 			expression.accept(parseConjunctExpVisitor);
-			if (parseConjunctExpVisitor.isAlwaysFalse()) {
-				return;
+			if (parseConjunctExpVisitor.isAlwaysFalse()) { //there exists at least one constant conjunction
+				//that always evaluates to false, and we know select or join wouldn't output any tuples
+				return; //simply return -> null on this.operator
 			}
 			// SELECT * FROM A WHERE A.sid  A:A.sid = 1
 			selectMap = parseConjunctExpVisitor.getSelectMap();
@@ -172,7 +173,7 @@ public class DBSelectVisitor implements SelectVisitor {
 				FromItem rightItem = joins.get(i).getRightItem();
 				Operator newScanSelect = buildScanSelectFromItem(rightItem);
 				for (FromItem table:leftTable) {
-					String tableItemReference = table.getAlias() != null ? table.getAlias() : fromItem.toString();
+					String tableItemReference = table.getAlias() != null ? table.getAlias() : table.toString();
 					String rightItemReference = rightItem.getAlias() != null ? rightItem.getAlias() : rightItem.toString();
 					if (parseConjunctExpVisitor != null && 
 							parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference) != null) {
@@ -181,8 +182,9 @@ public class DBSelectVisitor implements SelectVisitor {
 						
 					}
 				}
+				leftTable.add(rightItem);
 				left = condition == null ? new JoinOperator(left, newScanSelect) 
-						: new JoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem), condition);
+						: new JoinOperator(left, newScanSelect, condition);
 			}
 			joinOperator = left;
 		}

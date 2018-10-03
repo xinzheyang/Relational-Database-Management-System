@@ -20,6 +20,7 @@ public class QueryParser {
 	private String output;
 	public QueryParser(String in, String out) {
 		queriesFile = in;
+		output = out;
 	}
 	
 	public void parse() {
@@ -32,7 +33,7 @@ public class QueryParser {
 				statement.accept(dbStatementVisitor);
 				Operator operator = dbStatementVisitor.getOperator();
 				if (operator == null) {
-					File file = new File(output + "query" + count++);
+					File file = new File(output + File.separator + "query" + count++);
 
 					/* This logic will make sure that the file 
 					 * gets created if it is not present at the
@@ -41,7 +42,7 @@ public class QueryParser {
 						file.createNewFile();
 					}
 				} else {
-					operator.dump(output + "query" + count++);
+					operator.dump(output + File.separator + "query" + count++);
 				}
 			}
 		} catch (Exception e) {
