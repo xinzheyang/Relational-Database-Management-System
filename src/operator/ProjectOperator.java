@@ -8,8 +8,8 @@ import java.util.HashMap;
 import database.Tuple;
 
 /**
- * @author sitianchen
- *
+ * The Project Operator selects the columns to be projected from its child Operator
+ * @author xinqi
  */
 public class ProjectOperator extends Operator {
 	
@@ -17,6 +17,11 @@ public class ProjectOperator extends Operator {
 //	private HashMap<String, Integer> columnIndexMap;
 	private int[] indices;
 	
+	/**
+	 * Initializes the project operator
+	 * @param op the child operator of this object
+	 * @param cols the names of the columns to be projected
+	 */
 	public ProjectOperator(Operator op, String[] cols) {
 		childOp = op;
 		HashMap<String,Integer> map = new HashMap<>();
@@ -27,6 +32,7 @@ public class ProjectOperator extends Operator {
 		}
 		columnIndexMap = map;
 	}
+	
 	/* (non-Javadoc)
 	 * @see database.Operator#getNextTuple()
 	 * Iterate over columns to be projected

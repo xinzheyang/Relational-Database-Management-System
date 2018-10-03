@@ -10,17 +10,24 @@ import visitor.EvaluateExpVisitor;
 import net.sf.jsqlparser.expression.Expression;
 
 /**
- * @author sitianchen
+ * The operator gets two child operators and join their tuples together
+ * @author xinqi
  *
  */
 public class JoinOperator extends Operator {
 	
-	public Operator leftChild; //left child operator of where the source for getNextTuple() comes from.
-	public Operator rightChild; //right child operator of where the source for getNextTuple() comes from.
-	public Expression joinCondition;
-	public Tuple leftTuple;
-	public EvaluateExpVisitor visitor;
+	private Operator leftChild; //left child operator of where the source for getNextTuple() comes from.
+	private Operator rightChild; //right child operator of where the source for getNextTuple() comes from.
+	private Expression joinCondition;
+	private Tuple leftTuple;
+	private EvaluateExpVisitor visitor;
 	
+	/**
+	 * Initializes the Join operator with condition given
+	 * @param left the left operator to be joined
+	 * @param right the right operator to be joined
+	 * @param condition the Expression condition that filters the tuples
+	 */
 	public JoinOperator(Operator left, Operator right, Expression condition) {
 		leftChild = left;
 		rightChild = right;
@@ -36,6 +43,11 @@ public class JoinOperator extends Operator {
 		visitor = new EvaluateExpVisitor();
 	}
 	
+	/**
+	 * Initializes the Join operator without condition given
+	 * @param left the left operator to be joined
+	 * @param right the right operator to be joined
+	 */
 	public JoinOperator(Operator left, Operator right) {
 		this(left, right, null);
 	}

@@ -12,23 +12,34 @@ import java.util.stream.Collectors;
 import net.sf.jsqlparser.schema.Table;
 
 /**
- * @author xinzheyang
- * We use
+ * @author xinqi
+ * We use this class to represent a data entry with selected columns in a table
  *
  */
 public class Tuple {
 //	private Table table;
 //	public HashMap<String,Integer> tupleData;
+	
+	/**
+	 * @param lst the list of indices to sort by
+	 * @return the comparator that Collection can use
+	 */
 	public static Comparator<Tuple> getComparator(List<Integer> lst) {
 		return new TupleComparator(lst);
 	}
 	
 	private int[] colValues;
 
+	/** Getter for colValues
+	 * @return the colValues of the object
+	 */
 	public int[] getColValues() {
 		return colValues;
 	}
 
+	/** Setter for colValues
+	 * @param colValues the column values to be set
+	 */
 	public void setColValues(int[] colValues) {
 		this.colValues = colValues;
 	}
@@ -37,11 +48,15 @@ public class Tuple {
 	 * corresponding table. First get corresponding
 	 * column names from the data catalog, then map each column name to the read values.
 	 */
+	
+	/**
+	 *Initializes a Tuple with a string containing column names
+	 * @param tupleString the column values separated by ","
+	 */
 	public Tuple(String tupleString) {
 //		this.table = table;
 //		String[] columnNames = DBCatalog.getTableColumns(tableName);
 		String[] columnValuesStr = tupleString.split(",");
-//		assert columnNames.length == columnValuesStr.length;
 		colValues = new int[columnValuesStr.length];
 
 		for(int i = 0; i < columnValuesStr.length; i++) {
@@ -49,29 +64,34 @@ public class Tuple {
 		}
 	}
 	
-	/* Overloading constructor.
+
+	/**
+	 * Construct the Tuple with an array as column values
+	 * @param colValues the column values
 	 */
 	public Tuple(int[] colValues) {
 		this.colValues = colValues;
 	}
 	
+	/**
+	 * Get the value of this index
+	 * @param colIndex the index to look from
+	 * @return 
+	 */
 	public int getColumnValue(int colIndex) {
 		assert colIndex < colValues.length;
 		return colValues[colIndex];
 	}
 
-//	/* Overloading constructor for join operator (merging two tuples together).
-//	 */
-//	public Tuple(Tuple tup1, Tuple tup2) {
-//
-//	}
-
+	/**
+	 * Merge this tuple with another tuple
+	 * @param tuple2 the tuple to be merged with
+	 * @return The new tuple generated
+	 */
 	public Tuple merge(Tuple tuple2) {
-//		this.colValues = ArrayUtils.addAll(first, second);
 		int[] newarr = new int[colValues.length + tuple2.colValues.length];
 		System.arraycopy(colValues, 0, newarr, 0, colValues.length);
 		System.arraycopy(tuple2.colValues, 0, newarr, colValues.length, tuple2.colValues.length);
-//		this.colValues = newarr;
 		return new Tuple(newarr);
 	}
 
@@ -81,6 +101,9 @@ public class Tuple {
 //		return tupleData.get(columnName);
 //	}
 
+	/* 
+	 * Converts the Tuple into a string where each value is connected by a ","
+	 */
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 //		Collection<Integer> values = tupleData.values();
@@ -93,9 +116,12 @@ public class Tuple {
 	}
 	
 
-//	public Table getTable() {
-//		return this.table;
-//	}
+
+	/**
+	 * @author xinqi
+	 * The comparator that sorts the Tuples according to a list of column 
+	 * indices as the order
+	 */
 	private static class TupleComparator implements Comparator<Tuple> { 	
 		private List<Integer> indexes;
 	    public TupleComparator(List<Integer> lst) {

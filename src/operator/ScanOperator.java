@@ -16,8 +16,10 @@ import database.Tuple;
 
 /**
  * @author sitianchen
- *
+ * Scan Operator reads information from the text file containing a table and stores it
+ * in some attributes.
  */
+
 public class ScanOperator extends Operator {
 	
 	private String tb;
@@ -27,6 +29,14 @@ public class ScanOperator extends Operator {
 	
 	/* Upon initialization, opens up a file scan on the appropriate data file
 	 * data file.
+	 */
+	
+	
+	
+	/**
+	 * Upon initialization, opens up a file scan on the appropriate data file
+	 * @param tableName the name of the table we want to scan from
+	 * @throws FileNotFoundException
 	 */
 	public ScanOperator(String tableName) throws FileNotFoundException {
 		tb = tableName;
@@ -41,6 +51,13 @@ public class ScanOperator extends Operator {
 	}
 	/* Overloading constructor that enables aliases. 
 	 */
+	
+	/**
+	 * Initializes the scan operator if a table uses alias
+	 * @param tableName the name of the table we want to scan from
+	 * @param alias the alias that the table uses
+	 * @throws FileNotFoundException
+	 */
 	public ScanOperator(String tableName, String alias) throws FileNotFoundException {
 		tb = tableName;
 		this.alias = alias;
@@ -52,16 +69,22 @@ public class ScanOperator extends Operator {
 		}
 			
 	}
+	
+	
+	/**
+	 * @return the alias of the table
+	 */
 	public String getAlias() {
 		return alias;
 	}
+	
+	/**
+	 * @return the name of the table
+	 */
 	public String getTableName() {
 		return tb;
 	}
 
-	/* Reads the next line from the file that stores the base table and 
-	 * returns the next tuple.
-	 */
 	@Override
 	public Tuple getNextTuple() {
 		// TODO Auto-generated method stub
@@ -97,11 +120,4 @@ public class ScanOperator extends Operator {
 			e.printStackTrace();
 		}
 	}
-//
-//	@Override
-//	public void dump(String fileOut) {
-//		super.dump(fileOut);
-//	}
-
-
 }

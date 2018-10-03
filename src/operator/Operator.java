@@ -12,6 +12,7 @@ import java.util.*;
 import database.Tuple;
 
 /**
+ * The abstract class for all kinds of operators
  * @author xinzheyang
  *
  */
@@ -19,28 +20,40 @@ public abstract class Operator {
 	
 	
 	protected HashMap<String, Integer> columnIndexMap;
-	
-	
-	/* Get the input parameter's mapped index in columnIndexMap.
-	 * 
+		
+	/**
+	 * get the index of the table given a column name
+	 * @param colName the column name
+	 * @return
 	 */
 	public int getColumnIndex(String colName) {
 		return columnIndexMap.get(colName);
 	}
 	
+	/** 
+	 * Getter for columnIndexMap
+	 * @return The HashMap that maps column names to indices
+	 */
 	public HashMap<String, Integer> getColumnIndexMap() {
 		return columnIndexMap;
 	}
 	
-	/**
-	 * @return
+	/** Reads the next line from the file that stores the base table and returns the next tuple.
+	 * @return the next Tuple object
 	 */
 	public abstract Tuple getNextTuple();
+
+	
 	/**
-	 * 
+	 * Resets the operator so that when it calls getNextTuple(), it starts from the first tuple again.
 	 */
 	public abstract void reset();
 	
+	
+	/**
+	 * Writes the data to a specific output file
+	 * @param fileOut the path of the txt file that the data should be written to.
+	 */
 	public void dump(String fileOut) {
 		BufferedWriter bw = null;
 		try {

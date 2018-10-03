@@ -13,7 +13,9 @@ import java.util.List;
 import database.Tuple;
 
 /**
- * @author sitianchen
+ * @author xinqi
+ * SortOperator gets all the tuples from its child operator, put them in a list,
+ * and sort them according to the order passed in as the column names list.
  *
  */
 public class SortOperator extends Operator {
@@ -24,6 +26,11 @@ public class SortOperator extends Operator {
 	private List<Tuple> allTuples=new ArrayList<>();
 	private int index;
 	
+	/**
+	 * Initializes the sort operator
+	 * @param op The parent operator
+	 * @param cols array containing the names of the columns to sort by
+	 */
 	public SortOperator(Operator op, String[] cols) {
 		childOp=op;
 //		List<Integer> =new ArrayList<>();

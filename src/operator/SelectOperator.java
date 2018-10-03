@@ -14,7 +14,8 @@ import net.sf.jsqlparser.expression.Expression;
 
 /**
  * @author sitianchen
- *
+ * The select operator selects tuples from its child operator that satisfy certain 
+ * conditions.
  */
 public class SelectOperator extends Operator {
 
@@ -23,30 +24,56 @@ public class SelectOperator extends Operator {
 	private EvaluateExpVisitor visitor;
 //	private HashMap<String, Integer> columnIndexMap;
 
+	/**Gettor for childOp
+	 * @return the child operator of this object
+	 */
 	public Operator getChildOp() {
 		return childOp;
 	}
 
+	/**
+	 * Setter for the childOp
+	 * @param childOp the operator to be set as childOp
+	 */
 	public void setChildOp(Operator childOp) {
 		this.childOp = childOp;
 	}
 
+	/**
+	 * Getter for ex
+	 * @return ex of the object
+	 */
 	public Expression getEx() {
 		return ex;
 	}
 
+	/**
+	 * Setter for ex
+	 * @param ex the expression to be set as ex
+	 */
 	public void setEx(Expression ex) {
 		this.ex = ex;
 	}
 
+	/**Getter for visitor
+	 * @return visitor of the object
+	 */
 	public EvaluateExpVisitor getVisitor() {
 		return visitor;
 	}
 
+	/** Setter for visitor
+	 * @param visitor the visitor to be set
+	 */
 	public void setVisitor(EvaluateExpVisitor visitor) {
 		this.visitor = visitor;
 	}
 
+	/**
+	 * Initializes the select operator
+	 * @param op the child operator
+	 * @param exp the selection condition
+	 */
 	public SelectOperator(Operator op, Expression exp) {
 		childOp = op;
 		ex = exp;
@@ -89,11 +116,5 @@ public class SelectOperator extends Operator {
 	public void reset() {
 		childOp.reset();
 	}
-//
-//	@Override
-//	public void dump(String fileOut) {
-//		// TODO Auto-generated method stub
-//		super.dump(fileOut);
-//	}
 
 }
