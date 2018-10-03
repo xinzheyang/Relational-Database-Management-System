@@ -4,17 +4,18 @@
 package database;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * @author xinzheyang
- *
+ * This the top level Main class that takes input and output directory
+ * and parses SQL queries in input directory and dumps results in output directory
+ * The program will not terminate when errors occur.
  */
 public class Main {
 
 
 	/**
-	 * @param args
+	 * @param args[0] = dirIn, args[1] = dirOut
 	 */
 	public static void main(String[] args) {
 		try{
