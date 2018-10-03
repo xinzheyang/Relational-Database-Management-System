@@ -59,18 +59,30 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	private Tuple currTuple;
 	private Operator op;
 	
+	/** Getter for returnBoolValue.
+	 * @return this.returnBoolValue
+	 */
 	public boolean getReturnBoolValue() {
 		return returnBoolValue;
 	}
 	
+	/** Getter for returnLongValue.
+	 * @return this.returnLongValue
+	 */
 	public int getReturnLongValue() {
 		return returnLongValue;
 	}
 	
+	/** Set the visitor's current tuple to tup.
+	 * @param tup
+	 */
 	public void setCurrTuple(Tuple tup) {
 		currTuple = tup;
 	}
 	
+	/** Set the visitor's operator to op.
+	 * @param op
+	 */
 	public void setOperator(Operator op) {
 		this.op = op;
 	}

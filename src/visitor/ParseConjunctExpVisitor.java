@@ -74,16 +74,26 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 		selectMap = new HashMap<String, Expression>();
 	}
 	
+	/** Getter for joinMap.
+	 * @return joinMap
+	 */
 	public HashMap<List<String>, Expression> getJoinMap() {
 		return joinMap;
 	}
 	
+	/** Getter for selectMap.
+	 * @return selectMap
+	 */
 	public HashMap<String, Expression> getSelectMap() {
 		return selectMap;
 	}
 	
-	/* Hashes into the joinMap with a sorted (thus unique) ArrayList key that consists of
+	/**Hashes into the joinMap with a sorted (thus unique) ArrayList key that consists of
 	 * the two tableNames passed in.
+	 * @param tb1: a table name
+	 * @param tb2: another table name
+	 * @return the two table's names as key, the key's mapped value (the existing join
+	 * condition of the tables) or null if key non-existent
 	 */
 	public Expression getJoinCondition(String tb1, String tb2) {
 		List<String> key = new ArrayList<String>();
@@ -93,14 +103,19 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 		return joinMap.get(key);
 	}
 	
-	/* Hashes into the the selectMap with tableNames passed in as the key.
+	/**Hashes into the the selectMap with tableNames passed in as the key.
+	 * @param tb
+	 * @return tb as key, the key's mapped value (the existing select condition of the table)
+	 * or null if key non-existent
 	 */
 	public Expression getSelectCondition(String tb) {
 		return selectMap.get(tb);
 	}
 	
-	/* Checks whether at least one of the separate conjunctions always 
+	
+	/**Checks whether at least one of the separate conjunctions always 
 	 * evaluates to false.
+	 * @return the alwaysFalse field of this visitor instance
 	 */
 	public boolean isAlwaysFalse() {
 		return alwaysFalse;
