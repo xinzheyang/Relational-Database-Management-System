@@ -156,7 +156,7 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 				if (!eval.getReturnBoolValue()) { //if, after evaluation the result is false
 					alwaysFalse = true; //where condition always false
 				}
-				//if is true, simply ignore the expression
+				//if is true, simply ignore the expression (cuz of conjunction)
 			}
 			catch(Exception e) { //pre-assumptions should never fail
 				System.out.println("This try block should never fail.");

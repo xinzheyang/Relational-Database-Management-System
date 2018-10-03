@@ -89,11 +89,5 @@ public class SelectOperator extends Operator {
 	public void reset() {
 		childOp.reset();
 	}
-//
-//	@Override
-//	public void dump(String fileOut) {
-//		// TODO Auto-generated method stub
-//		super.dump(fileOut);
-//	}
 
 }

@@ -41,6 +41,9 @@ public abstract class Operator {
 	 */
 	public abstract void reset();
 	
+	/* Keeps on calling the getNextTuple() method of this operator and keeps 
+	 * writing tuples into the fileOut path until end of table file is reached.
+	 */
 	public void dump(String fileOut) {
 		BufferedWriter bw = null;
 		try {

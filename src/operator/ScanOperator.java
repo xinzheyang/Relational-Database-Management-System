@@ -97,11 +97,6 @@ public class ScanOperator extends Operator {
 			e.printStackTrace();
 		}
 	}
-//
-//	@Override
-//	public void dump(String fileOut) {
-//		super.dump(fileOut);
-//	}
 
 
 }
