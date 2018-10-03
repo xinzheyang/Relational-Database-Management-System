@@ -26,6 +26,12 @@ public class QueryParser {
 		output = out;
 	}
 	
+	
+	/**
+	 * The parse method creates a File reader and makes each statement
+	 * accept the dbStatementVisitor and dumps the result into output dir
+	 * If operator is null, output an empty file
+	 */
 	public void parse() {
 		try {
 			CCJSqlParser parser = new CCJSqlParser(new FileReader(queriesFile));
