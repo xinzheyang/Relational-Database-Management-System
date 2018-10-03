@@ -8,9 +8,10 @@ import java.util.HashMap;
 
 import database.Tuple;
 
-/**
+/** 
  * @author sitianchen
- *
+ * Operator for SELECT DISTINCT [...]. The child operator has to be a SortOperator. Duplicates
+ * are removed for all tuples.
  */
 public class DupElimOperator extends Operator {
 	private SortOperator childOp; //child operator of where the source for getNextTuple() comes from.
@@ -20,8 +21,8 @@ public class DupElimOperator extends Operator {
 		childOp = child;
 		columnIndexMap = childOp.getColumnIndexMap();
 	}
-	/* (non-Javadoc)
-	 * @see database.Operator#getNextTuple()
+	/* Keep getting next tuple until the next tuple is different from the 
+	 * prevDistinct tuple or no more tuples can be retrieved.
 	 */
 	@Override
 	public Tuple getNextTuple() {
@@ -44,14 +45,5 @@ public class DupElimOperator extends Operator {
 		childOp.reset();
 
 	}
-
-	/* (non-Javadoc)
-	 * @see database.Operator#dump()
-	 */
-//	@Override
-//	public void dump(String fileOut) {
-//		// TODO Auto-generated method stub
-//
-//	}
 
 }

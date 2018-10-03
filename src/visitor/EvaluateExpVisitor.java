@@ -47,7 +47,8 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import operator.Operator;
 
-/**
+/** An instance of the class evaluates an expression by recursively breaking 
+ * down the expression visiting its sub-expressions.
  * @author sitianchen
  *
  */
@@ -58,18 +59,30 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 	private Tuple currTuple;
 	private Operator op;
 	
+	/** Getter for returnBoolValue.
+	 * @return this.returnBoolValue
+	 */
 	public boolean getReturnBoolValue() {
 		return returnBoolValue;
 	}
 	
+	/** Getter for returnLongValue.
+	 * @return this.returnLongValue
+	 */
 	public int getReturnLongValue() {
 		return returnLongValue;
 	}
 	
+	/** Set the visitor's current tuple to tup.
+	 * @param tup
+	 */
 	public void setCurrTuple(Tuple tup) {
 		currTuple = tup;
 	}
 	
+	/** Set the visitor's operator to op.
+	 * @param op
+	 */
 	public void setOperator(Operator op) {
 		this.op = op;
 	}
@@ -331,14 +344,18 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
+	/* First gets the corresponding index of the tableColumn in the current operator,
+	 * then accesses the corresponding value in the tuple by the index.
 	 */
 	@Override
 	public void visit(Column tableColumn) {
-		// TODO Auto-generated method stub
-		int colIndex = op.getColumnIndex(tableColumn.getTable().getName() + "." + tableColumn.getColumnName());
-		returnLongValue = currTuple.getColumnValue(colIndex);
+		try{
+			int colIndex = op.getColumnIndex(tableColumn.getTable().getName() + "." + tableColumn.getColumnName());
+			returnLongValue = currTuple.getColumnValue(colIndex);
+			
+		} catch(NullPointerException e) { 
+			System.out.println("column name non-existent, please check your input");
+		}
 	}
 
 	/* (non-Javadoc)

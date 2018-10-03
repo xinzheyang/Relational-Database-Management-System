@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package operator;
 
@@ -21,18 +21,18 @@ import database.Tuple;
  */
 
 public class ScanOperator extends Operator {
-	
+
 	private String tb;
 	private String alias;
 	private BufferedReader f;
 //	private HashMap<String, Integer> columnIndexMap;
-	
+
 	/* Upon initialization, opens up a file scan on the appropriate data file
 	 * data file.
 	 */
-	
-	
-	
+
+
+
 	/**
 	 * Upon initialization, opens up a file scan on the appropriate data file
 	 * @param tableName the name of the table we want to scan from
@@ -47,11 +47,11 @@ public class ScanOperator extends Operator {
 		for(int i = 0; i < schemaColNames.length; i++) {
 			columnIndexMap.put((tb + "." + schemaColNames[i]), i);
 		}
-			
+
 	}
-	/* Overloading constructor that enables aliases. 
+	/* Overloading constructor that enables aliases.
 	 */
-	
+
 	/**
 	 * Initializes the scan operator if a table uses alias
 	 * @param tableName the name of the table we want to scan from
@@ -67,17 +67,17 @@ public class ScanOperator extends Operator {
 		for(int i = 0; i < schemaColNames.length; i++) {
 			columnIndexMap.put((alias + "." + schemaColNames[i]), i);
 		}
-			
+
 	}
-	
-	
+
+
 	/**
 	 * @return the alias of the table
 	 */
 	public String getAlias() {
 		return alias;
 	}
-	
+
 	/**
 	 * @return the name of the table
 	 */

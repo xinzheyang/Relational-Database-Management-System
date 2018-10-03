@@ -28,9 +28,10 @@ public class DBCatalog {
 		//key=table name, value=col names array
 		tableMap = new HashMap<String, String[]>();
 	}
-	
-	/* Static get instance method, gets the singleton instance
-	 * of the class.
+
+	/** Static get instance method, gets the singleton instance
+	 * of the class. Initialize the catalog if necessary.
+	 * @return the singleton instance of the class
 	 */
 	public static DBCatalog getCatalog() {
 		if (catalog == null) {
@@ -39,10 +40,19 @@ public class DBCatalog {
 		return catalog;
 	}
 	
+	/** Gets all column names of the input table.
+	 * @param tableName
+	 * @return an array of all column names of the table.
+	 */
 	public static String[] getTableColumns(String tableName) {
 		return tableMap.get(tableName);
 	}
 	
+	
+	/**
+	 * @param tableName
+	 * @return the table file location in local directory for the given tableName.
+	 */
 	public static String getTableLoc(String tableName) {
 		return locDir + File.separator + tableName;
 	}

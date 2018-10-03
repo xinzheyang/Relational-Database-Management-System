@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package operator;
 
@@ -17,10 +17,10 @@ import database.Tuple;
  *
  */
 public abstract class Operator {
-	
-	
+
+
 	protected HashMap<String, Integer> columnIndexMap;
-		
+
 	/**
 	 * get the index of the table given a column name
 	 * @param colName the column name
@@ -29,29 +29,30 @@ public abstract class Operator {
 	public int getColumnIndex(String colName) {
 		return columnIndexMap.get(colName);
 	}
-	
-	/** 
+
+	/**
 	 * Getter for columnIndexMap
 	 * @return The HashMap that maps column names to indices
 	 */
 	public HashMap<String, Integer> getColumnIndexMap() {
 		return columnIndexMap;
 	}
-	
+
 	/** Reads the next line from the file that stores the base table and returns the next tuple.
 	 * @return the next Tuple object
 	 */
 	public abstract Tuple getNextTuple();
 
-	
+
 	/**
 	 * Resets the operator so that when it calls getNextTuple(), it starts from the first tuple again.
 	 */
 	public abstract void reset();
-	
-	
+
+
 	/**
-	 * Writes the data to a specific output file
+	 * Keeps on calling the getNextTuple() method of this operator and keeps
+ 	 * writing tuples into the fileOut path until end of table file is reached.
 	 * @param fileOut the path of the txt file that the data should be written to.
 	 */
 	public void dump(String fileOut) {
@@ -62,7 +63,7 @@ public abstract class Operator {
 			//Specify the file name and path here
 			File file = new File(fileOut);
 
-			/* This logic will make sure that the file 
+			/* This logic will make sure that the file
 			 * gets created if it is not present at the
 			 * specified location*/
 			if (!file.exists()) {
@@ -80,7 +81,7 @@ public abstract class Operator {
 			ioe.printStackTrace();
 		}
 		finally
-		{ 
+		{
 			try{
 				if(bw!=null)
 					bw.close();
