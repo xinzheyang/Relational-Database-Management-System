@@ -43,6 +43,8 @@ public class DBCatalog {
 		return tableMap.get(tableName);
 	}
 	
+	/* Get the table file location in local directory for the given tableName.
+	 */
 	public static String getTableLoc(String tableName) {
 		return locDir + File.separator + tableName;
 	}
