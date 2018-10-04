@@ -40,10 +40,25 @@ public class QueryParser {
 			Statement statement;
 			int count = 1;
 			while ((statement = parser.Statement()) != null) {
-				DBStatementVisitor dbStatementVisitor = new DBStatementVisitor();
-				statement.accept(dbStatementVisitor);
-				Operator operator = dbStatementVisitor.getOperator();
-				if (operator == null) {
+				try {
+					DBStatementVisitor dbStatementVisitor = new DBStatementVisitor();
+					statement.accept(dbStatementVisitor);
+					Operator operator = dbStatementVisitor.getOperator();
+					if (operator == null) {
+						File file = new File(output + File.separator + "query" + count++);
+						FileWriter fw = new FileWriter(file); //the instant the file is opened for writing, original
+						//contents are overwrite. We write nothing in this case since operator == null
+
+						/* This logic will make sure that the file 
+						 * gets created if it is not present at the
+						 * specified location*/
+						if (!file.exists()) {
+							file.createNewFile();
+						}
+					} else {
+						operator.dump(output + File.separator + "query" + count++);
+					}
+				} catch (Exception e) {
 					File file = new File(output + File.separator + "query" + count++);
 					FileWriter fw = new FileWriter(file); //the instant the file is opened for writing, original
 					//contents are overwrite. We write nothing in this case since operator == null
@@ -53,10 +68,8 @@ public class QueryParser {
 					 * specified location*/
 					if (!file.exists()) {
 						file.createNewFile();
-					}
-				} else {
-					operator.dump(output + File.separator + "query" + count++);
 				}
+				
 			}
 		} catch (Exception e) {
 			System.err.println("Exception occurred during parsing");
