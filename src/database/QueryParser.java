@@ -27,8 +27,8 @@ public class QueryParser {
 		queriesFile = in;
 		output = out;
 	}
-	
-	
+
+
 	/**
 	 * The parse method creates a File reader and makes each statement
 	 * accept the dbStatementVisitor and dumps the result into output dir
@@ -68,10 +68,11 @@ public class QueryParser {
 					 * specified location*/
 					if (!file.exists()) {
 						file.createNewFile();
+					}
+
 				}
-				
-			}
-		} catch (Exception e) {
+			} 
+		}catch (Exception e) {
 			System.err.println("Exception occurred during parsing");
 			e.printStackTrace();
 		}
