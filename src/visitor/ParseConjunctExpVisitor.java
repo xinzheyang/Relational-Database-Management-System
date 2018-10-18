@@ -141,7 +141,7 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 				tb2 = tbStack.pop();
 			}
 		}
-		if (tb1 != "" && tb2 != "") { //Join Condition, stack had two tables
+		if (tb1 != "" && tb2 != "" && ! tb1.equals(tb2)) { //Join Condition, stack had two tables
 			List<String> key = new ArrayList<String>();
 			key.add(tb1);
 			key.add(tb2);

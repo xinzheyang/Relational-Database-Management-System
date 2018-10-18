@@ -139,7 +139,7 @@ public class DBSelectVisitor implements SelectVisitor {
 		}
 		
 		
-		
+//		System.out.println(selectMap);
 		scanOperator = buildScanFromItem(fromItem);
 		
 		selectOperator = buildSelectFromScan(scanOperator);
