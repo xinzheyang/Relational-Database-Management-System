@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+import operator.Operator;
+
 /**
  * @author sitianchen
  *
@@ -20,12 +22,16 @@ public class TupleWriter {
 	private ByteBuffer buffer;
 	private FileOutputStream fout;
 	private static final int PAGE_SIZE = 4096;
+	private int numTuples;
+	private int numAttribs;
 	
-	public TupleWriter(String fileout) {
+	public TupleWriter(String fileout, Operator op) {
 		try {
 			fout = new FileOutputStream(fileout);
 			fc = fout.getChannel();
 			buffer = ByteBuffer.allocate(PAGE_SIZE);
+			numAttribs = op.getColumnIndexMap().size();
+		    numTuples = 0;
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -35,6 +41,7 @@ public class TupleWriter {
 	
 	public void close() {
 		try {
+			fc.close();
 			fout.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -56,19 +63,42 @@ public class TupleWriter {
 		this.tuple = t;
 	}
 	
-	/** Writes a tuple to the file path specified
-	 * @param fileout: the file path to be written out to
+	
+	/** Puts meta data to buffer and then writes to channel.
+	 * @param numAttribs
+	 * @param numTuples
 	 */
-	public void write() {
-		for(int val : tuple.getColValues()) {
-			buffer.putInt(val);
-		}
+	public void writeMetaData() {
+		buffer.putInt(numAttribs);
+		buffer.putInt(0); //number of tuples initialized as 0
 		try {
 			fc.write(buffer);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	/** Writes a tuple to the file path specified
+	 * @param fileout: the file path to be written out to
+	 */
+	public void writeToBuffer() {
+		//clear buffer if exceed limit/capacity???
+		if (buffer.position() + numAttribs * 4 > buffer.limit()) {
+			buffer.putInt(4, numTuples); //second int to be written
+			//flush this page to the buffer
+			try {
+				fc.write(buffer);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			buffer.clear();
+			writeMetaData();
+			numTuples = 0;
+		}
+		for(int val : tuple.getColValues()) {
+			buffer.putInt(val);
+		}
+		++numTuples;
 	}
 
 }
