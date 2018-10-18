@@ -14,17 +14,12 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.Union;
-import operator.DupElimOperator;
-import operator.JoinOperator;
-import operator.Operator;
-import operator.ProjectOperator;
-import operator.ScanOperator;
-import operator.SelectOperator;
-import operator.SortOperator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import logicaloperator.*;
 
 /**
  * @author xinzheyang
@@ -33,21 +28,21 @@ import java.util.List;
  * query plan in a bottom-up manner.
  */
 public class DBSelectVisitor implements SelectVisitor {
-	private Operator operator = null;
-    private ScanOperator scanOperator;
-    private SelectOperator selectOperator;
-    private JoinOperator joinOperator;
-    private ProjectOperator projectOperator;
-    private SortOperator sortOperator;
-    private DupElimOperator dupElimOperator;
+	private LogicalOperator operator = null;
+    private LogicalScanOperator scanOperator;
+    private LogicalSelectOperator selectOperator;
+    private LogicalJoinOperator joinOperator;
+    private LogicalProjectOperator projectOperator;
+    private LogicalSortOperator sortOperator;
+    private LogicalDupElimOperator dupElimOperator;
     
     private ParseConjunctExpVisitor parseConjunctExpVisitor;
     private HashMap<String, Expression> selectMap;
-	public Operator getOperator() {
+	public LogicalOperator getOperator() {
 		return operator;
 	}
 
-	public void setOperator(Operator operator) {
+	public void setOperator(LogicalOperator operator) {
 		this.operator = operator;
 	}
 	
@@ -55,10 +50,10 @@ public class DBSelectVisitor implements SelectVisitor {
 	 * @param fromItem
 	 * @return an scanOperator that builds from an FromItem
 	 */
-	private ScanOperator buildScanFromItem(FromItem fromItem) {
+	private LogicalScanOperator buildScanFromItem(FromItem fromItem) {
 		DBFromItemVisitor dbFromItemVisitor = new DBFromItemVisitor();
 		fromItem.accept(dbFromItemVisitor);
-		scanOperator = (ScanOperator) dbFromItemVisitor.getOperator();
+		scanOperator = (LogicalScanOperator) dbFromItemVisitor.getOperator();
 		return scanOperator;
 	}
 	
@@ -66,15 +61,15 @@ public class DBSelectVisitor implements SelectVisitor {
 	 * @param scanOperator
 	 * @return an selectOperator that builds from a scanOperator
 	 */
-	private SelectOperator buildSelectFromScan(ScanOperator scanOperator) {
-		SelectOperator selectOp = null;
+	private LogicalSelectOperator buildSelectFromScan(LogicalScanOperator scanOperator) {
+		LogicalSelectOperator selectOp = null;
 		if (selectMap != null && selectMap.size() > 0) {
 			String tableName = scanOperator.getTableName();
 			if (scanOperator.getAlias() != "") {
 				tableName = scanOperator.getAlias();
 			}
 			if (selectMap.containsKey(tableName)) {
-				selectOp = new SelectOperator(scanOperator, selectMap.get(tableName));
+				selectOp = new LogicalSelectOperator(scanOperator, selectMap.get(tableName));
 			}
 		}
 		return selectOp;
@@ -84,9 +79,9 @@ public class DBSelectVisitor implements SelectVisitor {
 	 * @param fromItem
 	 * @return builds a selectOperator from FromItem if possible, otherwise a scanOperator
 	 */
-	private Operator buildScanSelectFromItem(FromItem fromItem) {
-		ScanOperator scanOperator = buildScanFromItem(fromItem);
-		SelectOperator selectOperator = buildSelectFromScan(scanOperator);
+	private LogicalOperator buildScanSelectFromItem(FromItem fromItem) {
+		LogicalScanOperator scanOperator = buildScanFromItem(fromItem);
+		LogicalSelectOperator selectOperator = buildSelectFromScan(scanOperator);
 		if (selectOperator == null) {
 			return scanOperator;
 		} else {
@@ -99,20 +94,20 @@ public class DBSelectVisitor implements SelectVisitor {
 	 * @param orderByElements
 	 * @return a sortOperator built from a list of OrderByElements, which follows the query plan structure
 	 */
-	private SortOperator buildSort(List<OrderByElement> orderByElements) {
-		SortOperator sortOperator = null;
+	private LogicalSortOperator buildSort(List<OrderByElement> orderByElements) {
+		LogicalSortOperator sortOperator = null;
 		String[] cols = new String[orderByElements.size()];
 		for (int i=0; i<orderByElements.size(); i++) {
 			cols[i] = orderByElements.get(i).toString();
 		}
 		if (projectOperator != null) {
-			sortOperator = new SortOperator(projectOperator, cols);
+			sortOperator = new LogicalSortOperator(projectOperator, cols);
 		} else if (joinOperator != null) {
-			sortOperator = new SortOperator(joinOperator, cols);
+			sortOperator = new LogicalSortOperator(joinOperator, cols);
 		} else if (selectOperator != null) {
-			sortOperator = new SortOperator(selectOperator, cols);
+			sortOperator = new LogicalSortOperator(selectOperator, cols);
 		} else if (scanOperator != null) {
-			sortOperator = new SortOperator(scanOperator, cols);
+			sortOperator = new LogicalSortOperator(scanOperator, cols);
 		}
 		return sortOperator;
 	}
@@ -151,19 +146,19 @@ public class DBSelectVisitor implements SelectVisitor {
 		
 		
 		if (joins != null && joins.size() > 0) {
-			JoinOperator left;
+			LogicalJoinOperator left;
 			FromItem firstRightItem = joins.get(0).getRightItem();
 			ArrayList<FromItem> leftTable = new ArrayList<>();
-			Operator initLeftOp = selectOperator == null ? scanOperator : selectOperator;
+			LogicalOperator initLeftOp = selectOperator == null ? scanOperator : selectOperator;
 			
 			String fromItemReference = fromItem.getAlias() != null ? fromItem.getAlias() : fromItem.toString();
 			String fromRightItemReference = firstRightItem.getAlias() != null ? firstRightItem.getAlias() : firstRightItem.toString();
 			if (parseConjunctExpVisitor != null && 
 					parseConjunctExpVisitor.getJoinCondition(fromItemReference, fromRightItemReference) != null) {
 				Expression condition = parseConjunctExpVisitor.getJoinCondition(fromItemReference, fromRightItemReference);
-				left = new JoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem), condition);
+				left = new LogicalJoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem), condition);
 			} else {
-				left = new JoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem));
+				left = new LogicalJoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem));
 			}
 			
 			leftTable.add(fromItem);
@@ -172,7 +167,7 @@ public class DBSelectVisitor implements SelectVisitor {
 			for (int i=1; i<joins.size(); i++) {
 				Expression condition = null;
 				FromItem rightItem = joins.get(i).getRightItem();
-				Operator newScanSelect = buildScanSelectFromItem(rightItem);
+				LogicalOperator newScanSelect = buildScanSelectFromItem(rightItem);
 				for (FromItem table:leftTable) {
 					String tableItemReference = table.getAlias() != null ? table.getAlias() : table.toString();
 					String rightItemReference = rightItem.getAlias() != null ? rightItem.getAlias() : rightItem.toString();
@@ -184,8 +179,8 @@ public class DBSelectVisitor implements SelectVisitor {
 					}
 				}
 				leftTable.add(rightItem);
-				left = condition == null ? new JoinOperator(left, newScanSelect) 
-						: new JoinOperator(left, newScanSelect, condition);
+				left = condition == null ? new LogicalJoinOperator(left, newScanSelect) 
+						: new LogicalJoinOperator(left, newScanSelect, condition);
 			}
 			joinOperator = left;
 		}
@@ -198,11 +193,11 @@ public class DBSelectVisitor implements SelectVisitor {
 					cols[i] = selectItem.getExpression().toString();
 				}
 			if (joinOperator == null) {
-				Operator childOp = selectOperator == null ? scanOperator : selectOperator;
-				projectOperator = new ProjectOperator(childOp, cols);
+				LogicalOperator childOp = selectOperator == null ? scanOperator : selectOperator;
+				projectOperator = new LogicalProjectOperator(childOp, cols);
 				
 			} else {
-				projectOperator = new ProjectOperator(joinOperator, cols);
+				projectOperator = new LogicalProjectOperator(joinOperator, cols);
 			}
 			}
 			
@@ -215,9 +210,9 @@ public class DBSelectVisitor implements SelectVisitor {
 		
 		if (distinct != null) {
 			if (sortOperator == null) {
-				dupElimOperator = new DupElimOperator(buildSort(new ArrayList<>()));
+				dupElimOperator = new LogicalDupElimOperator(buildSort(new ArrayList<>()));
 			} else {
-				dupElimOperator = new DupElimOperator(sortOperator);
+				dupElimOperator = new LogicalDupElimOperator(sortOperator);
 			}
 		}
 		

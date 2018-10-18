@@ -1,7 +1,7 @@
 /**
  * 
  */
-package operator;
+package physicaloperator;
 
 import java.util.HashMap;
 

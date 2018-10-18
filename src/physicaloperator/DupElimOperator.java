@@ -1,7 +1,7 @@
 /**
  *
  */
-package operator;
+package physicaloperator;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,10 +14,10 @@ import database.Tuple;
  * are removed for all tuples.
  */
 public class DupElimOperator extends Operator {
-	private SortOperator childOp; //child operator of where the source for getNextTuple() comes from.
+	private Operator childOp; //child operator of where the source for getNextTuple() comes from.
 	private Tuple prevDistinct; //the previous distinct tuple
 
-	public DupElimOperator(SortOperator child) {
+	public DupElimOperator(Operator child) {
 		childOp = child;
 		columnIndexMap = childOp.getColumnIndexMap();
 	}

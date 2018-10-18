@@ -53,7 +53,7 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import operator.Operator;
+import physicaloperator.Operator;
 
 /**
  * @author sitianchen
