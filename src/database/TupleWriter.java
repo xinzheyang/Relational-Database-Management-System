@@ -78,12 +78,24 @@ public class TupleWriter {
 		}
 	}
 	
+	public void flushLastPage() {
+		buffer.putInt(4, numTuples);
+		while (buffer.limit() < buffer.capacity()) {
+			buffer.put(buffer.limit(), (byte) 0);
+		}
+		try {
+			fc.write(buffer);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/** Writes a tuple to the file path specified
 	 * @param fileout: the file path to be written out to
 	 */
 	public void writeToBuffer() {
-		//clear buffer if exceed limit/capacity???
-		if (buffer.position() + numAttribs * 4 > buffer.limit()) {
+		//clear buffer if exceed limit/capacity??? if limit exceed capacity
+		if (buffer.limit() + numAttribs * 4 > buffer.capacity()) {
 			buffer.putInt(4, numTuples); //second int to be written
 			//flush this page to the buffer
 			try {
