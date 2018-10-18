@@ -64,20 +64,19 @@ public class TupleWriter {
 	}
 	
 	
-	/** Puts meta data to buffer and then writes to channel.
+	/** Puts meta data to buffer.
 	 * @param numAttribs
 	 * @param numTuples
 	 */
 	public void writeMetaData() {
 		buffer.putInt(numAttribs);
 		buffer.putInt(0); //number of tuples initialized as 0
-		try {
-			fc.write(buffer);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 	
+	/** Flushes the last page to be written out from the buffer
+	 * to the channel, fill remaining page with 0s and then write the page out.
+	 *  To be called in Operator.dump()
+	 */
 	public void flushLastPage() {
 		buffer.putInt(4, numTuples);
 		while (buffer.limit() < buffer.capacity()) {
