@@ -1,6 +1,8 @@
 ==================== Project 2 checkpoint ====================
 The top-level class is Main.java in the database package
 
+TupleReader.java and TupleWriter.java added to package "database"
+
 The logical operators are in the package “logicaloperator”
 The physical operators are in the package “physicaloperator”
 The PhysicalPlanBuilder is in the package “visitor”
