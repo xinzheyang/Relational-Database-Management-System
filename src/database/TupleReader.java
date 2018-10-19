@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package database;
 import java.io.FileInputStream;
@@ -12,7 +12,7 @@ import java.nio.channels.FileChannel;
  *
  */
 public class TupleReader {
-	
+
 //	private Tuple tuple;
 	private FileChannel channel;
 	private ByteBuffer bf;
@@ -23,10 +23,10 @@ public class TupleReader {
 	int numTuples;
 	int[] colValues;
 	int maxTuples;
-	
-	
+
+
 	public TupleReader(String file) {
-		try { 
+		try {
 			fin = new FileInputStream(file);
 			channel = fin.getChannel();
 			bf = ByteBuffer.allocate(PAGE_SIZE);
@@ -43,7 +43,7 @@ public class TupleReader {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void reset(int index) {
 		int pageIndex = index/maxTuples;
 		try {
@@ -53,7 +53,7 @@ public class TupleReader {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public int getNextPage() {
 //		try {
 //			channel.read(bf);
@@ -66,7 +66,7 @@ public class TupleReader {
 //			return -1;
 //		}
 //		if(channel.position() >= channel.size()) {
-//			
+//
 //		}
 		try {
 			bf.clear();
@@ -83,7 +83,7 @@ public class TupleReader {
 		}
 		return -1;
 	}
-	
+
 	public void close() {
 		try {
 			channel.close();

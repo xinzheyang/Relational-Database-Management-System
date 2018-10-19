@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package visitor;
 
@@ -53,7 +53,7 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import operator.Operator;
+import physicaloperator.Operator;
 
 /**
  * @author sitianchen
@@ -61,33 +61,33 @@ import operator.Operator;
  * Joins into separately independent conjunct expressions.
  */
 public class ParseConjunctExpVisitor implements ExpressionVisitor {
-	
+
 	private Stack<String> tbStack; //stack keeping record of tables last involved
 	private HashMap<List<String>, Expression> joinMap; //mapping tables referenced --> Join Condition
 	private HashMap<String, Expression> selectMap; //mapping tables referenced --> Select Condition
-	private boolean alwaysFalse; //checker for a false constant boolean conjunct in the where clause - if one of the 
+	private boolean alwaysFalse; //checker for a false constant boolean conjunct in the where clause - if one of the
 	//conjunct is false, the where clause is always false
-	
+
 	public ParseConjunctExpVisitor() {
 		tbStack = new Stack<String>();
 		joinMap = new HashMap<List<String>, Expression>();
 		selectMap = new HashMap<String, Expression>();
 	}
-	
+
 	/** Getter for joinMap.
 	 * @return joinMap
 	 */
 	public HashMap<List<String>, Expression> getJoinMap() {
 		return joinMap;
 	}
-	
+
 	/** Getter for selectMap.
 	 * @return selectMap
 	 */
 	public HashMap<String, Expression> getSelectMap() {
 		return selectMap;
 	}
-	
+
 	/**Hashes into the joinMap with a sorted (thus unique) ArrayList key that consists of
 	 * the two tableNames passed in.
 	 * @param tb1: a table name
@@ -102,7 +102,7 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 		Collections.sort(key);
 		return joinMap.get(key);
 	}
-	
+
 	/**Hashes into the the selectMap with tableNames passed in as the key.
 	 * @param tb
 	 * @return tb as key, the key's mapped value (the existing select condition of the table)
@@ -111,16 +111,16 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	public Expression getSelectCondition(String tb) {
 		return selectMap.get(tb);
 	}
-	
-	
-	/**Checks whether at least one of the separate conjunctions always 
+
+
+	/**Checks whether at least one of the separate conjunctions always
 	 * evaluates to false.
 	 * @return the alwaysFalse field of this visitor instance
 	 */
 	public boolean isAlwaysFalse() {
 		return alwaysFalse;
 	}
-	
+
 	/* Visits a binary operator by visiting its left and right expressions
 	 * separately.
 	 */
@@ -128,11 +128,10 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 		binExp.getLeftExpression().accept(this);
 		binExp.getRightExpression().accept(this);
 	}
-	
+
 	/* Visits an operator that's one of =, ! =, <, >, <=, >=.
 	 */
 	public void visitOp(BinaryExpression op) {
-//		System.out.println(tbStack);
 		visitBinExp(op);
 		String tb1 = "";
 		String tb2 = "";
@@ -142,8 +141,6 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 				tb2 = tbStack.pop();
 			}
 		}
-//		System.out.println(tb1);
-//		System.out.println(tb2);
 		if (tb1 != "" && tb2 != "" && ! tb1.equals(tb2)) { //Join Condition, stack had two tables
 			List<String> key = new ArrayList<String>();
 			key.add(tb1);
@@ -156,7 +153,7 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 				Expression newExp = new AndExpression(joinMap.get(key), op);
 				joinMap.put(key, newExp);
 			}
-		} 
+		}
 		else if (tb1 != "" || tb2 != "") { //Select Condition, stack had one table
 			String key = tb1 != "" ? tb1 : tb2;
 			if (!selectMap.containsKey(key)) {
@@ -241,43 +238,43 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(Addition addition) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(Division division) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(Multiplication multiplication) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(Subtraction subtraction) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
-	public void visit(AndExpression andExpression) {    
+	public void visit(AndExpression andExpression) {
 	    visitBinExp(andExpression);
-	    
+
 	}
 
 	@Override
 	public void visit(OrExpression orExpression) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(Between between) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
@@ -299,37 +296,37 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(InExpression inExpression) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(IsNullExpression isNullExpression) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(LikeExpression likeExpression) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(MinorThan minorThan) {
 		visitOp(minorThan);
-		
+
 	}
 
 	@Override
 	public void visit(MinorThanEquals minorThanEquals) {
 		visitOp(minorThanEquals);
-		
+
 	}
 
 	@Override
 	public void visit(NotEqualsTo notEqualsTo) {
 		visitOp(notEqualsTo);
-		
+
 	}
 
 	@Override
@@ -340,67 +337,67 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(SubSelect subSelect) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(CaseExpression caseExpression) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(WhenClause whenClause) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(ExistsExpression existsExpression) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(AllComparisonExpression allComparisonExpression) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(AnyComparisonExpression anyComparisonExpression) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(Concat concat) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(Matches matches) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(BitwiseAnd bitwiseAnd) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(BitwiseOr bitwiseOr) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 	@Override
 	public void visit(BitwiseXor bitwiseXor) {
 		throw new UnsupportedOperationException("not supported");
-		
+
 	}
 
 }

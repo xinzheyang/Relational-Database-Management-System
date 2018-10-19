@@ -45,7 +45,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import operator.Operator;
+import physicaloperator.Operator;
 
 /** An instance of the class evaluates an expression by recursively breaking 
  * down the expression visiting its sub-expressions.

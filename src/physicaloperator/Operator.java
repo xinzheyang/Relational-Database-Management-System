@@ -1,7 +1,7 @@
 /**
  *
  */
-package operator;
+package physicaloperator;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -49,8 +49,8 @@ public abstract class Operator {
 	 * Resets the operator so that when it calls getNextTuple(), it starts from the first tuple again.
 	 */
 	public abstract void reset();
-	
-	
+
+
 	/** Human readable version of dump.
 	 * @param fileOut
 	 */
@@ -88,7 +88,7 @@ public abstract class Operator {
 				System.out.println("Error in closing the BufferedWriter"+ex);
 			}
 		}
-		
+
 	}
 
 

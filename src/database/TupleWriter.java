@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package database;
 
@@ -9,14 +9,14 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import operator.Operator;
+import physicaloperator.Operator;
 
 /**
  * @author sitianchen
  *
  */
 public class TupleWriter {
-	
+
 	private Tuple tuple;
 	private FileChannel fc;
 	private ByteBuffer buffer;
@@ -24,7 +24,7 @@ public class TupleWriter {
 	private static final int PAGE_SIZE = 4096;
 	private int numTuples;
 	private int numAttribs;
-	
+
 	public TupleWriter(String fileout, Operator op) {
 		try {
 			fout = new FileOutputStream(fileout);
@@ -35,10 +35,10 @@ public class TupleWriter {
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}	
-		
+		}
+
 	}
-	
+
 	public void close() {
 		try {
 			fc.close();
@@ -48,23 +48,23 @@ public class TupleWriter {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/** Gets the instance's tuple
 	 * @return the instance's tuple
 	 */
 	public Tuple getTuple() {
 		return tuple;
 	}
-	
+
 	/** Sets the instance's tuple
 	 * @param t: the tuple to be set
 	 */
 	public void setTuple(Tuple t) {
 		this.tuple = t;
 	}
-	
-	
-	/** Puts meta data to buffer and then writes to channel.
+
+
+	/** Puts meta data to buffer.
 	 * @param numAttribs
 	 * @param numTuples
 	 */
@@ -73,7 +73,11 @@ public class TupleWriter {
 //		System.out.println(numAttribs);
 		buffer.putInt(0); //number of tuples initialized as 0
 	}
-	
+
+	/** Flushes the last page to be written out from the buffer
+	 * to the channel, fill remaining page with 0s and then write the page out.
+	 *  To be called in Operator.dump()
+	 */
 	public void flushLastPage() {
 		if(numTuples == 0) {
 			return;
@@ -89,7 +93,7 @@ public class TupleWriter {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/** Writes a tuple to the file path specified
 	 * @param fileout: the file path to be written out to
 	 */

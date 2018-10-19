@@ -16,7 +16,7 @@ import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import operator.*;
+import physicaloperator.*;
 
 /**
  * @author sitianchen

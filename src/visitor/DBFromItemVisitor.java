@@ -5,12 +5,14 @@ package visitor;
 
 import java.io.FileNotFoundException;
 
+import logicaloperator.LogicalOperator;
+import logicaloperator.LogicalScanOperator;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
 import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import operator.Operator;
-import operator.ScanOperator;
+import physicaloperator.Operator;
+import physicaloperator.ScanOperator;
 /**
  * @author xinzheyang
  * A visitor that implements the FromItemVisitor.
@@ -18,19 +20,19 @@ import operator.ScanOperator;
  * supported in this system.
  */
 public class DBFromItemVisitor implements FromItemVisitor {
-	private Operator operator = null;
+	private LogicalOperator operator = null;
 
 	/**
 	 * @return operator
 	 */
-	public Operator getOperator() {
+	public LogicalOperator getOperator() {
 		return operator;
 	}
 
 	/**
 	 * @param operator
 	 */
-	public void setOperator(Operator operator) {
+	public void setOperator(LogicalOperator operator) {
 		this.operator = operator;
 	}
 
@@ -40,12 +42,12 @@ public class DBFromItemVisitor implements FromItemVisitor {
 	@Override
 	public void visit(Table tableName) {
 		try {
-			ScanOperator scanOperator;
+			LogicalScanOperator scanOperator;
 			if (tableName.getAlias() != null) {
-				scanOperator = new ScanOperator(tableName.getName(), tableName.getAlias());
+				scanOperator = new LogicalScanOperator(tableName.getName(), tableName.getAlias());
 			}
 			else {
-				scanOperator = new ScanOperator(tableName.getName());
+				scanOperator = new LogicalScanOperator(tableName.getName());
 			}
 			operator = scanOperator;
 		} catch (FileNotFoundException e) {
