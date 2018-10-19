@@ -1,3 +1,12 @@
+==================== Project 2 checkpoint ====================
+The top-level class is Main.java in the database package
+
+The logical operators are in the package “logicaloperator”
+The physical operators are in the package “physicaloperator”
+The PhysicalPlanBuilder is in the package “visitor”
+
+
+==================== Project 1 ====================
 - Our program is run by Main.java with its main() method calling our interpreter (the QueryParser class along with DBStatementVisitor, DBSelectVisitor and DBFromItemVisitor) to parse the input queries.
 
 - Our logic for extracting join conditions from the WHERE clause comes as the following:

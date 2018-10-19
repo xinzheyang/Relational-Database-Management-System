@@ -8,10 +8,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 
+import logicaloperator.LogicalOperator;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.statement.Statement;
-import operator.Operator;
+import physicaloperator.Operator;
 import visitor.DBStatementVisitor;
+import visitor.PhysicalPlanBuilder;
 
 
 /**
@@ -43,7 +45,10 @@ public class QueryParser {
 				try {
 					DBStatementVisitor dbStatementVisitor = new DBStatementVisitor();
 					statement.accept(dbStatementVisitor);
-					Operator operator = dbStatementVisitor.getOperator();
+					LogicalOperator logicalOperator = dbStatementVisitor.getOperator();
+					PhysicalPlanBuilder physicalPlanBuilder = new PhysicalPlanBuilder();
+					logicalOperator.accept(physicalPlanBuilder);
+					Operator operator = physicalPlanBuilder.getOperator();
 					if (operator == null) {
 						File file = new File(output + File.separator + "query" + count++);
 						FileWriter fw = new FileWriter(file); //the instant the file is opened for writing, original
@@ -60,12 +65,7 @@ public class QueryParser {
 					}
 				} catch (Exception e) {
 					File file = new File(output + File.separator + "query" + count++);
-					FileWriter fw = new FileWriter(file); //the instant the file is opened for writing, original
-					//contents are overwrite. We write nothing in this case since operator == null
-
-					/* This logic will make sure that the file 
-					 * gets created if it is not present at the
-					 * specified location*/
+					FileWriter fw = new FileWriter(file); 
 					if (!file.exists()) {
 						file.createNewFile();
 					}

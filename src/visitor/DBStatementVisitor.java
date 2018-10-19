@@ -3,6 +3,7 @@
  */
 package visitor;
 
+import logicaloperator.LogicalOperator;
 import net.sf.jsqlparser.statement.StatementVisitor;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.delete.Delete;
@@ -13,7 +14,7 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.truncate.Truncate;
 import net.sf.jsqlparser.statement.update.Update;
-import operator.Operator;;
+import physicaloperator.Operator;;
 
 
 /**
@@ -23,13 +24,13 @@ import operator.Operator;;
  * supported in this system.
  */
 public class DBStatementVisitor implements StatementVisitor{
-	private Operator operator = null;
+	private LogicalOperator operator = null;
 
-	public Operator getOperator() {
+	public LogicalOperator getOperator() {
 		return operator;
 	}
 
-	public void setOperator(Operator operator) {
+	public void setOperator(LogicalOperator operator) {
 		this.operator = operator;
 	}
 
