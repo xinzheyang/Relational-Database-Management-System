@@ -3,8 +3,8 @@
  */
 package operator;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+//import java.io.BufferedReader;
+//import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.*;
 import database.DBCatalog;
 import database.Tuple;
+import database.TupleReader;
 
 /**
  * @author sitianchen
@@ -24,7 +25,8 @@ public class ScanOperator extends Operator {
 
 	private String tb;
 	private String alias;
-	private BufferedReader f;
+	private TupleReader reader;
+//	private BufferedReader f;
 //	private HashMap<String, Integer> columnIndexMap;
 
 	/* Upon initialization, opens up a file scan on the appropriate data file
@@ -41,7 +43,8 @@ public class ScanOperator extends Operator {
 	public ScanOperator(String tableName) throws FileNotFoundException {
 		tb = tableName;
 		alias = "";
-		f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tb)));
+		reader = new TupleReader(DBCatalog.getTableLoc(tb));
+//		f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tb)));
 		columnIndexMap = new HashMap<String, Integer>();
 		String[] schemaColNames = DBCatalog.getTableColumns(tb);
 		for(int i = 0; i < schemaColNames.length; i++) {
@@ -61,7 +64,8 @@ public class ScanOperator extends Operator {
 	public ScanOperator(String tableName, String alias) throws FileNotFoundException {
 		tb = tableName;
 		this.alias = alias;
-		f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tableName)));
+//		f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tableName)));
+		reader = new TupleReader(DBCatalog.getTableLoc(tb));
 		columnIndexMap = new HashMap<String, Integer>();
 		String[] schemaColNames = DBCatalog.getTableColumns(tableName);
 		for(int i = 0; i < schemaColNames.length; i++) {
@@ -87,24 +91,25 @@ public class ScanOperator extends Operator {
 
 	@Override
 	public Tuple getNextTuple() {
-		// TODO Auto-generated method stub
-
-		try {
-			//			String[] cols = DBCatalog.getTableColumns(this.tb);
-			//			String values = f.readLine();
-			String values;
-			if((values=f.readLine()) != null) {
-				return new Tuple(values);
-			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			System.out.println("fail to read table file");
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+//		try {
+//			String[] cols = DBCatalog.getTableColumns(this.tb);
+//			String values = f.readLine();
+//			String values;
+//			if((values=f.readLine()) != null) {
+//				return new Tuple(values);
+//			}
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			System.out.println("fail to read table file");
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return null;
+		Tuple curr = reader.getNextTuple();
+//		System.out.println(curr);
+		return curr;
 	}
 
 	/* (non-Javadoc)
@@ -113,11 +118,12 @@ public class ScanOperator extends Operator {
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
-		try {
-			f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tb)));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tb)));
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		reader.reset(0);
 	}
 }

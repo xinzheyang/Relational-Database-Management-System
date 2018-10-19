@@ -70,19 +70,19 @@ public class TupleWriter {
 	 */
 	public void writeMetaData() {
 		buffer.putInt(numAttribs);
+//		System.out.println(numAttribs);
 		buffer.putInt(0); //number of tuples initialized as 0
-		try {
-			fc.write(buffer);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	public void flushLastPage() {
-		buffer.putInt(4, numTuples);
-		while (buffer.limit() < buffer.capacity()) {
-			buffer.put(buffer.limit(), (byte) 0);
+		if(numTuples == 0) {
+			return;
 		}
+		buffer.putInt(4, numTuples);
+		while (buffer.position() < buffer.capacity()) {
+			buffer.put((byte) 0);
+		}
+		buffer.position(0);
 		try {
 			fc.write(buffer);
 		} catch (IOException e) {
@@ -95,9 +95,11 @@ public class TupleWriter {
 	 */
 	public void writeToBuffer() {
 		//clear buffer if exceed limit/capacity??? if limit exceed capacity
-		if (buffer.limit() + numAttribs * 4 > buffer.capacity()) {
+		if (buffer.position() + numAttribs * 4 > buffer.capacity()) {
+//			System.out.println("hi");
 			buffer.putInt(4, numTuples); //second int to be written
 			//flush this page to the buffer
+			buffer.position(0);
 			try {
 				fc.write(buffer);
 			} catch (IOException e) {
@@ -108,6 +110,7 @@ public class TupleWriter {
 			numTuples = 0;
 		}
 		for(int val : tuple.getColValues()) {
+//			System.out.println(tuple);
 			buffer.putInt(val);
 		}
 		++numTuples;

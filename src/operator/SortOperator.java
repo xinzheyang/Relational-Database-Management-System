@@ -46,20 +46,29 @@ public class SortOperator extends Operator {
 		}
 		Tuple tuple;
 		while((tuple = childOp.getNextTuple()) != null) {
+//			System.out.println(tuple);
 			allTuples.add(tuple);
 		}
 		Comparator<Tuple> com = Tuple.getComparator(colIndexes);
 		Collections.sort(allTuples, com);
+//		System.out.println(allTuples.size());
 		index=0;
 		
+	}
+	
+	public int getIndex() {
+		return index;
 	}
 	/* (non-Javadoc)
 	 * @see database.Operator#getNextTuple()
 	 */
 	@Override
 	public Tuple getNextTuple() {
+//		System.out.println(index);
 		if (index < allTuples.size()) {
-			return allTuples.get(index++);
+			Tuple cur = allTuples.get(index++);
+//			System.out.println(cur);
+			return cur;
 		}
 		return null;
 	}

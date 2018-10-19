@@ -26,10 +26,13 @@ public class DupElimOperator extends Operator {
 	 */
 	@Override
 	public Tuple getNextTuple() {
+//		System.out.println(childOp.getIndex());
 		Tuple curr = childOp.getNextTuple();
+//		System.out.println(curr);
 		if (prevDistinct != null) {
 			while(curr != null && Arrays.equals(curr.getColValues(), prevDistinct.getColValues())) {
 				curr = childOp.getNextTuple();
+//				System.out.println(curr);
 			}
 		}
 		prevDistinct = curr;
