@@ -82,4 +82,10 @@ public class SortOperator extends Operator {
 		index=0;
 	}
 
+	@Override
+	public void reset(int index) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

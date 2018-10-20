@@ -46,9 +46,15 @@ public abstract class Operator {
 
 
 	/**
-	 * Resets the operator so that when it calls getNextTuple(), it starts from the first tuple again.
+	 * Resets the operator to the beginning so that when it calls getNextTuple(), it starts from the first tuple again.
 	 */
 	public abstract void reset();
+	
+	
+	/** Resets the operator by index.
+	 * @param index The index of the page to be reset to.
+	 */
+	public abstract void reset(int index);
 
 
 	/** Human readable version of dump.

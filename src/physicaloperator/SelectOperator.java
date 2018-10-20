@@ -117,4 +117,10 @@ public class SelectOperator extends Operator {
 		childOp.reset();
 	}
 
+	@Override
+	public void reset(int index) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -41,8 +41,8 @@ public class PhysicalPlanBuilder {
 		Operator left = operator;
 		op.getRightChild().accept(this);
 		Operator right = operator;
-		JoinOperator joinOperator = op.getJoinCondition() == null ? 
-				new JoinOperator(left, right) : new JoinOperator(left, right, op.getJoinCondition());
+		TNLJoinOperator joinOperator = op.getJoinCondition() == null ? 
+				new TNLJoinOperator(left, right) : new TNLJoinOperator(left, right, op.getJoinCondition());
 		operator = joinOperator;
 	}
 	

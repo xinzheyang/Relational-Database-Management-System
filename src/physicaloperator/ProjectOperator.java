@@ -59,4 +59,10 @@ public class ProjectOperator extends Operator {
 		childOp.reset();
 	}
 
+	@Override
+	public void reset(int index) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

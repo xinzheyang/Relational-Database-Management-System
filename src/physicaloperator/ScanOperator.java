@@ -126,4 +126,10 @@ public class ScanOperator extends Operator {
 //		}
 		reader.reset(0);
 	}
+
+	@Override
+	public void reset(int index) {
+		// TODO Auto-generated method stub
+		
+	}
 }
