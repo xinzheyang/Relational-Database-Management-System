@@ -126,15 +126,14 @@ public class BNLJoinOperator extends JoinOperator {
 	 */
 	@Override
 	public void reset() {
-		leftChild.reset();
-		rightChild.reset();
+		super.reset();
 		buffer.clear();
 		rightTuple = rightChild.getNextTuple();
 	}
 
-	@Override
-	public void reset(int index) {
-		//no-op
-		
-	}
+//	@Override
+//	public void reset(int index) {
+//		//no-op
+//		
+//	}
 }

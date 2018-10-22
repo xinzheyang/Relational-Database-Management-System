@@ -18,6 +18,7 @@ public class DupElimOperator extends Operator {
 	private Tuple prevDistinct; //the previous distinct tuple
 
 	public DupElimOperator(Operator child) {
+		assert (child instanceof SortOperator);
 		childOp = child;
 		columnIndexMap = childOp.getColumnIndexMap();
 	}
@@ -26,13 +27,11 @@ public class DupElimOperator extends Operator {
 	 */
 	@Override
 	public Tuple getNextTuple() {
-//		System.out.println(childOp.getIndex());
+
 		Tuple curr = childOp.getNextTuple();
-//		System.out.println(curr);
 		if (prevDistinct != null) {
 			while(curr != null && Arrays.equals(curr.getColValues(), prevDistinct.getColValues())) {
 				curr = childOp.getNextTuple();
-//				System.out.println(curr);
 			}
 		}
 		prevDistinct = curr;
@@ -50,7 +49,7 @@ public class DupElimOperator extends Operator {
 	}
 	@Override
 	public void reset(int index) {
-		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("not supported");
 		
 	}
 

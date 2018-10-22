@@ -44,22 +44,23 @@ public abstract class JoinOperator extends Operator {
 //		return null;
 //	}
 //
-//	/* (non-Javadoc)
-//	 * @see physicaloperator.Operator#reset()
-//	 */
-//	@Override
-//	public void reset() {
-//		// TODO Auto-generated method stub
-//
-//	}
+	/* (non-Javadoc)
+	 * @see physicaloperator.Operator#reset()
+	 */
+	@Override
+	public void reset() {
+		leftChild.reset();
+		rightChild.reset();
+
+	}
 //
 //	/* (non-Javadoc)
 //	 * @see physicaloperator.Operator#reset(int)
 //	 */
 //	@Override
-//	public void reset(int index) {
-//		// TODO Auto-generated method stub
-//
-//	}
+	public void reset(int index) {
+		throw new UnsupportedOperationException("not supported");
+
+	}
 
 }

@@ -83,14 +83,13 @@ public class TNLJoinOperator extends JoinOperator {
 	 */
 	@Override
 	public void reset() {
-		leftChild.reset();
-		rightChild.reset();
+		super.reset();
 		leftTuple = leftChild.getNextTuple();
 	}
 
-	@Override
-	public void reset(int index) {
-		// TODO Auto-generated method stub
-		
-	}
+//	@Override
+//	public void reset(int index) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 }

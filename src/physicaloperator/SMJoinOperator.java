@@ -16,16 +16,18 @@ import visitor.EquiConjunctVisitor;
  */
 public class SMJoinOperator extends JoinOperator {
 	private int jumpBackToPartition; //index of previous right relation's start of partition to jump back to
-	private int tupleIndex;
-	private ArrayList<Tuple> allTuples;
+	private Tuple tLeft; //initialized to first tuple in left relation
+	private Tuple tRight; //initialized to first tuple in right relation
+	private Tuple startOfCurrPartition; //start of current partition, initialized to first tuple in right relation
 	
 	public SMJoinOperator(Operator left, Operator right, Expression condition) {
 		super(left, right, condition);
 		assert(left instanceof SortOperator);
 		assert(right instanceof SortOperator);
-		tupleIndex = 0;
 		jumpBackToPartition = 0;
-		allTuples = new ArrayList<Tuple>();
+		tLeft = leftChild.getNextTuple();
+		tRight = rightChild.getNextTuple();
+		startOfCurrPartition = tRight;
 	}
 	
 	/** Compare two tuples by the order of the equity conjunct condition.
@@ -49,16 +51,12 @@ public class SMJoinOperator extends JoinOperator {
 		if (index >= size){ return 0; }
 		return (l > r) ? 1 : -1;
 	}
-	
-	/** Gets all tuples with the joinCondition.
-	 * @return all tuples
+
+	/* (non-Javadoc)
+	 * @see physicaloperator.Operator#getNextTuple()
 	 */
-	public void getAllTuples() {
-		
-//		ArrayList<Tuple> allTuples = new ArrayList<Tuple>();
-		Tuple tLeft = leftChild.getNextTuple(); //initialized to first tuple in left relation
-		Tuple tRight = rightChild.getNextTuple(); //initialized to first tuple in right relation
-		Tuple startOfCurrPartition = tRight; //start of current partition, initialized to first tuple in right relation
+	@Override
+	public Tuple getNextTuple() {
 		while(tLeft != null && tRight != null) {
 			while(compareByCondition(tLeft, startOfCurrPartition) == -1) {
 				tLeft = leftChild.getNextTuple();
@@ -70,46 +68,17 @@ public class SMJoinOperator extends JoinOperator {
 			}
 			tRight = startOfCurrPartition;
 			while(compareByCondition(tLeft, startOfCurrPartition) == 0) {
-//				tRight = startOfCurrPartition;
 				rightChild.reset(jumpBackToPartition);
 				while(compareByCondition(tRight, tLeft) == 0) {
-					allTuples.add(tLeft.merge(tRight));
+					Tuple merged = tLeft.merge(tRight);
 					tRight = rightChild.getNextTuple();
+					return merged;
 				}
 				tLeft = leftChild.getNextTuple();
 			}
 			startOfCurrPartition = tRight;
 		}
 		
-//		return allTuples;
-	}
-
-	/* (non-Javadoc)
-	 * @see physicaloperator.Operator#getNextTuple()
-	 */
-	@Override
-	public Tuple getNextTuple() {
-//		Tuple tLeft = leftChild.getNextTuple(); //initialized to first tuple in left relation
-//		Tuple tRight = rightChild.getNextTuple(); //initialized to first tuple in right relation
-//		Tuple startOfCurrPartition = tRight; //start of current partition, initialized to first tuple in right relation
-//		while(tLeft != null && tRight != null) {
-//			while(compareByCondition(tLeft, startOfCurrPartition) == -1) {
-//				tLeft = leftChild.getNextTuple();
-//			}
-//			
-//			while(compareByCondition(tLeft, startOfCurrPartition) == 1) {
-//				startOfCurrPartition = rightChild.getNextTuple();
-//				jumpBackToPartition++;
-//			}
-//			tRight = startOfCurrPartition;
-//			while(compareByCondition(tLeft, startOfCurrPartition) == 0) {
-//				tRight = startOfCurrPartition;
-//				while(compareByCondition(tRight, tLeft) == 0) {
-//					
-//				}
-//			}
-//		}
-		if (tupleIndex < allTuples.size()) return allTuples.get(tupleIndex++);
 		return null;
 	}
 
@@ -118,14 +87,16 @@ public class SMJoinOperator extends JoinOperator {
 	 */
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
-
+		super.reset();
+		tLeft = leftChild.getNextTuple();
+		tRight = rightChild.getNextTuple();
+		startOfCurrPartition = tRight;
 	}
 
-	@Override
-	public void reset(int index) {
-		// TODO Auto-generated method stub
-		
-	}
+//	@Override
+//	public void reset(int index) {
+//		throw new UnsupportedOperationException("not supported");
+//		
+//	}
 
 }

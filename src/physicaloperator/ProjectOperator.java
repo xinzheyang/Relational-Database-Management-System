@@ -61,7 +61,7 @@ public class ProjectOperator extends Operator {
 
 	@Override
 	public void reset(int index) {
-		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("not supported");
 		
 	}
 
