@@ -22,10 +22,12 @@ public class Main {
 			
 			String dirIn = args[0];
 			String dirOut = args[1];
+			String dirTemp = args[2];
 			String dbDir = dirIn + File.separator + "db";
 			String qFile = dirIn + File.separator + "queries.sql";
 			DBCatalog.getCatalog().parseSchema(dbDir);
 			QueryParser queryParser = new QueryParser(qFile, dirOut);
+			DBCatalog.setTempDir(dirTemp);
 			queryParser.parse();
 			
 		} catch(Exception e) {

@@ -104,12 +104,10 @@ public abstract class Operator {
 	 * @param fileOut the path of the txt file that the data should be written to.
 	 */
 	public void dump(String fileOut) {
-//		System.out.println(fileOut);
 		TupleWriter tw = new TupleWriter(fileOut, this);
 		tw.writeMetaData();
 		Tuple tup;
 		while((tup=getNextTuple()) != null) {
-//			System.out.println(tup);
 			tw.setTuple(tup);
 			tw.writeToBuffer();
 		}
