@@ -10,7 +10,8 @@ import net.sf.jsqlparser.expression.Expression;
 import visitor.EquiConjunctVisitor;
 
 /** Partition-based approach to avoid cross-producting. Merging phase follows the 
- * algorithm in textbook page 460.
+ * algorithm in textbook page 460. All join conditions assumed to be conjunctions of
+ * equality conditions.
  * @author sitianchen
  *
  */
@@ -28,6 +29,10 @@ public class SMJoinOperator extends JoinOperator {
 		tLeft = leftChild.getNextTuple();
 		tRight = rightChild.getNextTuple();
 		startOfCurrPartition = tRight;
+	}
+	
+	public SMJoinOperator(Operator left, Operator right) {
+		this(left, right, null);
 	}
 	
 	/** Compare two tuples by the order of the equity conjunct condition.
@@ -52,7 +57,10 @@ public class SMJoinOperator extends JoinOperator {
 		return (l > r) ? 1 : -1;
 	}
 
-	/* (non-Javadoc)
+	/** Gets the next tuple of the operator by looking for the next matching 
+	 * right tuple in the current partition. Resets right operator to the
+	 * start of current partition before reading the next left tuple.
+	 * This implementation follows the algorithm in textbook page 460.
 	 * @see physicaloperator.Operator#getNextTuple()
 	 */
 	@Override
@@ -93,10 +101,5 @@ public class SMJoinOperator extends JoinOperator {
 		startOfCurrPartition = tRight;
 	}
 
-//	@Override
-//	public void reset(int index) {
-//		throw new UnsupportedOperationException("not supported");
-//		
-//	}
 
 }

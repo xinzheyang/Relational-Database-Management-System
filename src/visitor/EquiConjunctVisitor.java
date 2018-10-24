@@ -48,30 +48,40 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import physicaloperator.Operator;
 
-/**
+/** An ExpressionVisitor only used for processing join condition in Sort Merge Join.
+ * Visit every conjunct in the equality expression and record all columns names and values
+ * referenced in left and right relations.
  * @author sitianchen
  *
  */
 public class EquiConjunctVisitor implements ExpressionVisitor {
 	
-	private ArrayList<String> leftCompareCols;
-	private ArrayList<Integer> leftCompareVals;
-	private ArrayList<String> rightCompareCols;
-	private ArrayList<Integer> rightCompareVals;
-	private Tuple tupleLeft;
-	private Tuple tupleRight;
+	private ArrayList<String> leftCompareCols; //column names of left relation to be compared in order
+	private ArrayList<Integer> leftCompareVals; //column values of left relation to be compared in order
+	private ArrayList<String> rightCompareCols;  //column names of right relation to be compared in order
+	private ArrayList<Integer> rightCompareVals; //column values of right relation to be compared in order
+	private Tuple tupleLeft; //current tuple from left operator getNextTuple()
+	private Tuple tupleRight; //current tuple from right operator getNextTuple()
 	private boolean isLeft; //for evaluating column expressions, differ between left and right
-	private Operator leftOp;
-	private Operator rightOp;
-//	private int compareResult; //0 for equal, -1 for tupleLeft < tupleRight, 1 for tupleLeft > tupleRight
+	private Operator leftOp; //left operator of the join
+	private Operator rightOp; //right operator of the join
+	private boolean isEval;
 	
 	public EquiConjunctVisitor(Tuple tupleLeft, Tuple tupleRight, Operator leftOp, Operator rightOp) {
 		this.tupleLeft = tupleLeft;
 		this.tupleRight = tupleRight;
 		this.leftOp = leftOp;
 		this.rightOp = rightOp;
+		isEval = true;
 	}
 	
+	/** Constructs an equity conjunct visitor with no evaluation properties.
+	 * All the information we want are the left and right column names.
+	 */
+	public EquiConjunctVisitor() {
+		isEval = false;
+	}
+	//--SETTERS AND GETTERS--
 	public void setTupleLeft(Tuple tupleLeft) {
 		this.tupleLeft = tupleLeft;
 	}
@@ -95,6 +105,7 @@ public class EquiConjunctVisitor implements ExpressionVisitor {
 	public ArrayList<Integer> getRightCompareVals() {
 		return rightCompareVals;
 	}
+	//--SETTERS AND GETTERS--
 
 	@Override
 	public void visit(NullValue nullValue) { throw new UnsupportedOperationException("not supported"); }
@@ -185,22 +196,37 @@ public class EquiConjunctVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(NotEqualsTo notEqualsTo) { throw new UnsupportedOperationException("not supported"); }
 
+	/** Create a new Evaluate ExpressionVisitor to evaluate this column expression.
+	 * Record the column expression's column name, column value by first checking 
+	 * the side of equality the column belongs to and then adding to the right record.
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
+	 */
 	@Override
 	public void visit(Column tableColumn) {
-		EvaluateExpVisitor eval = new EvaluateExpVisitor();
-		if(isLeft) {
-			eval.setCurrTuple(tupleLeft);
-			eval.setOperator(leftOp);
-			tableColumn.accept(eval);
-			leftCompareVals.add(eval.getReturnLongValue());
-			leftCompareCols.add(tableColumn.getWholeColumnName());
+		if (isEval) { //we need tuple value information, evaluate the column expression
+			EvaluateExpVisitor eval = new EvaluateExpVisitor();
+			if (isLeft) {
+				eval.setCurrTuple(tupleLeft);
+				eval.setOperator(leftOp);
+				tableColumn.accept(eval);
+				leftCompareVals.add(eval.getReturnLongValue());
+				leftCompareCols.add(tableColumn.getWholeColumnName());
+			}
+			else {
+				eval.setCurrTuple(tupleRight);
+				eval.setOperator(rightOp);
+				tableColumn.accept(eval);
+				rightCompareVals.add(eval.getReturnLongValue());
+				rightCompareCols.add(tableColumn.getWholeColumnName());
+			}
 		}
-		else {
-			eval.setCurrTuple(tupleRight);
-			eval.setOperator(rightOp);
-			tableColumn.accept(eval);
-			rightCompareVals.add(eval.getReturnLongValue());
-			rightCompareCols.add(tableColumn.getWholeColumnName());
+		else { //we just need the names of columns
+			if (isLeft) {
+				leftCompareCols.add(tableColumn.getWholeColumnName());
+			}
+			else {
+				rightCompareCols.add(tableColumn.getWholeColumnName());
+			}
 		}
 		
 	}

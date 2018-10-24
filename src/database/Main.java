@@ -25,7 +25,9 @@ public class Main {
 			String dirTemp = args[2];
 			String dbDir = dirIn + File.separator + "db";
 			String qFile = dirIn + File.separator + "queries.sql";
-			DBCatalog.getCatalog().parseSchema(dbDir);
+			String configFile = dirIn + File.separator + "plan_builder_config.txt";
+			DBCatalog.getCatalog().parseSchema(dbDir); //parse schema
+			DBCatalog.getCatalog().parseConfig(configFile); //parse physical plan configuration
 			QueryParser queryParser = new QueryParser(qFile, dirOut);
 			DBCatalog.setTempDir(dirTemp);
 			queryParser.parse();

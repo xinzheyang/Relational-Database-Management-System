@@ -21,7 +21,8 @@ public class DBCatalog {
 	private static String tempDir; //path to the directory where the temp files for external sort to be written are
 	private static int tempDirCount; // a self incrementing counter inside tempDir
 	private static DBCatalog catalog = null; //singleton object for global reference
-	
+	private static String[] joinMethod;
+	private static String[] sortMethod;
 	/* A private Constructor prevents any other class
 	 * from instantiating a DBCatalog object.
 	 */
@@ -70,8 +71,54 @@ public class DBCatalog {
 		DBCatalog.tempDir = tempDir;
 	}
 	
-	/* Parses in schema information by reading the schema file in the directory path specified.
+	public static String getJoinMethod() {
+		assert joinMethod.length > 0;
+		return joinMethod[0];
+	}
+	
+	public static int getJoinBufferSize() {
+		assert joinMethod.length == 2;
+		return Integer.parseInt(joinMethod[1]);
+	}
+	
+	public static String getSortMethod() {
+		assert sortMethod.length > 0;
+		return sortMethod[0];
+	}
+	
+	public static int getSortBufferSize() {
+		assert sortMethod.length == 2;
+		return Integer.parseInt(sortMethod[1]);
+	}
+	
+	/** Parses the physical plan configuration file and sets the join and sort methods 
+	 * for all queries that will be processed.
+	 * @param dir: path to the physical plan configuration file
+	 */
+	public void parseConfig(String dir) {
+		try {
+			BufferedReader configIn = new BufferedReader(new FileReader(dir));
+			String line = configIn.readLine();
+			joinMethod = line.split(" ");
+			line = configIn.readLine();
+			sortMethod = line.split(" ");
+			if (joinMethod.length < 1 || joinMethod.length > 2) {
+				joinMethod = new String[]{"0"}; //set default to TNLJ if invalid input
+			}
+			if (sortMethod.length < 1 || sortMethod.length > 2) {
+				sortMethod = new String[]{"0"}; //set default to in memory sort if invalid input
+			}
+			configIn.close();
+		} catch (Exception e) {
+			System.out.println("An error occurred in processing the Physical Plan Configuration file.");
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/** Parses in schema information by reading the schema file in the directory path specified.
 	 * Link table present in schema to where the file for the table is located.
+	 * @param dir: path to the /db directory
 	 */
 	public void parseSchema(String dir) throws IOException {
 		
@@ -83,6 +130,7 @@ public class DBCatalog {
 			tableMap.put(tableInfo[0], Arrays.copyOfRange(tableInfo, 1, tableInfo.length)); //key=table name, value=col names array
 //			locMap.put(tableInfo[0], dir + File.separator + "data" + File.separator)
 		}
+		schemaIn.close();
 	}
 
 }

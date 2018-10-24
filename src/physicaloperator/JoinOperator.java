@@ -9,7 +9,7 @@ import database.Tuple;
 import net.sf.jsqlparser.expression.Expression;
 import visitor.EvaluateExpVisitor;
 
-/**
+/** An abstract class that all physical join operators inherits.
  * @author sitianchen
  *
  */
