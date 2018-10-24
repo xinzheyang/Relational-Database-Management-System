@@ -42,15 +42,26 @@ public class QueryParser {
 			Statement statement;
 			int count = 1;
 			while ((statement = parser.Statement()) != null) {
+				int localCount = count++;
+				Operator operator = null;
 				try {
 					DBStatementVisitor dbStatementVisitor = new DBStatementVisitor();
 					statement.accept(dbStatementVisitor);
 					LogicalOperator logicalOperator = dbStatementVisitor.getOperator();
 					PhysicalPlanBuilder physicalPlanBuilder = new PhysicalPlanBuilder();
 					logicalOperator.accept(physicalPlanBuilder);
-					Operator operator = physicalPlanBuilder.getOperator();
+					operator = physicalPlanBuilder.getOperator();
+				} catch (Exception e) {
+					File file = new File(output + File.separator + "query" + localCount);
+					FileWriter fw = new FileWriter(file); 
+					if (!file.exists()) {
+						file.createNewFile();
+					}
+					continue;
+				}
+				try {
 					if (operator == null) {
-						File file = new File(output + File.separator + "query" + count++);
+						File file = new File(output + File.separator + "query" + localCount);
 						FileWriter fw = new FileWriter(file); //the instant the file is opened for writing, original
 						//contents are overwrite. We write nothing in this case since operator == null
 
@@ -61,15 +72,12 @@ public class QueryParser {
 							file.createNewFile();
 						}
 					} else {
-						operator.dump(output + File.separator + "query" + count++);
+						operator.dump(output + File.separator + "query" + localCount);
 					}
-				} catch (Exception e) {
-					File file = new File(output + File.separator + "query" + count++);
-					FileWriter fw = new FileWriter(file); 
-					if (!file.exists()) {
-						file.createNewFile();
-					}
-
+				} catch (Exception e2) {
+					// TODO: handle exception
+					System.err.println("Exception occurred during dumping");
+					e2.printStackTrace();
 				}
 			} 
 		}catch (Exception e) {
