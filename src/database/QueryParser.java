@@ -61,7 +61,7 @@ public class QueryParser {
 							file.createNewFile();
 						}
 					} else {
-						operator.dump(output + File.separator + "query" + count++);
+						operator.dumpHumanReadable(output + File.separator + "query" + count++);
 					}
 				} catch (Exception e) {
 					File file = new File(output + File.separator + "query" + count++);
