@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package database;
 
@@ -19,7 +19,7 @@ import visitor.PhysicalPlanBuilder;
 /**
  * @author xinzheyang
  * This class creates an instance of a query parser, which
- * parses according to input and output files and using a 
+ * parses according to input and output files and using a
  * while loop to go over all the queries in the file
  */
 public class QueryParser {
@@ -53,7 +53,7 @@ public class QueryParser {
 					operator = physicalPlanBuilder.getOperator();
 				} catch (Exception e) {
 					File file = new File(output + File.separator + "query" + localCount);
-					FileWriter fw = new FileWriter(file); 
+					FileWriter fw = new FileWriter(file);
 					if (!file.exists()) {
 						file.createNewFile();
 					}
@@ -65,21 +65,21 @@ public class QueryParser {
 						FileWriter fw = new FileWriter(file); //the instant the file is opened for writing, original
 						//contents are overwrite. We write nothing in this case since operator == null
 
-						/* This logic will make sure that the file 
+						/* This logic will make sure that the file
 						 * gets created if it is not present at the
 						 * specified location*/
 						if (!file.exists()) {
 							file.createNewFile();
 						}
 					} else {
-						operator.dump(output + File.separator + "query" + localCount);
+						operator.dumpHumanReadable(output + File.separator + "query" + count++);
 					}
 				} catch (Exception e2) {
 					// TODO: handle exception
 					System.err.println("Exception occurred during dumping");
 					e2.printStackTrace();
 				}
-			} 
+			}
 		}catch (Exception e) {
 			System.err.println("Exception occurred during parsing");
 			e.printStackTrace();

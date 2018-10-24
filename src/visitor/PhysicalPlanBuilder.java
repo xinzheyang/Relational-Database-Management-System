@@ -76,8 +76,8 @@ public class PhysicalPlanBuilder {
 			else if (DBCatalog.getJoinMethod().equals("2")) { //SMJ
 				Expression smjCondition = op.getJoinCondition();
 				EquiConjunctVisitor equiVisit = new EquiConjunctVisitor();
-				smjCondition.accept(equiVisit); //by accepting, the visitor processes the 
-				//join condition and extract left and right column names in the sorting order
+				smjCondition.accept(equiVisit); /*by accepting, the visitor processes the 
+				join condition and extract left and right column names in the sorting order.*/
 				String[] sortOrderLeft = (String[]) equiVisit.getLeftCompareCols().toArray();
 				String[] sortOrderRight = (String[]) equiVisit.getRightCompareCols().toArray();
 				//push down left and right sort operator to sort relations before merging
