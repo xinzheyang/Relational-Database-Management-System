@@ -29,15 +29,15 @@ import logicaloperator.*;
  */
 public class DBSelectVisitor implements SelectVisitor {
 	private LogicalOperator operator = null;
-    private LogicalScanOperator scanOperator;
-    private LogicalSelectOperator selectOperator;
-    private LogicalJoinOperator joinOperator;
-    private LogicalProjectOperator projectOperator;
-    private LogicalSortOperator sortOperator;
-    private LogicalDupElimOperator dupElimOperator;
-    
-    private ParseConjunctExpVisitor parseConjunctExpVisitor;
-    private HashMap<String, Expression> selectMap;
+	private LogicalScanOperator scanOperator;
+	private LogicalSelectOperator selectOperator;
+	private LogicalJoinOperator joinOperator;
+	private LogicalProjectOperator projectOperator;
+	private LogicalSortOperator sortOperator;
+	private LogicalDupElimOperator dupElimOperator;
+
+	private ParseConjunctExpVisitor parseConjunctExpVisitor;
+	private HashMap<String, Expression> selectMap;
 	public LogicalOperator getOperator() {
 		return operator;
 	}
@@ -45,7 +45,7 @@ public class DBSelectVisitor implements SelectVisitor {
 	public void setOperator(LogicalOperator operator) {
 		this.operator = operator;
 	}
-	
+
 	/**
 	 * @param fromItem
 	 * @return an scanOperator that builds from an FromItem
@@ -56,7 +56,7 @@ public class DBSelectVisitor implements SelectVisitor {
 		scanOperator = (LogicalScanOperator) dbFromItemVisitor.getOperator();
 		return scanOperator;
 	}
-	
+
 	/**
 	 * @param scanOperator
 	 * @return an selectOperator that builds from a scanOperator
@@ -74,7 +74,7 @@ public class DBSelectVisitor implements SelectVisitor {
 		}
 		return selectOp;
 	}
-	
+
 	/**
 	 * @param fromItem
 	 * @return builds a selectOperator from FromItem if possible, otherwise a scanOperator
@@ -88,8 +88,8 @@ public class DBSelectVisitor implements SelectVisitor {
 			return selectOperator;
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param orderByElements
 	 * @return a sortOperator built from a list of OrderByElements, which follows the query plan structure
@@ -111,8 +111,8 @@ public class DBSelectVisitor implements SelectVisitor {
 		}
 		return sortOperator;
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * This is the visit method that overrides SelectVisitor for PlainSelect type
 	 * It basically parses all the SQL elements and builds the query from bottom up
@@ -126,7 +126,7 @@ public class DBSelectVisitor implements SelectVisitor {
 		List<Join> joins = plainSelect.getJoins();
 		List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
 		Expression expression = plainSelect.getWhere();
-		
+
 		if (expression != null) {
 			parseConjunctExpVisitor = new ParseConjunctExpVisitor();
 			expression.accept(parseConjunctExpVisitor);
@@ -137,20 +137,20 @@ public class DBSelectVisitor implements SelectVisitor {
 			// SELECT * FROM A WHERE A.sid  A:A.sid = 1
 			selectMap = parseConjunctExpVisitor.getSelectMap();
 		}
-		
-		
-//		System.out.println(selectMap);
+
+
+		//		System.out.println(selectMap);
 		scanOperator = buildScanFromItem(fromItem);
-		
+
 		selectOperator = buildSelectFromScan(scanOperator);
-		
-		
+
+
 		if (joins != null && joins.size() > 0) {
 			LogicalJoinOperator left;
 			FromItem firstRightItem = joins.get(0).getRightItem();
 			ArrayList<FromItem> leftTable = new ArrayList<>();
 			LogicalOperator initLeftOp = selectOperator == null ? scanOperator : selectOperator;
-			
+
 			String fromItemReference = fromItem.getAlias() != null ? fromItem.getAlias() : fromItem.toString();
 			String fromRightItemReference = firstRightItem.getAlias() != null ? firstRightItem.getAlias() : firstRightItem.toString();
 			if (parseConjunctExpVisitor != null && 
@@ -160,10 +160,10 @@ public class DBSelectVisitor implements SelectVisitor {
 			} else {
 				left = new LogicalJoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem));
 			}
-			
+
 			leftTable.add(fromItem);
 			leftTable.add(firstRightItem);
-			
+
 			for (int i=1; i<joins.size(); i++) {
 				Expression condition = null;
 				FromItem rightItem = joins.get(i).getRightItem();
@@ -175,7 +175,7 @@ public class DBSelectVisitor implements SelectVisitor {
 							parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference) != null) {
 						Expression tempCondition = parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference);
 						condition = condition == null ? tempCondition: new AndExpression(condition, tempCondition);
-						
+
 					}
 				}
 				leftTable.add(rightItem);
@@ -184,7 +184,7 @@ public class DBSelectVisitor implements SelectVisitor {
 			}
 			joinOperator = left;
 		}
-		
+
 		if (selectItems != null && selectItems.size() > 0) {
 			String[] cols = new String[selectItems.size()];
 			if (!(selectItems.size() == 1 && selectItems.get(0) instanceof AllColumns)) {
@@ -192,22 +192,22 @@ public class DBSelectVisitor implements SelectVisitor {
 					SelectExpressionItem selectItem = (SelectExpressionItem) selectItems.get(i);
 					cols[i] = selectItem.getExpression().toString();
 				}
-			if (joinOperator == null) {
-				LogicalOperator childOp = selectOperator == null ? scanOperator : selectOperator;
-				projectOperator = new LogicalProjectOperator(childOp, cols);
-				
-			} else {
-				projectOperator = new LogicalProjectOperator(joinOperator, cols);
+				if (joinOperator == null) {
+					LogicalOperator childOp = selectOperator == null ? scanOperator : selectOperator;
+					projectOperator = new LogicalProjectOperator(childOp, cols);
+
+				} else {
+					projectOperator = new LogicalProjectOperator(joinOperator, cols);
+				}
 			}
-			}
-			
+
 		}
-		
-		
+
+
 		if (orderByElements != null && orderByElements.size() > 0) {
 			sortOperator = buildSort(orderByElements);
 		}
-		
+
 		if (distinct != null) {
 			if (sortOperator == null) {
 				dupElimOperator = new LogicalDupElimOperator(buildSort(new ArrayList<>()));
@@ -215,7 +215,7 @@ public class DBSelectVisitor implements SelectVisitor {
 				dupElimOperator = new LogicalDupElimOperator(sortOperator);
 			}
 		}
-		
+
 		if (dupElimOperator != null) {
 			operator = dupElimOperator;
 		} else if (sortOperator != null) {
