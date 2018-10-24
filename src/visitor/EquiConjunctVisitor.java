@@ -68,6 +68,8 @@ public class EquiConjunctVisitor implements ExpressionVisitor {
 	private boolean isEval;
 	
 	public EquiConjunctVisitor(Tuple tupleLeft, Tuple tupleRight, Operator leftOp, Operator rightOp) {
+		leftCompareVals = new ArrayList<Integer>();
+		rightCompareVals = new ArrayList<Integer>();
 		this.tupleLeft = tupleLeft;
 		this.tupleRight = tupleRight;
 		this.leftOp = leftOp;
@@ -79,6 +81,8 @@ public class EquiConjunctVisitor implements ExpressionVisitor {
 	 * All the information we want are the left and right column names.
 	 */
 	public EquiConjunctVisitor() {
+		leftCompareCols = new ArrayList<String>();
+		rightCompareCols = new ArrayList<String>();
 		isEval = false;
 	}
 	//--SETTERS AND GETTERS--
@@ -210,14 +214,12 @@ public class EquiConjunctVisitor implements ExpressionVisitor {
 				eval.setOperator(leftOp);
 				tableColumn.accept(eval);
 				leftCompareVals.add(eval.getReturnLongValue());
-				leftCompareCols.add(tableColumn.getWholeColumnName());
 			}
 			else {
 				eval.setCurrTuple(tupleRight);
 				eval.setOperator(rightOp);
 				tableColumn.accept(eval);
 				rightCompareVals.add(eval.getReturnLongValue());
-				rightCompareCols.add(tableColumn.getWholeColumnName());
 			}
 		}
 		else { //we just need the names of columns

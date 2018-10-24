@@ -4,6 +4,7 @@
 package visitor;
 
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 
 import database.DBCatalog;
 import logicaloperator.*;
@@ -78,8 +79,11 @@ public class PhysicalPlanBuilder {
 				EquiConjunctVisitor equiVisit = new EquiConjunctVisitor();
 				smjCondition.accept(equiVisit); /*by accepting, the visitor processes the 
 				join condition and extract left and right column names in the sorting order.*/
-				String[] sortOrderLeft = (String[]) equiVisit.getLeftCompareCols().toArray();
-				String[] sortOrderRight = (String[]) equiVisit.getRightCompareCols().toArray();
+				Object[] sortLeftObj = equiVisit.getLeftCompareCols().toArray();
+				Object[] sortRightObj = equiVisit.getRightCompareCols().toArray();
+				
+				String[] sortOrderLeft = Arrays.copyOf(sortLeftObj, sortLeftObj.length, String[].class);
+				String[] sortOrderRight = Arrays.copyOf(sortRightObj, sortRightObj.length, String[].class);
 				//push down left and right sort operator to sort relations before merging
 				SortOperator leftSort = getSortOperator(left, sortOrderLeft);
 				SortOperator rightSort = getSortOperator(right, sortOrderRight);

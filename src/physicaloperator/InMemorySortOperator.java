@@ -61,7 +61,7 @@ public class InMemorySortOperator extends SortOperator {
 	@Override
 	public void reset(int index) {
 		// TODO Auto-generated method stub
-		
+		this.index = index;
 	}
 
 }

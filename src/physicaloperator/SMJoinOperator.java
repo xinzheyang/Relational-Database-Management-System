@@ -17,30 +17,38 @@ import visitor.EquiConjunctVisitor;
  */
 public class SMJoinOperator extends JoinOperator {
 	private int jumpBackToPartition; //index of previous right relation's start of partition to jump back to
+	private int currRightPosition;
 	private Tuple tLeft; //initialized to first tuple in left relation
 	private Tuple tRight; //initialized to first tuple in right relation
 	private Tuple startOfCurrPartition; //start of current partition, initialized to first tuple in right relation
-	
+
 	public SMJoinOperator(Operator left, Operator right, Expression condition) {
 		super(left, right, condition);
 		assert(left instanceof SortOperator);
 		assert(right instanceof SortOperator);
 		jumpBackToPartition = 0;
+		currRightPosition = 0;
+//		leftChild.dumpHumanReadable("testLeft");
+//		rightChild.dumpHumanReadable("testRight");
+//		leftChild.reset(0);
+//		rightChild.reset(0);
 		tLeft = leftChild.getNextTuple();
 		tRight = rightChild.getNextTuple();
 		startOfCurrPartition = tRight;
 	}
-	
+
 	public SMJoinOperator(Operator left, Operator right) {
 		this(left, right, null);
 	}
-	
+
 	/** Compare two tuples by the order of the equity conjunct condition.
 	 * @param tl left tuple to be compared
 	 * @param tr right tuple to be compared
 	 * @return 0 if tl == tr, -1 if tl < tr, 1 if tl > tr
 	 */
 	public int compareByCondition(Tuple tl, Tuple tr) {
+		assert tl != null;
+		assert tr != null;
 		EquiConjunctVisitor equiVisit = new EquiConjunctVisitor(tl, tr, leftChild, rightChild);
 		this.joinCondition.accept(equiVisit);
 		ArrayList<Integer> leftVals = equiVisit.getLeftCompareVals();
@@ -65,28 +73,75 @@ public class SMJoinOperator extends JoinOperator {
 	 */
 	@Override
 	public Tuple getNextTuple() {
-		while(tLeft != null && tRight != null) {
-			while(compareByCondition(tLeft, startOfCurrPartition) == -1) {
-				tLeft = leftChild.getNextTuple();
+
+		if (tLeft != null && tRight == null) {
+			rightChild.reset(jumpBackToPartition);
+			tRight = rightChild.getNextTuple();
+			currRightPosition = jumpBackToPartition;
+			tLeft = leftChild.getNextTuple();
+		}
+		
+		if (tLeft == null) {
+			return null;
+		}
+		
+		if (compareByCondition(tLeft, tRight) == 0 && 
+				compareByCondition(tLeft, startOfCurrPartition) == 0) {
+			while(tRight != null && tLeft != null && compareByCondition(tLeft, tRight) == 0) {
+				Tuple merged = tLeft.merge(tRight);
+				tRight = rightChild.getNextTuple();
+				currRightPosition++;
+				return merged;
 			}
+		}
+		
+		if (compareByCondition(tLeft, startOfCurrPartition) == 0 && 
+				compareByCondition(tLeft, tRight) != 0) {
+			tLeft = leftChild.getNextTuple();
 			
-			while(compareByCondition(tLeft, startOfCurrPartition) == 1) {
-				startOfCurrPartition = rightChild.getNextTuple();
-				jumpBackToPartition++;
-			}
-			tRight = startOfCurrPartition;
 			while(compareByCondition(tLeft, startOfCurrPartition) == 0) {
 				rightChild.reset(jumpBackToPartition);
-				while(compareByCondition(tRight, tLeft) == 0) {
+				tRight = rightChild.getNextTuple();
+				currRightPosition = jumpBackToPartition;
+				while(compareByCondition(tLeft, tRight) == 0) {
 					Tuple merged = tLeft.merge(tRight);
 					tRight = rightChild.getNextTuple();
+					currRightPosition++;
 					return merged;
 				}
 				tLeft = leftChild.getNextTuple();
 			}
 			startOfCurrPartition = tRight;
+			jumpBackToPartition = currRightPosition;
+			
 		}
-		
+
+		while(tLeft != null && tRight != null) {
+			while(tLeft != null && startOfCurrPartition != null && compareByCondition(tLeft, startOfCurrPartition) == -1) {
+				tLeft = leftChild.getNextTuple();
+			}
+
+			while(startOfCurrPartition != null && tLeft != null && compareByCondition(tLeft, startOfCurrPartition) == 1) {
+				startOfCurrPartition = rightChild.getNextTuple();
+				jumpBackToPartition++;
+			}
+			tRight = startOfCurrPartition;
+			while(tLeft != null && startOfCurrPartition != null && compareByCondition(tLeft, startOfCurrPartition) == 0) {
+				rightChild.reset(jumpBackToPartition);
+				tRight = rightChild.getNextTuple();
+				currRightPosition = jumpBackToPartition;
+				while(tRight != null && tLeft != null && compareByCondition(tLeft, tRight) == 0) {
+					Tuple merged = tLeft.merge(tRight);
+					tRight = rightChild.getNextTuple();
+					currRightPosition++;
+					return merged;
+				}
+				tLeft = leftChild.getNextTuple();
+			}
+			startOfCurrPartition = tRight;
+			jumpBackToPartition = currRightPosition;
+		}
+
 		return null;
 	}
 

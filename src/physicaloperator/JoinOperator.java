@@ -24,7 +24,7 @@ public abstract class JoinOperator extends Operator {
 		leftChild = left;
 		rightChild = right;
 		
-		columnIndexMap = leftChild.getColumnIndexMap(); //same col index map as child operator
+		columnIndexMap = new HashMap<String, Integer>(leftChild.getColumnIndexMap()); //same col index map as child operator
 		int leftSize = leftChild.getColumnIndexMap().size();
 		HashMap<String,Integer> rightMap = rightChild.getColumnIndexMap();
 		for(String s: rightMap.keySet()) {
