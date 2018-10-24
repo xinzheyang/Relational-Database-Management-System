@@ -27,11 +27,11 @@ public class PhysicalPlanBuilder {
 	 */
 	private SortOperator getSortOperator(Operator child, String[] cols) {
 		SortOperator sortOperator;
-		if (DBCatalog.getSortMethod() == "0") {
+		if (DBCatalog.getSortMethod().equals("0")) {
 			sortOperator = new InMemorySortOperator(child, cols);
 		}
 		else {
-			assert DBCatalog.getSortMethod() == "1";
+			assert DBCatalog.getSortMethod().equals("1");
 			sortOperator = new ExternalSortOperator(child, cols, DBCatalog.getSortBufferSize());
 		}
 		
@@ -62,18 +62,18 @@ public class PhysicalPlanBuilder {
 		op.getRightChild().accept(this);
 		Operator right = operator;
 		JoinOperator joinOperator;
-		if (DBCatalog.getJoinMethod() == "0") { //TNLJ
+		if (DBCatalog.getJoinMethod().equals("0")) { //TNLJ
 			joinOperator = op.getJoinCondition() == null ? 
 					new TNLJoinOperator(left, right) : new TNLJoinOperator(left, right, op.getJoinCondition());
 		}
 		else {
-			if (DBCatalog.getJoinMethod() == "1") { //BNLJ
+			if (DBCatalog.getJoinMethod().equals("1")) { //BNLJ
 				int bufferSize = DBCatalog.getJoinBufferSize();
 				joinOperator = op.getJoinCondition() == null ?
 						new BNLJoinOperator(left, right, bufferSize) : 
 							new BNLJoinOperator(left, right, op.getJoinCondition(), bufferSize);
 			}
-			else if (DBCatalog.getJoinMethod() == "2") { //SMJ
+			else if (DBCatalog.getJoinMethod().equals("2")) { //SMJ
 				Expression smjCondition = op.getJoinCondition();
 				EquiConjunctVisitor equiVisit = new EquiConjunctVisitor();
 				smjCondition.accept(equiVisit); //by accepting, the visitor processes the 

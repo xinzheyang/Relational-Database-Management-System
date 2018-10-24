@@ -141,7 +141,7 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 				tb2 = tbStack.pop();
 			}
 		}
-		if (tb1 != "" && tb2 != "" && ! tb1.equals(tb2)) { //Join Condition, stack had two tables
+		if (!tb1.isEmpty() && !tb2.isEmpty() && ! tb1.equals(tb2)) { //Join Condition, stack had two tables
 			List<String> key = new ArrayList<String>();
 			key.add(tb1);
 			key.add(tb2);
@@ -154,8 +154,8 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 				joinMap.put(key, newExp);
 			}
 		}
-		else if (tb1 != "" || tb2 != "") { //Select Condition, stack had one table
-			String key = tb1 != "" ? tb1 : tb2;
+		else if (!tb1.isEmpty() || !tb2.isEmpty()) { //Select Condition, stack had one table
+			String key = !tb1.isEmpty() ? tb1 : tb2;
 			if (!selectMap.containsKey(key)) {
 				selectMap.put(key, op);
 			}
