@@ -16,9 +16,10 @@ import java.util.*;
 public class DBCatalog {
 	
 	private static HashMap<String, String[]> tableMap; //
-//	private HashMap<String, String> locMap; //do we need this when all table files are in the same dir?
 	private static String locDir;
 	private static String outputDir; //path to the directory where the output files to be written are
+	private static String tempDir; //path to the directory where the temp files for external sort to be written are
+	private static int tempDirCount; // a self incrementing counter inside tempDir
 	private static DBCatalog catalog = null; //singleton object for global reference
 	
 	/* A private Constructor prevents any other class
@@ -59,6 +60,14 @@ public class DBCatalog {
 	
 	public static String getOutputDir() {
 		return outputDir;
+	}
+	
+	public static String getTempDir() {
+		return tempDir + File.separator + "temp" + tempDirCount++;
+	}
+	
+	public static void setTempDir(String tempDir) {
+		DBCatalog.tempDir = tempDir;
 	}
 	
 	/* Parses in schema information by reading the schema file in the directory path specified.
