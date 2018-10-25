@@ -4,6 +4,7 @@
 package physicaloperator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import database.Tuple;
@@ -52,11 +53,17 @@ public class BNLJoinOperator extends JoinOperator {
 	public void updateBuffer() {
 		buffer.clear();
 		int numTuples = 4096 * buffer_size / (4 * leftChild.getColumnIndexMap().size());
+//		System.out.println(numTuples);
+//		int numTuples = 1;
 		int i=0;
 		while(i< numTuples) {
-			buffer.add(leftChild.getNextTuple());
+			Tuple left = leftChild.getNextTuple();
+			if(left == null) break;
+			buffer.add(left);
 			i++;
 		}
+//		System.out.println("number of columns is " + leftChild.getColumnIndexMap().size());
+//		System.out.println("size is " + buffer.size());
 	}
 	
 
@@ -72,14 +79,20 @@ public class BNLJoinOperator extends JoinOperator {
 				//while the end of the buffer is not reached
 				while(index < buffer.size()) {
 					//combine the two tuples and check if they pass the result;
+//					System.out.println(index);
 					Tuple combinedTuple = buffer.get(index).merge(rightTuple);
 					index++;
+//					if(combinedTuple.getColValues()[0]==179) {
+//						System.out.println(Arrays.toString(combinedTuple.getColValues()));
+//						System.out.println("179");
+//					}
 					if(joinCondition == null) return combinedTuple;
 					visitor.setCurrTuple(combinedTuple);
 					visitor.setOperator(this);
 					joinCondition.accept(visitor);
 					boolean result = visitor.getReturnBoolValue();
 					if(result) {
+//						System.out.println(Arrays.toString(combinedTuple.getColValues()));
 						return combinedTuple;
 					}
 				}
@@ -90,6 +103,7 @@ public class BNLJoinOperator extends JoinOperator {
 			//finish one block, so get another, and starts from the first right child again
 			updateBuffer();
 			rightChild.reset();
+			rightTuple = rightChild.getNextTuple();
 		}
 		return null;
 	}

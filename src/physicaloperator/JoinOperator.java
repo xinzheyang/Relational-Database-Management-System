@@ -23,7 +23,6 @@ public abstract class JoinOperator extends Operator {
 	public JoinOperator(Operator left, Operator right, Expression condition) {
 		leftChild = left;
 		rightChild = right;
-		
 		columnIndexMap = new HashMap<String, Integer>(leftChild.getColumnIndexMap()); //same col index map as child operator
 		int leftSize = leftChild.getColumnIndexMap().size();
 		HashMap<String,Integer> rightMap = rightChild.getColumnIndexMap();

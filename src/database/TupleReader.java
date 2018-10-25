@@ -44,7 +44,6 @@ public class TupleReader {
 	}
 
 	public void reset(int index) {
-		System.out.println(index);
 		int pageIndex = index/maxTuples;
 		try {
 			channel.position(pageIndex*4096);

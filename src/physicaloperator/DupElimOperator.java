@@ -20,7 +20,7 @@ public class DupElimOperator extends Operator {
 	public DupElimOperator(Operator child) {
 		assert (child instanceof SortOperator);
 		childOp = child;
-		columnIndexMap = childOp.getColumnIndexMap();
+		columnIndexMap = new HashMap<String, Integer>(childOp.getColumnIndexMap());
 	}
 	/* Keep getting next tuple until the next tuple is different from the 
 	 * prevDistinct tuple or no more tuples can be retrieved.
