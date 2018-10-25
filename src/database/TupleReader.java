@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 /**
  * @author xinqi
- *
+ * An TupleReader reads the binary-formatted file and grabs tuples from it.
  */
 public class TupleReader {
 
@@ -24,6 +24,9 @@ public class TupleReader {
 	int maxTuples;
 
 
+	/**Construct the TupleReader object
+	 * @param file the binary file to read from
+	 */
 	public TupleReader(String file) {
 		try {
 			fin = new FileInputStream(file);
@@ -43,6 +46,10 @@ public class TupleReader {
 		}
 	}
 
+	/**Given the index of the tuple, direct FileChannel to the page it is in
+	 * and move the pointer to the beginning of that tuple
+	 * @param index the index of the tuple that we want from the table
+	 */
 	public void reset(int index) {
 		int pageIndex = index/maxTuples;
 		try {
@@ -57,6 +64,9 @@ public class TupleReader {
 		}
 	}
 
+	/**Read a page of given size into the buffer
+	 * @return -1 if there is no next page, 1 otherwise
+	 */
 	public int getNextPage() {
 //		try {
 //			channel.read(bf);
@@ -87,6 +97,9 @@ public class TupleReader {
 		return -1;
 	}
 
+	/**
+	 * Closes the channel and the file
+	 */
 	public void close() {
 		try {
 			channel.close();
@@ -96,6 +109,9 @@ public class TupleReader {
 		}
 	}
 
+	/**Grab the next tuple from the file
+	 * @return the next Tuple object starting at the current pointer
+	 */
 	public Tuple getNextTuple() {
 		//if there is any more tuple on the current page
 		if(index > numTuples) {
