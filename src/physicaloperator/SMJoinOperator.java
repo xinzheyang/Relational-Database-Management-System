@@ -99,11 +99,11 @@ public class SMJoinOperator extends JoinOperator {
 				compareByCondition(tLeft, tRight) != 0) {
 			tLeft = leftChild.getNextTuple();
 			
-			while(compareByCondition(tLeft, startOfCurrPartition) == 0) {
+			while(tLeft != null && compareByCondition(tLeft, startOfCurrPartition) == 0) {
 				rightChild.reset(jumpBackToPartition);
 				tRight = rightChild.getNextTuple();
 				currRightPosition = jumpBackToPartition;
-				while(compareByCondition(tLeft, tRight) == 0) {
+				while(tLeft != null && compareByCondition(tLeft, tRight) == 0) {
 					Tuple merged = tLeft.merge(tRight);
 					tRight = rightChild.getNextTuple();
 					currRightPosition++;

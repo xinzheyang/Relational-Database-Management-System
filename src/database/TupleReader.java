@@ -51,6 +51,7 @@ public class TupleReader {
 			int i=0;
 			while(i<index % maxTuples) {
 				getNextTuple();
+				i++;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
