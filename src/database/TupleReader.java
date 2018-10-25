@@ -48,6 +48,10 @@ public class TupleReader {
 		try {
 			channel.position(pageIndex*4096);
 			getNextPage();
+			int i=0;
+			while(i<index % maxTuples) {
+				getNextTuple();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
