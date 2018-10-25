@@ -26,6 +26,10 @@ public class TupleWriter {
 	private int numTuples;
 	private int numAttribs;
 
+	/**
+	 * @param fileout    file output path
+	 * @param op  the operator to be written
+	 */
 	public TupleWriter(String fileout, Operator op) {
 		try {
 			fout = new FileOutputStream(fileout);
@@ -39,7 +43,28 @@ public class TupleWriter {
 		}
 
 	}
+	
+	/**
+	 * @param fileout  file output path
+	 * @param nCols  number of columns to be generated
+	 */
+	public TupleWriter(String fileout, int nCols) {
+		try {
+			fout = new FileOutputStream(fileout);
+			fc = fout.getChannel();
+			buffer = ByteBuffer.allocate(PAGE_SIZE);
+			numAttribs = nCols;
+		    numTuples = 0;
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
+	}
+
+	/**
+	 *  closes the TupleWriter and output channel
+	 */
 	public void close() {
 		try {
 			fc.close();
