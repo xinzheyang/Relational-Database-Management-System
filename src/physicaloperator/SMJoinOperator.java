@@ -138,8 +138,6 @@ public class SMJoinOperator extends JoinOperator {
 				}
 				tLeft = leftChild.getNextTuple();
 			}
-			startOfCurrPartition = tRight;
-			jumpBackToPartition = currRightPosition;
 		}
 
 		return null;

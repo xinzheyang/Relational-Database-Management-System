@@ -19,7 +19,7 @@ public class DBCatalog {
 	private static String locDir;
 	private static String outputDir; //path to the directory where the output files to be written are
 	private static String tempDir; //path to the directory where the temp files for external sort to be written are
-	private static int tempDirCount; // a self incrementing counter inside tempDir
+	private static int tempDirCount = 0; // a self incrementing counter inside tempDir
 	private static DBCatalog catalog = null; //singleton object for global reference
 	private static String[] joinMethod;
 	private static String[] sortMethod;
@@ -69,6 +69,22 @@ public class DBCatalog {
 	
 	public static void setTempDir(String tempDir) {
 		DBCatalog.tempDir = tempDir;
+	}
+	
+	private static boolean deleteTempDir(File file) {
+		File[] allFiles = file.listFiles();
+		if (allFiles != null) {
+			for (File f: allFiles) {
+				deleteTempDir(f);
+			}
+		}
+		return file.delete();
+	}
+	
+	public static void resetTempDir() {
+		tempDirCount = 0;
+		File file = new File(tempDir);
+		deleteTempDir(file);
 	}
 	
 	public static String getJoinMethod() {
