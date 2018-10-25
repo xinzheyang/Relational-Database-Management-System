@@ -57,8 +57,10 @@ public class QueryParser {
 					if (!file.exists()) {
 						file.createNewFile();
 					}
+					DBCatalog.resetTempDir();
 					continue;
 				}
+				DBCatalog.resetTempDir();
 				try {
 					if (operator == null) {
 						File file = new File(output + File.separator + "query" + localCount);
@@ -72,10 +74,10 @@ public class QueryParser {
 							file.createNewFile();
 						}
 					} else {
+//						operator.dump(output + File.separator + "query" + localCount);
 						operator.dumpHumanReadable(output + File.separator + "query" + localCount);
 					}
 				} catch (Exception e2) {
-					// TODO: handle exception
 					System.err.println("Exception occurred during dumping");
 					e2.printStackTrace();
 				}

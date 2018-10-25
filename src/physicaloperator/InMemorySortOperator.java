@@ -5,7 +5,6 @@ package physicaloperator;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import database.Tuple;
@@ -54,7 +53,6 @@ public class InMemorySortOperator extends SortOperator {
 	 */
 	@Override
 	public void reset() {
-		childOp.reset();
 		index=0;
 	}
 

@@ -27,3 +27,6 @@ hs_err_pid*
 bin/.DS_Store
 .DS_Store
 src/.DS_Store
+expected
+input
+output
