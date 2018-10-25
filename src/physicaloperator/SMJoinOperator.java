@@ -28,10 +28,6 @@ public class SMJoinOperator extends JoinOperator {
 		assert(right instanceof SortOperator);
 		jumpBackToPartition = 0;
 		currRightPosition = 0;
-//		leftChild.dumpHumanReadable("testLeft");
-//		rightChild.dumpHumanReadable("testRight");
-//		leftChild.reset(0);
-//		rightChild.reset(0);
 		tLeft = leftChild.getNextTuple();
 		tRight = rightChild.getNextTuple();
 		startOfCurrPartition = tRight;
@@ -61,7 +57,7 @@ public class SMJoinOperator extends JoinOperator {
 			l = leftVals.get(index);
 			r = rightVals.get(index++);
 		}
-		if (index >= size){ return 0; }
+		if (index >= size && l == r){ return 0; }
 		return (l > r) ? 1 : -1;
 	}
 
@@ -99,11 +95,11 @@ public class SMJoinOperator extends JoinOperator {
 				compareByCondition(tLeft, tRight) != 0) {
 			tLeft = leftChild.getNextTuple();
 			
-			while(compareByCondition(tLeft, startOfCurrPartition) == 0) {
+			while(tLeft != null && compareByCondition(tLeft, startOfCurrPartition) == 0) {
 				rightChild.reset(jumpBackToPartition);
 				tRight = rightChild.getNextTuple();
 				currRightPosition = jumpBackToPartition;
-				while(compareByCondition(tLeft, tRight) == 0) {
+				while(tLeft != null && compareByCondition(tLeft, tRight) == 0) {
 					Tuple merged = tLeft.merge(tRight);
 					tRight = rightChild.getNextTuple();
 					currRightPosition++;

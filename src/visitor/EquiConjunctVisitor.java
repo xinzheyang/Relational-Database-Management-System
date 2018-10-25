@@ -168,6 +168,9 @@ public class EquiConjunctVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(Between between) { throw new UnsupportedOperationException("not supported"); }
 
+	/** Visits the left expression, and then visit the right expression.
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.relational.EqualsTo)
+	 */
 	@Override
 	public void visit(EqualsTo equalsTo) {
 		isLeft = true;

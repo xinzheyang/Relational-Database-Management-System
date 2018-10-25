@@ -9,7 +9,8 @@ import visitor.PhysicalPlanBuilder;
 
 /**
  * @author xinzheyang
- *
+ * An logical operator that stores minimal information
+ * to be visited by PhysicalPlanBuilder to transform into a physical plan builder
  */
 public class LogicalScanOperator extends LogicalOperator {
 	private String tb;

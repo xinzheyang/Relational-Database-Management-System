@@ -11,7 +11,8 @@ import java.nio.channels.FileChannel;
 
 import physicaloperator.Operator;
 
-/**
+/** A class for writing tuples to binary files. Uses the Java NIO package
+ * to write page by page.
  * @author sitianchen
  *
  */
