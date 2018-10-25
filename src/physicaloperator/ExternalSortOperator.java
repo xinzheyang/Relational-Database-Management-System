@@ -65,20 +65,23 @@ public class ExternalSortOperator extends SortOperator {
 		int res = 0;
 		ArrayList<TupleReader> buffer =  new ArrayList<TupleReader>();
 		HashMap<Tuple, TupleReader> map = new HashMap<Tuple, TupleReader>();
-		TupleWriter tw = new TupleWriter(path + File.separator + passCounter + "_" + numRun, this);
-		tw.writeMetaData();
 		for(int i=0; i<bufSize-1; i++) {
-			String prevPassRunPath = path + File.separator + (passCounter-1) + "_" + i;
+			String prevPassRunPath = path + File.separator + (passCounter-1) + "_" + (numRun*(bufSize-1)+i);
 			Path p = Paths.get(prevPassRunPath);
 			if (Files.exists(p)) {
 				TupleReader tReader = new TupleReader(prevPassRunPath);
 				buffer.add(tReader);
 			} else {
 				res = -1;
+				if (i == 0) {
+					return res;
+				}
 				break;
 			}
 			
 		}
+		TupleWriter tw = new TupleWriter(path + File.separator + passCounter + "_" + numRun, this);
+		tw.writeMetaData();
 		PriorityQueue<Tuple> tupleQueue = new PriorityQueue<Tuple>(com);
 		for(int i=0; i<buffer.size(); i++) {
 			TupleReader tr = buffer.get(i);
