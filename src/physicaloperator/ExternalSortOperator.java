@@ -1,6 +1,3 @@
-/**
- * 
- */
 package physicaloperator;
 
 import java.io.BufferedWriter;
@@ -23,7 +20,7 @@ import database.TupleWriter;
 
 /**
  * @author xinzheyang
- *
+ * An implementation of SortOperator
  */
 public class ExternalSortOperator extends SortOperator {
 	private int bufSize;
@@ -32,10 +29,12 @@ public class ExternalSortOperator extends SortOperator {
 	private int passCounter = 0;
 	private int numRuns = 0;
 	private TupleReader sortedRun;
+	
 	/**
-	 * @param op
-	 * @param cols
-	 * @param size
+	 * @param op the child operator to be sorted
+	 * @param cols the columns that in which order to be sorted
+	 * @param size the size of buffer pages
+	 * This constructor sorts the childOperator op using external merge sort with "size" buffer pages
 	 */
 	public ExternalSortOperator(Operator op, String[] cols, int size) {
 		super(op, cols);
@@ -52,6 +51,16 @@ public class ExternalSortOperator extends SortOperator {
 		}
 		sortedRun = new TupleReader(path + File.separator + (passCounter-1) + "_" + (numRuns-1));
 	}
+	
+	
+	/**
+	 * @param numRun
+	 * @return 0 if there are still runs to be read and merged, -1 otherwise
+	 * this method merges runs of previous pass using available buffer pages
+	 * and generates temp files that has numRun runs
+	 * The key idea is to use a PriorityQueue to store runs in the main memory
+	 * and pops the minimum tuple
+	 */
 	private int mergeHelper(int numRun) {
 		int res = 0;
 		ArrayList<TupleReader> buffer =  new ArrayList<TupleReader>();
@@ -99,6 +108,9 @@ public class ExternalSortOperator extends SortOperator {
 		return res;
 	}
 	
+	/**
+	 * @return number of runs created during this merge pass
+	 */
 	private int merge() {
 		int numRun = 0;
 		while (mergeHelper(numRun++) == 0) {}
@@ -107,6 +119,11 @@ public class ExternalSortOperator extends SortOperator {
 	}
 	
 	
+	/**
+	 * @param numRun the counter of runs
+	 * @return 0 if there are still files to be read and processed, -1 otherwise
+	 * this method sorts the a run that fits the buffer pages
+	 */
 	private int passZeroHelper(int numRun) {
 		int res = 0;
 		TupleWriter tw = new TupleWriter(path + File.separator + "0_" + numRun, this);
@@ -172,6 +189,9 @@ public class ExternalSortOperator extends SortOperator {
 //		return res;
 //	}
 	
+	/**
+	 * @return the number of runs created in the temp folder
+	 */
 	private int passZero() {
 		int numRun = 0;
 		while (passZeroHelper(numRun++) == 0) {}
@@ -181,6 +201,9 @@ public class ExternalSortOperator extends SortOperator {
 	
 	
 
+	/* (non-Javadoc)
+	 * @see physicaloperator.Operator#getNextTuple()
+	 */
 	@Override
 	public Tuple getNextTuple() {
 		if (sortedRun != null) {
@@ -190,6 +213,9 @@ public class ExternalSortOperator extends SortOperator {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see physicaloperator.Operator#reset()
+	 */
 	@Override
 	public void reset() {
 		if (sortedRun != null) {
@@ -198,6 +224,9 @@ public class ExternalSortOperator extends SortOperator {
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see physicaloperator.Operator#reset(int)
+	 */
 	@Override
 	public void reset(int index) {
 		sortedRun.reset(index);

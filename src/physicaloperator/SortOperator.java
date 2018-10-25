@@ -14,7 +14,9 @@ import database.Tuple;
  * @author xinqi
  * SortOperator gets all the tuples from its child operator, put them in a list,
  * and sort them according to the order passed in as the column names list.
- *
+ * 
+ * An abstract SortOperator. 
+ * Possible implementations are InMemorySortOperator and ExternalSortOperator
  */
 public abstract class SortOperator extends Operator {
 	
@@ -41,35 +43,5 @@ public abstract class SortOperator extends Operator {
 		}
 		com = Tuple.getComparator(colIndexes);
 	}
-	
-//	public int getIndex() {
-//		return index;
-//	}
-//	/* (non-Javadoc)
-//	 * @see database.Operator#getNextTuple()
-//	 */
-//	@Override
-//	public Tuple getNextTuple() {
-//		if (index < allTuples.size()) {
-//			Tuple cur = allTuples.get(index++);
-//			return cur;
-//		}
-//		return null;
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see database.Operator#reset()
-//	 */
-//	@Override
-//	public void reset() {
-//		childOp.reset();
-//		index=0;
-//	}
-//
-//	@Override
-//	public void reset(int index) {
-//		// TODO Auto-generated method stub
-//		
-//	}
 
 }
