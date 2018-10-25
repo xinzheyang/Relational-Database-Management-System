@@ -35,15 +35,6 @@ public abstract class JoinOperator extends Operator {
 	}
 
 	/* (non-Javadoc)
-	 * @see physicaloperator.Operator#getNextTuple()
-	 */
-//	@Override
-//	public Tuple getNextTuple() {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-	/* (non-Javadoc)
 	 * @see physicaloperator.Operator#reset()
 	 */
 	@Override

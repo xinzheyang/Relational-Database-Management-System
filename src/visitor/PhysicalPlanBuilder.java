@@ -57,6 +57,10 @@ public class PhysicalPlanBuilder {
 		operator = projectOperator;
 	}
 	
+	/**
+	 * @param op the logicalJoinOperator
+	 * it consults the config and determines which physical Join operators to construct
+	 */
 	public void visit(LogicalJoinOperator op) {
 		op.getLeftChild().accept(this);
 		Operator left = operator;
@@ -119,6 +123,9 @@ public class PhysicalPlanBuilder {
 		
 	}
 
+	/**
+	 * @return operator
+	 */
 	public Operator getOperator() {
 		return operator;
 	}
