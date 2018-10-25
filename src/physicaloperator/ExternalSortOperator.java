@@ -20,7 +20,7 @@ import database.TupleWriter;
 
 /**
  * @author xinzheyang
- * An implementation of SortOperator
+ * An implementation of SortOperator that uses external merge sort algorithm
  */
 public class ExternalSortOperator extends SortOperator {
 	private int bufSize;
@@ -148,7 +148,13 @@ public class ExternalSortOperator extends SortOperator {
 		return res;
 	}
 	
-//	private int passZeroHelper(int numRun) {
+//	/**
+//	 * @param numRun the counter of runs
+//	 * @return 0 if there are still files to be read and processed, -1 otherwise
+//	 * this method sorts the a run that fits the buffer pages
+//	 * Human readable version, for debugging purposes
+//	 */
+//	private int passZeroHelperHuman(int numRun) {
 //		int res = 0;
 //		BufferedWriter bw = null;
 //		try {

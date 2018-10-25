@@ -13,7 +13,8 @@ import physicaloperator.*;
 
 /**
  * @author xinzheyang
- *
+ * A physical plan builder that uses visitor pattern to
+ * transform a logical operator into a physical operator
  */
 public class PhysicalPlanBuilder {
 	Operator operator;

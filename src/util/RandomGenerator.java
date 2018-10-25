@@ -11,19 +11,26 @@ import database.TupleWriter;
 
 /**
  * @author xinzheyang
- *
+ * A random byte table generator
  */
 public class RandomGenerator {
 	
 	private String path;
 	/**
-	 * 
+	 * @param dir the directory to store the generated binary file
 	 */
 	public RandomGenerator(String dir) {
 		path = dir;
 	}
 	
 	
+	/**
+	 * @param fname fname to store the binary file
+	 * @param nRow number of rows of the table
+	 * @param nCol number of columns of the table
+	 * @param lo the lower bound of random generator
+	 * @param hi the upper bound of random generator
+	 */
 	public void generate(String fname, int nRow, int nCol, int lo, int hi) {
 		TupleWriter tw = new TupleWriter(path + File.separator + fname, nCol);
 		tw.writeMetaData();
