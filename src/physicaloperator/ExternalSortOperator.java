@@ -200,7 +200,7 @@ public class ExternalSortOperator extends SortOperator {
 
 	@Override
 	public void reset(int index) {
-		sortedRun.reset(0);
+		sortedRun.reset(index);
 		
 	}
 }
