@@ -10,6 +10,7 @@ according to the algorithm described in the textbook.
   - Tuple Comparison: we implemented a compareByCondition(Tuple tl, Tuple tr) helper method to compare tuples with the join condition. We first extract the column values in order of the equality conjunct by an instance of the visitor/EquiConjunctVisitor.java, and then compare the values in this order until one pair of values differ or the comparison finds that all column values are equal.
 
 -Our BNLJ operator is located in physicaloperator/BNLJoinOperator.java. It extends the abstract JoinOperator and overrides the constructor. We follow the instruction on the writeup for the Block-Nested Loop Join. Taking in a parameter as buffer size in pages, we calculate the number of tuples on the buffer and take in left tuples by calling getNextTuple on the left operator. Then we just take in right Tuple and combine it with the tuples in the buffer one by one until all the tuples in the buffer are joined. Then we get the next right tuple and join it with the tuples in the buffer again. We update the buffer to receive a new bunch of tuples if the right tuples are used up. We also reset the right tuples to the beginning as well. Then we repeat the process above.
+
 Acknowledgement: Raghu Ramakrishnan, Johannes Gehrke; Database Management Systems
 
 ==================== Project 2 checkpoint ====================
