@@ -1,3 +1,8 @@
+==================== Project 2 main submission ====================
+The top-level class is Main.java in the database package
+
+
+
 ==================== Project 2 checkpoint ====================
 The top-level class is Main.java in the database package
 
