@@ -1,6 +1,8 @@
 ==================== Project 2 main submission ====================
 The top-level class is Main.java in the database package
 
+We implemented ExternalSortOperator.java which inherits an abstract SortOperator.java
+according to the algorithm descibed in the textbook.
 
 
 ==================== Project 2 checkpoint ====================
