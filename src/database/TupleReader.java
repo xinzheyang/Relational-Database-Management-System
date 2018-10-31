@@ -22,6 +22,8 @@ public class TupleReader {
 	int numTuples;
 	int[] colValues;
 	int maxTuples;
+	int pageIndex=0;
+//	int tupleIndex=0;
 
 
 	/**Construct the TupleReader object
@@ -33,7 +35,7 @@ public class TupleReader {
 			channel = fin.getChannel();
 			bf = ByteBuffer.allocate(PAGE_SIZE);
 			channel.read(bf);
-			index = 1;
+//			index = 1;
 			numAttr = bf.getInt(0);
 //			System.out.println("numAttr" + numAttr);
 			numTuples = bf.getInt(4);
@@ -89,7 +91,8 @@ public class TupleReader {
 			}
 			else {
 				numTuples = bf.getInt(4);
-				index=1;
+				index=0;
+				pageIndex++;
 				return 1;
 			}
 		} catch (IOException e) {
@@ -115,13 +118,13 @@ public class TupleReader {
 	 */
 	public Tuple getNextTuple() {
 		//if there is any more tuple on the current page
-		if(index > numTuples) {
+		if(index >= numTuples) {
 //			System.out.println("enter the loop");
 			if(getNextPage() < 0) {return null;}
 		}
 		int i=0;
 		while(i<numAttr) {
-			colValues[i] = bf.getInt(8+4*(index-1)*numAttr+i*4);
+			colValues[i] = bf.getInt(8+4*(index)*numAttr+i*4);
 //			System.out.println(colValues[i]);
 			i++;
 		}
@@ -129,5 +132,20 @@ public class TupleReader {
 		index++;
 //		System.out.println("index" + index);
 		return new Tuple(colValues.clone());
+	}
+	
+	/**Grab the next tuple from the file
+	 * @return the next Tuple object starting at the current pointer
+	 */
+	public int[] getColNext(int colIndex) {
+		//if there is any more tuple on the current page
+		if(index >= numTuples) {
+//			System.out.println("enter the loop");
+			if(getNextPage() < 0) {return null;}
+		}
+		int value = bf.getInt(8+4*(index)*numAttr+colIndex*4);
+//		index++;
+//		System.out.println("index" + index);
+		return new int[] {value, pageIndex,index++};
 	}
 }
