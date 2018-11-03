@@ -36,7 +36,7 @@ public class IndexNode {
 		return min;
 	}
 	
-	public List<Integer> getAddress() {
+	public List<Integer> getChildAddresses() {
 		return addresses;
 	}
 	
