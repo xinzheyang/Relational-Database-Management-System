@@ -85,21 +85,38 @@ public class TreeSerializer {
 	public void serialize(LeafNode ln) throws IOException {
 		buffer.clear();
 		buffer.putInt(0);
-		List<DataEntry> entries = ln.getEntries();
-		buffer.putInt(entries.size());
 		
-		for (DataEntry e: entries) {
+		List<Integer> keys = ln.getKeys();
+		List<List<int[]>> listOfRids = ln.getListOfRids();
+		int numOfEntries = keys.size();
+		buffer.putInt(numOfEntries);
+		
+		for (int i = 0; i < numOfEntries; i++) {
 			
-			buffer.putInt(e.getKey());
-			List<int[]> rids = e.getRids(); 
+			buffer.putInt(keys.get(i));
+			List<int[]> rids = listOfRids.get(i); 
 			buffer.putInt(rids.size());
 			
-			for (int[] rid: rids) {
+			for (int[] rid: listOfRids.get(i)) {
 				buffer.putInt(rid[0]);
 				buffer.putInt(rid[1]);
 			}
-			
 		}
+//		List<DataEntry> entries = ln.getEntries();
+//		buffer.putInt(entries.size());
+//		
+//		for (DataEntry e: entries) {
+//			
+//			buffer.putInt(e.getKey());
+//			List<int[]> rids = e.getRids(); 
+//			buffer.putInt(rids.size());
+//			
+//			for (int[] rid: rids) {
+//				buffer.putInt(rid[0]);
+//				buffer.putInt(rid[1]);
+//			}
+			
+//		}
 		
 		buffer.position(0);
 		fc.write(buffer);
