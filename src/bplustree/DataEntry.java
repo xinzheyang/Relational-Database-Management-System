@@ -40,5 +40,8 @@ public class DataEntry {
 	public int getKey() {
 		return key;
 	}
-
+	
+	public List<int[]> getRids() {
+		return rid;
+	}
 }
