@@ -6,6 +6,8 @@ package database;
 import java.io.*;
 import java.util.*;
 
+import bplustree.BPlusTree;
+
 /**
  * The catalog can keep track of information such as
  * where a file for a given table is located, what the schema of different tables is, 
@@ -15,7 +17,8 @@ import java.util.*;
  */
 public class DBCatalog {
 	
-	private static HashMap<String, String[]> tableMap; //
+	private static HashMap<String, String[]> schemaMap; //
+	private static HashMap<String, String> treeIndexMap;
 	private static String locDir;
 	private static String outputDir; //path to the directory where the output files to be written are
 	private static String tempDir; //path to the directory where the temp files for external sort to be written are
@@ -28,7 +31,8 @@ public class DBCatalog {
 	 */
 	private DBCatalog() {
 		//key=table name, value=col names array
-		tableMap = new HashMap<String, String[]>();
+		schemaMap = new HashMap<String, String[]>();
+		treeIndexMap = new HashMap<String, String>();
 	}
 
 	/** Static get instance method, gets the singleton instance
@@ -47,7 +51,7 @@ public class DBCatalog {
 	 * @return an array of all column names of the table.
 	 */
 	public static String[] getTableColumns(String tableName) {
-		return tableMap.get(tableName);
+		return schemaMap.get(tableName);
 	}
 	
 	
@@ -57,6 +61,10 @@ public class DBCatalog {
 	 */
 	public static String getTableLoc(String tableName) {
 		return locDir + File.separator + tableName;
+	}
+	
+	public static String getIndexKey(String tableName) {
+		return treeIndexMap.get(tableName);
 	}
 	
 	public static String getOutputDir() {
@@ -134,19 +142,33 @@ public class DBCatalog {
 	
 	/** Parses in schema information by reading the schema file in the directory path specified.
 	 * Link table present in schema to where the file for the table is located.
+	 * Added feature for p3 to parse the index_info.txt as well.
 	 * @param dir: path to the /db directory
 	 */
-	public void parseSchema(String dir) throws IOException {
+	public void parseDbDir(String dir) throws IOException {
 		
 		locDir = dir + File.separator + "data";
 		BufferedReader schemaIn = new BufferedReader(new FileReader(dir + File.separator + "schema.txt"));
 		String line;
 		while ((line = schemaIn.readLine()) != null) {
-			String[] tableInfo = line.split(" ");
-			tableMap.put(tableInfo[0], Arrays.copyOfRange(tableInfo, 1, tableInfo.length)); //key=table name, value=col names array
+			String[] schemaInfo = line.split(" ");
+			schemaMap.put(schemaInfo[0], Arrays.copyOfRange(schemaInfo, 1, schemaInfo.length)); //key=table name, value=col names array
 //			locMap.put(tableInfo[0], dir + File.separator + "data" + File.separator)
 		}
 		schemaIn.close();
+		
+		String indexesOut = dir + File.separator + "indexes";
+		BufferedReader indexInfoIn = new BufferedReader(new FileReader(dir + File.separator + "index_info.txt"));
+		while (((line = indexInfoIn.readLine()) != null)) {
+			String[] indexInfo = line.split(" ");
+			treeIndexMap.put(indexInfo[0], indexInfo[1]);
+			assert indexInfo.length == 4;
+			String curIndexOut = indexesOut + File.separator + indexInfo[0] + "." + indexInfo[1];
+			BPlusTree curTree = new BPlusTree(getTableLoc(indexInfo[0]), curIndexOut, "1".equals(indexInfo[2]), Integer.parseInt(indexInfo[3]));
+			curTree.scanAndConstructAll();
+			//PLACEHOLDER: set up indices by calling BPlusTree methods
+		}
+		indexInfoIn.close();
 	}
 
 }

@@ -27,6 +27,11 @@ public class TreeSerializer {
 		buffer = ByteBuffer.allocate(PAGE_SIZE);
 	}
 	
+	public void close() throws IOException {
+		fc.close();
+		fout.close();
+	}
+	
 	/** Serializes the header page of the tree, in order of:
 	 *  - the address of the root, stored at offset 0 on the header page
 	 *  - the number of leaves in the tree, at offset 4
