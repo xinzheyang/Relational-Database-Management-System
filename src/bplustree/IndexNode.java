@@ -38,7 +38,6 @@ public class IndexNode extends Node {
 		for (int i = 1; i < numOfChildren; i++) {
 			this.keys.add(children.get(i).getMin());
 		}
-		
 	}
 	
 //	public 

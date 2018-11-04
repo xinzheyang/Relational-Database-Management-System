@@ -52,10 +52,29 @@ public class TupleReader {
 	 * and move the pointer to the beginning of that tuple
 	 * @param index the index of the tuple that we want from the table
 	 */
+	public void reset(int pid, int tid) {
+//		int pageIndex = index/maxTuples;
+		try {
+			channel.position(pid*PAGE_SIZE);
+			getNextPage();
+			int i=0;
+			while(i<tid) {
+				getNextTuple();
+				i++;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**Given the index of the tuple, direct FileChannel to the page it is in
+	 * and move the pointer to the beginning of that tuple
+	 * @param index the index of the tuple that we want from the table
+	 */
 	public void reset(int index) {
 		int pageIndex = index/maxTuples;
 		try {
-			channel.position(pageIndex*4096);
+			channel.position(pageIndex*PAGE_SIZE);
 			getNextPage();
 			int i=0;
 			while(i<index % maxTuples) {
@@ -144,7 +163,7 @@ public class TupleReader {
 			if(getNextPage() < 0) {return null;}
 		}
 		int value = bf.getInt(8+4*(index)*numAttr+colIndex*4);
-//		index++;
+		index++;
 //		System.out.println("index" + index);
 		return new int[] {value, pageIndex,index++};
 	}
