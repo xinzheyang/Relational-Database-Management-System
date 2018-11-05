@@ -18,9 +18,10 @@ public class Main {
 	/** Runs the program with given args, args[0] is the specified input directory and 
 	 * args[1] is the directory we write the output queries to.
 	 * @param args
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) {
-		try{
+	public static void main(String[] args) throws IOException {
+//		try{
 			BufferedReader interpConfigIn = new BufferedReader(new FileReader(args[0]));
 //			String line;
 			String dirIn = interpConfigIn.readLine();
@@ -42,9 +43,9 @@ public class Main {
 			}
 			interpConfigIn.close();
 			
-		} catch(Exception e) {
-			System.out.println("An error occurred in main()");
-		}
+//		} catch(Exception e) {
+//			System.out.println("An error occurred in main()");
+//		}
 	}
 
 }

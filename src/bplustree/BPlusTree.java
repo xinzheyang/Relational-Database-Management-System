@@ -37,6 +37,7 @@ public class BPlusTree {
 			ClusteredIndexSortOperator sort = new ClusteredIndexSortOperator(scan, DBCatalog.getIndexKey(tableIn));
 			sort.dump(fileName);
 		}
+		this.order = order;
 	}
 
 	public void scanAndConstructAll() throws IOException {
@@ -99,7 +100,9 @@ public class BPlusTree {
 		}
 
 		buildLeafNodes(keyValues, rids);
+//		System.out.println("finished leaf nodes");
 		buildIndexNodes();
+		serializer.serializeHeader(counter, keyValues.size(), order);
 		serializer.close();
 		//		return rids;
 	}
@@ -158,6 +161,7 @@ public class BPlusTree {
 		//		counter++;
 		List<Node> curr = new ArrayList<>();
 		List<Node> prev = leafNodes;
+//		System.out.println(leafNodes.size());
 
 		if(leafNodes.size() == 1) {
 			IndexNode node= new IndexNode(leafNodes, counter);

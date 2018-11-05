@@ -175,7 +175,7 @@ public class DBCatalog {
 			treeIndexMap.put(indexInfo[0], new String[]{indexInfo[1], indexInfo[2]});
 			assert indexInfo.length == 4;
 			String curIndexOut = indexesOut + File.separator + indexInfo[0] + "." + indexInfo[1];
-			BPlusTree curTree = new BPlusTree(getTableLoc(indexInfo[0]), curIndexOut, "1".equals(indexInfo[2]), Integer.parseInt(indexInfo[3]));
+			BPlusTree curTree = new BPlusTree(indexInfo[0], curIndexOut, "1".equals(indexInfo[2]), Integer.parseInt(indexInfo[3]));
 			curTree.scanAndConstructAll();
 			//PLACEHOLDER: set up indices by calling BPlusTree methods
 		}

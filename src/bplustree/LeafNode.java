@@ -22,7 +22,7 @@ public class LeafNode extends Node {
 	
 	public LeafNode(List<Integer> keys, List<List<int[]>> listOfRids, int address) {
 		super(keys, address);
-		assert keys.size() == this.listOfRids.size();
+		assert keys.size() == listOfRids.size();
 		this.listOfRids = listOfRids;
 	}
 	
