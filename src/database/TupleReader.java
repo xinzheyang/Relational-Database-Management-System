@@ -96,7 +96,6 @@ public class TupleReader {
 //			index=1;
 //			return 1;
 //		} catch (IOException e) {
-//			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //			return -1;
 //		}

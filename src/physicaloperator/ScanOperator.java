@@ -84,11 +84,9 @@ public class ScanOperator extends Operator {
 //				return new Tuple(values);
 //			}
 //		} catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
 //			System.out.println("fail to read table file");
 //			e.printStackTrace();
 //		} catch (IOException e) {
-//			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
 //		return null;
@@ -102,11 +100,9 @@ public class ScanOperator extends Operator {
 	 */
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
 //		try {
 //			f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tb)));
 //		} catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
 		reader.reset(0);

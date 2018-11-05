@@ -43,7 +43,6 @@ public class DupElimOperator extends Operator {
 	 */
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
 		childOp.reset();
 
 	}

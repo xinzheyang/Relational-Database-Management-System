@@ -38,7 +38,6 @@ public class TupleWriter {
 			numAttribs = op.getColumnIndexMap().size();
 		    numTuples = 0;
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -56,7 +55,6 @@ public class TupleWriter {
 			numAttribs = nCols;
 		    numTuples = 0;
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -70,7 +68,6 @@ public class TupleWriter {
 			fc.close();
 			fout.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
