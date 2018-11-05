@@ -3,7 +3,9 @@
  */
 package database;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 
 /**
@@ -19,18 +21,26 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		try{
-			
-			String dirIn = args[0];
-			String dirOut = args[1];
-			String dirTemp = args[2];
+			BufferedReader interpConfigIn = new BufferedReader(new FileReader(args[0]));
+//			String line;
+			String dirIn = interpConfigIn.readLine();
+			String dirOut = interpConfigIn.readLine();
+			String dirTemp = interpConfigIn.readLine();
 			String dbDir = dirIn + File.separator + "db";
 			String qFile = dirIn + File.separator + "queries.sql";
 			String configFile = dirIn + File.separator + "plan_builder_config.txt";
-			DBCatalog.getCatalog().parseDbDir(dbDir); //parse schema
-			DBCatalog.getCatalog().parseConfig(configFile); //parse physical plan configuration
-			QueryParser queryParser = new QueryParser(qFile, dirOut);
-			DBCatalog.setTempDir(dirTemp);
-			queryParser.parse();
+			DBCatalog.getCatalog().parseSchema(dbDir); //parse schema
+			if (interpConfigIn.readLine().equals("1")) { //should build indices
+				DBCatalog.buildIndices(dbDir);
+			}
+			if (interpConfigIn.readLine().equals("1")) { //should evaluate SQL queries
+				DBCatalog.getCatalog().parseConfig(configFile); //parse physical plan configuration
+				QueryParser queryParser = new QueryParser(qFile, dirOut);
+				DBCatalog.setTempDir(dirTemp);
+				queryParser.parse();
+				//TODO: change PPB to use index scan as well if indices built
+			}
+			interpConfigIn.close();
 			
 		} catch(Exception e) {
 			System.out.println("An error occurred in main()");

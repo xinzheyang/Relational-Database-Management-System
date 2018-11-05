@@ -18,7 +18,7 @@ import bplustree.BPlusTree;
 public class DBCatalog {
 	
 	private static HashMap<String, String[]> schemaMap; //
-	private static HashMap<String, String> treeIndexMap;
+	private static HashMap<String, String[]> treeIndexMap;
 	private static String locDir;
 	private static String outputDir; //path to the directory where the output files to be written are
 	private static String tempDir; //path to the directory where the temp files for external sort to be written are
@@ -26,6 +26,7 @@ public class DBCatalog {
 	private static DBCatalog catalog = null; //singleton object for global reference
 	private static String[] joinMethod;
 	private static String[] sortMethod;
+	private static boolean useIndex;
 	/* A private Constructor prevents any other class
 	 * from instantiating a DBCatalog object.
 	 */
@@ -64,7 +65,11 @@ public class DBCatalog {
 	}
 	
 	public static String getIndexKey(String tableName) {
-		return treeIndexMap.get(tableName);
+		return treeIndexMap.get(tableName)[0];
+	}
+	
+	public static boolean hasClusteredIndex(String tableName) {
+		return "1".equals(treeIndexMap.get(tableName)[1]);
 	}
 	
 	public static String getOutputDir() {
@@ -142,10 +147,9 @@ public class DBCatalog {
 	
 	/** Parses in schema information by reading the schema file in the directory path specified.
 	 * Link table present in schema to where the file for the table is located.
-	 * Added feature for p3 to parse the index_info.txt as well.
 	 * @param dir: path to the /db directory
 	 */
-	public void parseDbDir(String dir) throws IOException {
+	public void parseSchema(String dir) throws IOException {
 		
 		locDir = dir + File.separator + "data";
 		BufferedReader schemaIn = new BufferedReader(new FileReader(dir + File.separator + "schema.txt"));
@@ -157,11 +161,16 @@ public class DBCatalog {
 		}
 		schemaIn.close();
 		
+	}
+	
+	public static void buildIndices(String dir) throws IOException {
+		
 		String indexesOut = dir + File.separator + "indexes";
 		BufferedReader indexInfoIn = new BufferedReader(new FileReader(dir + File.separator + "index_info.txt"));
+		String line;
 		while (((line = indexInfoIn.readLine()) != null)) {
 			String[] indexInfo = line.split(" ");
-			treeIndexMap.put(indexInfo[0], indexInfo[1]);
+			treeIndexMap.put(indexInfo[0], new String[]{indexInfo[1], indexInfo[2]});
 			assert indexInfo.length == 4;
 			String curIndexOut = indexesOut + File.separator + indexInfo[0] + "." + indexInfo[1];
 			BPlusTree curTree = new BPlusTree(getTableLoc(indexInfo[0]), curIndexOut, "1".equals(indexInfo[2]), Integer.parseInt(indexInfo[3]));
@@ -169,6 +178,8 @@ public class DBCatalog {
 			//PLACEHOLDER: set up indices by calling BPlusTree methods
 		}
 		indexInfoIn.close();
+		
+		useIndex = true;
 	}
 
 }
