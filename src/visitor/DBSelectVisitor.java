@@ -65,7 +65,7 @@ public class DBSelectVisitor implements SelectVisitor {
 		LogicalSelectOperator selectOp = null;
 		if (selectMap != null && selectMap.size() > 0) {
 			String tableName = scanOperator.getTableName();
-			if (scanOperator.getAlias() != "") {
+			if (scanOperator.getAlias() != null) {
 				tableName = scanOperator.getAlias();
 			}
 			if (selectMap.containsKey(tableName)) {

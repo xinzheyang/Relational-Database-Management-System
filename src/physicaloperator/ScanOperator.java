@@ -43,19 +43,20 @@ public class ScanOperator extends Operator {
 	 */
 	public ScanOperator(String tableName, String alias) throws FileNotFoundException {
 		tb = tableName;
-		if (alias == null || alias.equals("")) {
-			this.alias = "";
-		} else {
-			this.alias = alias;
-		}
+//		if (alias == null || alias.equals("")) {
+//			this.alias = "";
+//		} else {
+//			this.alias = alias;
+//		}
+		this.alias = alias;
 //		f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tableName)));
 		reader = new TupleReader(DBCatalog.getTableLoc(tb));
 		columnIndexMap = new HashMap<String, Integer>();
 		String[] schemaColNames = DBCatalog.getTableColumns(tableName);
 		for(int i = 0; i < schemaColNames.length; i++) {
-			columnIndexMap.put((alias + "." + schemaColNames[i]), i);
+			String ref = this.alias == null ? tb : this.alias;
+			columnIndexMap.put((ref + "." + schemaColNames[i]), i);
 		}
-
 	}
 
 
