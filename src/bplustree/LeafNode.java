@@ -15,10 +15,10 @@ public class LeafNode extends Node {
 	/**
 	 * 
 	 */
-	public LeafNode(List<DataEntry> entries) {
-		super();
-//		dataEntries = entries;
-	}
+//	public LeafNode(List<DataEntry> entries) {
+//		super();
+////		dataEntries = entries;
+//	}
 	
 	public LeafNode(List<Integer> keys, List<List<int[]>> listOfRids, int address) {
 		super(keys, address);
