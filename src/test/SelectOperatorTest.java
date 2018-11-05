@@ -3,9 +3,6 @@
  */
 package test;
 
-import static org.junit.Assert.*;
-
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.junit.Test;
@@ -31,7 +28,7 @@ public class SelectOperatorTest {
 	@Test
 	public void test() throws IOException {
 		initializeCatalog();
-		ScanOperator scan1 = new ScanOperator("Sailors");
+		ScanOperator scan1 = new ScanOperator("Sailors","");
 		GreaterThan gt0 = new GreaterThan();
 		gt0.setLeftExpression(new LongValue("2"));
 		gt0.setRightExpression(new LongValue("3"));
