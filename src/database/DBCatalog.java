@@ -33,7 +33,7 @@ public class DBCatalog {
 	private DBCatalog() {
 		//key=table name, value=col names array
 		schemaMap = new HashMap<String, String[]>();
-		treeIndexMap = new HashMap<String, String>();
+		treeIndexMap = new HashMap<String, String[]>();
 	}
 
 	/** Static get instance method, gets the singleton instance
@@ -120,6 +120,9 @@ public class DBCatalog {
 		return Integer.parseInt(sortMethod[1]);
 	}
 	
+	public static boolean useIndex() {
+		return useIndex;
+	}
 	/** Parses the physical plan configuration file and sets the join and sort methods 
 	 * for all queries that will be processed.
 	 * @param dir: path to the physical plan configuration file
@@ -179,7 +182,7 @@ public class DBCatalog {
 		}
 		indexInfoIn.close();
 		
-		useIndex = true;
+		useIndex = true; //set use index to true whenever this function is called and indices are successfully built.
 	}
 
 }
