@@ -63,6 +63,11 @@ public class IndexScanOperator extends ScanOperator {
 		}
 	}
 
+	/**
+	 * @param ind, the index of a leaf node
+	 * @return the (pid, tid) of the first key that satisfies the constraint 
+	 * @throws IOException
+	 */
 	private int[] findFirstKeyInLeaf(int ind) throws IOException {
 		channel.position(currLeaf * PAGE_SIZE);
 		buffer.clear();
@@ -84,6 +89,12 @@ public class IndexScanOperator extends ScanOperator {
 		return null;
 	}
 
+	/**
+	 * @param nodeInd, the leaf node index
+	 * The method reads all the satisfying rids in the leaf node and
+	 * updates the temperory Queue tempRids
+	 * @throws IOException
+	 */
 	private void readLeaf(int nodeInd) throws IOException {
 		channel.position(nodeInd * PAGE_SIZE);
 		buffer.clear();
@@ -110,6 +121,9 @@ public class IndexScanOperator extends ScanOperator {
 		}
 	}
 
+	/** deserializes the head node, i.e. the first node in the B+ tree index
+	 * @throws IOException
+	 */
 	private void deserializeHeader() throws IOException {
 		channel.position(0);
 		buffer.clear();
@@ -119,6 +133,11 @@ public class IndexScanOperator extends ScanOperator {
 		order = buffer.getInt();
 	}
 
+	/**
+	 * @param ind, the index node to start searching
+	 * @return the leaf node index that has the first key that satisfies the constraint
+	 * @throws IOException
+	 */
 	private int findLowkey(int ind) throws IOException {
 		channel.position(ind * PAGE_SIZE);
 		buffer.clear();
