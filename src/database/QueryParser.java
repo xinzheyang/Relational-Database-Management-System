@@ -74,8 +74,8 @@ public class QueryParser {
 							file.createNewFile();
 						}
 					} else {
-						operator.dump(output + File.separator + "query" + localCount);
-//						operator.dumpHumanReadable(output + File.separator + "query" + localCount);
+//						operator.dump(output + File.separator + "query" + localCount);
+						operator.dumpHumanReadable(output + File.separator + "query" + localCount);
 					}
 				} catch (Exception e2) {
 					System.err.println("Exception occurred during dumping");

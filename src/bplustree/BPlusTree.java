@@ -8,6 +8,7 @@ import physicaloperator.ScanOperator;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -38,6 +39,9 @@ public class BPlusTree {
 			sort.dump(fileName);
 		}
 		this.order = order;
+		String key = DBCatalog.getIndexKey(tableIn);
+		colIndex = Arrays.asList(DBCatalog.getTableColumns(tableIn)).indexOf(key);
+		
 	}
 
 	public void scanAndConstructAll() throws IOException {
@@ -98,7 +102,8 @@ public class BPlusTree {
 			//			}
 			//		});
 		}
-
+		System.out.println(keyValues);
+//		System.out.println(rids.size());
 		buildLeafNodes(keyValues, rids);
 //		System.out.println("finished leaf nodes");
 		buildIndexNodes();
