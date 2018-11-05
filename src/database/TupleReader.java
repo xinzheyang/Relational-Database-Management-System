@@ -162,7 +162,7 @@ public class TupleReader {
 			if(getNextPage() < 0) {return null;}
 		}
 		int value = bf.getInt(8+4*(index)*numAttr+colIndex*4);
-		index++;
+//		index++;
 //		System.out.println("index" + index);
 		return new int[] {value, pageIndex,index++};
 	}
