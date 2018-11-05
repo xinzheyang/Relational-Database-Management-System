@@ -169,7 +169,7 @@ public class BPlusTree {
 		System.out.println(prev.size());
 		System.out.println(order);
 
-		if(leafNodes.size() == 1) {
+		if(leafNodes.size() == 1) { 
 			IndexNode node= new IndexNode(leafNodes, counter);
 			this.serializer.serialize(node);//serialize
 		}
