@@ -121,7 +121,6 @@ public class PhysicalPlanBuilder {
 			scanOperator = new ScanOperator(op.getTableName(), op.getAlias());
 			operator = scanOperator;
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

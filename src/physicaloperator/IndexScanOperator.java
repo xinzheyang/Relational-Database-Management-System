@@ -43,6 +43,7 @@ public class IndexScanOperator extends ScanOperator {
 	public IndexScanOperator(String tablename, String alias, String indexColumn, int cluster, int low, int high)
 			throws IOException {
 		super(tablename, alias);
+		//TODO: initialize indexPath
 		lowKey = low;
 		highKey = high;
 		indexCol = indexColumn;

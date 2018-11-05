@@ -20,7 +20,6 @@ public class DataEntry {
 	 * 
 	 */
 	public DataEntry(int k, List<int[]> r) {
-		// TODO Auto-generated constructor stub
 		key = k;
 		rid = r;
 		rid.sort(new Comparator<int []>() {

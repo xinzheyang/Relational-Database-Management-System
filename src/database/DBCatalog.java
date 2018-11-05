@@ -143,7 +143,6 @@ public class DBCatalog {
 			configIn.close();
 		} catch (Exception e) {
 			System.out.println("An error occurred in processing the Physical Plan Configuration file.");
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
