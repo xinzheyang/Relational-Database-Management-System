@@ -33,9 +33,9 @@ public class SMJoinOperator extends JoinOperator {
 		startOfCurrPartition = tRight;
 	}
 
-	public SMJoinOperator(Operator left, Operator right) {
-		this(left, right, null);
-	}
+//	public SMJoinOperator(Operator left, Operator right) {
+//		this(left, right, null);
+//	}
 
 	/** Compare two tuples by the order of the equity conjunct condition.
 	 * @param tl left tuple to be compared

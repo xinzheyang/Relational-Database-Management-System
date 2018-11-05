@@ -153,13 +153,17 @@ public class DBSelectVisitor implements SelectVisitor {
 
 			String fromItemReference = fromItem.getAlias() != null ? fromItem.getAlias() : fromItem.toString();
 			String fromRightItemReference = firstRightItem.getAlias() != null ? firstRightItem.getAlias() : firstRightItem.toString();
-			if (parseConjunctExpVisitor != null && 
-					parseConjunctExpVisitor.getJoinCondition(fromItemReference, fromRightItemReference) != null) {
-				Expression condition = parseConjunctExpVisitor.getJoinCondition(fromItemReference, fromRightItemReference);
-				left = new LogicalJoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem), condition);
-			} else {
-				left = new LogicalJoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem));
-			}
+			
+			Expression conditionFirst = parseConjunctExpVisitor != null ? 
+					parseConjunctExpVisitor.getJoinCondition(fromItemReference, fromRightItemReference) : null;
+			left = new LogicalJoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem), conditionFirst);
+//			if (parseConjunctExpVisitor != null && 
+//					parseConjunctExpVisitor.getJoinCondition(fromItemReference, fromRightItemReference) != null) {
+//				Expression condition = parseConjunctExpVisitor.getJoinCondition(fromItemReference, fromRightItemReference);
+//				left = new LogicalJoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem), condition);
+//			} else {
+//				left = new LogicalJoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem));
+//			}
 
 			leftTable.add(fromItem);
 			leftTable.add(firstRightItem);
@@ -171,16 +175,21 @@ public class DBSelectVisitor implements SelectVisitor {
 				for (FromItem table:leftTable) {
 					String tableItemReference = table.getAlias() != null ? table.getAlias() : table.toString();
 					String rightItemReference = rightItem.getAlias() != null ? rightItem.getAlias() : rightItem.toString();
-					if (parseConjunctExpVisitor != null && 
-							parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference) != null) {
-						Expression tempCondition = parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference);
+					Expression tempCondition = parseConjunctExpVisitor != null ? 
+							parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference) : null;
+					if (tempCondition != null)
 						condition = condition == null ? tempCondition: new AndExpression(condition, tempCondition);
-
-					}
+//					if (parseConjunctExpVisitor != null && 
+//							parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference) != null) {
+//						Expression tempCondition = parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference);
+//						condition = condition == null ? tempCondition: new AndExpression(condition, tempCondition);
+//
+//					}
 				}
 				leftTable.add(rightItem);
-				left = condition == null ? new LogicalJoinOperator(left, newScanSelect) 
-						: new LogicalJoinOperator(left, newScanSelect, condition);
+				left = new LogicalJoinOperator(left, newScanSelect, condition);
+//				left = condition == null ? new LogicalJoinOperator(left, newScanSelect) 
+//						: new LogicalJoinOperator(left, newScanSelect, condition);
 			}
 			joinOperator = left;
 		}

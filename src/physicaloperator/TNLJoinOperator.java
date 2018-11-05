@@ -44,14 +44,14 @@ public class TNLJoinOperator extends JoinOperator {
 //		visitor = new EvaluateExpVisitor();
 	}
 	
-	/**
-	 * Initializes the Join operator without condition given
-	 * @param left the left operator to be joined
-	 * @param right the right operator to be joined
-	 */
-	public TNLJoinOperator(Operator left, Operator right) {
-		this(left, right, null);
-	}
+//	/**
+//	 * Initializes the Join operator without condition given
+//	 * @param left the left operator to be joined
+//	 * @param right the right operator to be joined
+//	 */
+//	public TNLJoinOperator(Operator left, Operator right) {
+//		this(left, right, null);
+//	}
 	/* (non-Javadoc)
 	 * @see database.Operator#getNextTuple()
 	 */

@@ -18,10 +18,10 @@ public class LogicalJoinOperator extends LogicalOperator {
 	/**
 	 * 
 	 */
-	public LogicalJoinOperator(LogicalOperator left, LogicalOperator right) {
-		leftChild = left;
-		rightChild = right;
-	}
+//	public LogicalJoinOperator(LogicalOperator left, LogicalOperator right) {
+//		leftChild = left;
+//		rightChild = right;
+//	}
 	
 	public LogicalJoinOperator(LogicalOperator left, LogicalOperator right, Expression condition) {
 		leftChild = left;

@@ -37,14 +37,14 @@ public class BNLJoinOperator extends JoinOperator {
 		rightTuple = rightChild.getNextTuple();
 	}
 	
-	/**
-	 * Initializes the BNLJoin operator without condition given
-	 * @param left the left operator to be joined
-	 * @param right the right operator to be joined
-	 */
-	public BNLJoinOperator(Operator left, Operator right, int size) {
-		this(left, right, null, size);
-	}
+//	/**
+//	 * Initializes the BNLJoin operator without condition given
+//	 * @param left the left operator to be joined
+//	 * @param right the right operator to be joined
+//	 */
+//	public BNLJoinOperator(Operator left, Operator right, int size) {
+//		this(left, right, null, size);
+//	}
 	
 	/**
 	 * Clear the previous elements in the buffer and fill it with new tuples from the 
