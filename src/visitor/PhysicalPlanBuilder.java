@@ -114,8 +114,7 @@ public class PhysicalPlanBuilder {
 	public void visit(LogicalScanOperator op) {
 		ScanOperator scanOperator;
 		try {
-			scanOperator = op.getAlias() == "" ?
-					new ScanOperator(op.getTableName()) : new ScanOperator(op.getTableName(), op.getAlias());
+			scanOperator = new ScanOperator(op.getTableName(), op.getAlias());
 			operator = scanOperator;
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
