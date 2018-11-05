@@ -43,12 +43,7 @@ public class DBFromItemVisitor implements FromItemVisitor {
 	public void visit(Table tableName) {
 		try {
 			LogicalScanOperator scanOperator;
-			if (tableName.getAlias() != null) {
-				scanOperator = new LogicalScanOperator(tableName.getName(), tableName.getAlias());
-			}
-			else {
-				scanOperator = new LogicalScanOperator(tableName.getName());
-			}
+			scanOperator = new LogicalScanOperator(tableName.getName(), tableName.getAlias());
 			operator = scanOperator;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

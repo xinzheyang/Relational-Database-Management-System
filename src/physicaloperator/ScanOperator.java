@@ -23,35 +23,15 @@ import database.TupleReader;
 
 public class ScanOperator extends Operator {
 
-	private String tb;
-	private String alias;
-	private TupleReader reader;
-//	private BufferedReader f;
-//	private HashMap<String, Integer> columnIndexMap;
-
+	protected String tb;
+	protected String alias;
+	protected TupleReader reader;
+	
 	/* Upon initialization, opens up a file scan on the appropriate data file
 	 * data file.
 	 */
 
 
-
-	/**
-	 * Upon initialization, opens up a file scan on the appropriate data file
-	 * @param tableName the name of the table we want to scan from
-	 * @throws FileNotFoundException
-	 */
-	public ScanOperator(String tableName) throws FileNotFoundException {
-		tb = tableName;
-		alias = "";
-		reader = new TupleReader(DBCatalog.getTableLoc(tb));
-//		f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tb)));
-		columnIndexMap = new HashMap<String, Integer>();
-		String[] schemaColNames = DBCatalog.getTableColumns(tb);
-		for(int i = 0; i < schemaColNames.length; i++) {
-			columnIndexMap.put((tb + "." + schemaColNames[i]), i);
-		}
-
-	}
 	/* Overloading constructor that enables aliases.
 	 */
 
@@ -63,7 +43,11 @@ public class ScanOperator extends Operator {
 	 */
 	public ScanOperator(String tableName, String alias) throws FileNotFoundException {
 		tb = tableName;
-		this.alias = alias;
+		if (alias == null || alias.equals("")) {
+			this.alias = "";
+		} else {
+			this.alias = alias;
+		}
 //		f = new BufferedReader(new FileReader(DBCatalog.getTableLoc(tableName)));
 		reader = new TupleReader(DBCatalog.getTableLoc(tb));
 		columnIndexMap = new HashMap<String, Integer>();

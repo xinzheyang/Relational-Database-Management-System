@@ -15,13 +15,6 @@ import visitor.PhysicalPlanBuilder;
 public class LogicalScanOperator extends LogicalOperator {
 	private String tb;
 	private String alias;
-	/**
-	 * 
-	 */
-	public LogicalScanOperator(String table) throws FileNotFoundException {
-		this.tb = table;
-		this.alias = "";
-	}
 	
 	public LogicalScanOperator(String table, String alias) throws FileNotFoundException {
 		this.tb = table;
