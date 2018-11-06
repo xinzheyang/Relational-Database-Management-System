@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import database.Tuple;
+
 /**
  * @author xinzheyang
  *
@@ -38,12 +39,12 @@ public class IndexScanOperator extends ScanOperator {
 	private boolean unclusterExceedHigh = false;
 
 	/**
-	 * @throws FileNotFoundException 
+	 * @throws FileNotFoundException
 	 * @throws IOException
 	 * 
 	 */
-	public IndexScanOperator(String tablename, String alias, String path, String indexColumn, int cluster, int low, int high) throws FileNotFoundException
-			{
+	public IndexScanOperator(String tablename, String alias, String path, String indexColumn, int cluster, int low,
+			int high) throws FileNotFoundException {
 		super(tablename, alias);
 		try {
 			indexPath = path;
@@ -68,12 +69,13 @@ public class IndexScanOperator extends ScanOperator {
 			System.err.println("err occured when constructing IndexScan");
 			e.printStackTrace();
 		}
-			
+
 	}
 
 	/**
-	 * @param ind, the index of a leaf node
-	 * @return the (pid, tid) of the first key that satisfies the constraint 
+	 * @param ind,
+	 *            the index of a leaf node
+	 * @return the (pid, tid) of the first key that satisfies the constraint
 	 * @throws IOException
 	 */
 	private int[] findFirstKeyInLeaf(int ind) throws IOException {
@@ -99,9 +101,9 @@ public class IndexScanOperator extends ScanOperator {
 	}
 
 	/**
-	 * @param nodeInd, the leaf node index
-	 * The method reads all the satisfying rids in the leaf node and
-	 * updates the temperory Queue tempRids
+	 * @param nodeInd,
+	 *            the leaf node index The method reads all the satisfying rids in
+	 *            the leaf node and updates the temperory Queue tempRids
 	 * @throws IOException
 	 */
 	private void readLeaf(int nodeInd) throws IOException {
@@ -119,7 +121,7 @@ public class IndexScanOperator extends ScanOperator {
 			int numRid = buffer.getInt(offset);
 			offset += 4;
 			if (key >= lowKey && key <= highKey) {
-				for (int j = 0; j < numRid*2; j += 2) {
+				for (int j = 0; j < numRid * 2; j += 2) {
 					tempRids.add(new int[] { buffer.getInt(offset + j * 4), buffer.getInt(offset + (j + 1) * 4) });
 				}
 			} else {
@@ -131,7 +133,9 @@ public class IndexScanOperator extends ScanOperator {
 		}
 	}
 
-	/** deserializes the head node, i.e. the first node in the B+ tree index
+	/**
+	 * deserializes the head node, i.e. the first node in the B+ tree index
+	 * 
 	 * @throws IOException
 	 */
 	private void deserializeHeader() throws IOException {
@@ -145,8 +149,10 @@ public class IndexScanOperator extends ScanOperator {
 	}
 
 	/**
-	 * @param ind, the index node to start searching
-	 * @return the leaf node index that has the first key that satisfies the constraint
+	 * @param ind,
+	 *            the index node to start searching
+	 * @return the leaf node index that has the first key that satisfies the
+	 *         constraint
 	 * @throws IOException
 	 */
 	private int findLowkey(int ind) throws IOException {
