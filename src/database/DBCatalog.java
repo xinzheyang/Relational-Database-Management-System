@@ -20,6 +20,7 @@ public class DBCatalog {
 	private static HashMap<String, String[]> schemaMap; //
 	private static HashMap<String, String[]> treeIndexMap;
 	private static String locDir;
+	private static String indexDir;
 	private static String outputDir; //path to the directory where the output files to be written are
 	private static String tempDir; //path to the directory where the temp files for external sort to be written are
 	private static int tempDirCount = 0; // a self incrementing counter inside tempDir
@@ -64,12 +65,28 @@ public class DBCatalog {
 		return locDir + File.separator + tableName;
 	}
 	
+	/** Gets the attribute name that serve as an index key for the table.
+	 * @param tableNamethe actual table name (not alias)
+	 * @return
+	 */
 	public static String getIndexKey(String tableName) {
 		return treeIndexMap.get(tableName)[0];
 	}
 	
-	public static boolean hasClusteredIndex(String tableName) {
-		return "1".equals(treeIndexMap.get(tableName)[1]);
+	/** Returns 1 if this table has clustered index, 0 otherwise.
+	 * @param tableName the actual table name (not alias)
+	 * @return
+	 */
+	public static int hasClusteredIndex(String tableName) {
+		return Integer.parseInt(treeIndexMap.get(tableName)[1]);
+	}
+	
+	/** Gets the index file location of this table.
+	 * @param tableName the actual table name (not alias)
+	 * @return
+	 */
+	public static String getIndexFileLoc(String tableName) {
+		return indexDir + File.separator + tableName + "." + getIndexKey(tableName);
 	}
 	
 	public static String getOutputDir() {
@@ -167,14 +184,14 @@ public class DBCatalog {
 	
 	public static void buildIndices(String dir) throws IOException {
 		
-		String indexesOut = dir + File.separator + "indexes";
+		indexDir = dir + File.separator + "indexes";
 		BufferedReader indexInfoIn = new BufferedReader(new FileReader(dir + File.separator + "index_info.txt"));
 		String line;
 		while (((line = indexInfoIn.readLine()) != null)) {
 			String[] indexInfo = line.split(" ");
 			treeIndexMap.put(indexInfo[0], new String[]{indexInfo[1], indexInfo[2]});
 			assert indexInfo.length == 4;
-			String curIndexOut = indexesOut + File.separator + indexInfo[0] + "." + indexInfo[1];
+			String curIndexOut = indexDir + File.separator + indexInfo[0] + "." + indexInfo[1];
 			BPlusTree curTree = new BPlusTree(indexInfo[0], curIndexOut, "1".equals(indexInfo[2]), Integer.parseInt(indexInfo[3]));
 			curTree.scanAndConstructAll();
 			//PLACEHOLDER: set up indices by calling BPlusTree methods
