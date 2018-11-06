@@ -34,7 +34,7 @@ public class BPlusTree {
 		this.isClustered = isClustered;
 		//if clustered, sort and replace relation file, we use in memory sort for now.
 		if (isClustered) {
-			ScanOperator scan = new ScanOperator(tableIn, "");
+			ScanOperator scan = new ScanOperator(tableIn, null);
 			ClusteredIndexSortOperator sort = new ClusteredIndexSortOperator(scan, DBCatalog.getIndexKey(tableIn));
 			sort.dump(fileName);
 		}

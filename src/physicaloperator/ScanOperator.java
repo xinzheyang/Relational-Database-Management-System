@@ -57,14 +57,16 @@ public class ScanOperator extends Operator {
 			String ref = this.alias == null ? tb : this.alias;
 			columnIndexMap.put((ref + "." + schemaColNames[i]), i);
 		}
+//		System.out.println(columnIndexMap);
 	}
 
 
 	/**
-	 * @return the alias of the table
+	 * @return the reference to the table, either its alias if the table uses alias
+	 * or the table's actual table name.
 	 */
-	public String getAlias() {
-		return alias;
+	public String getReference() {
+		return alias == null ? tb : alias;
 	}
 
 	/**
