@@ -134,7 +134,6 @@ public class PhysicalPlanBuilder {
 
 		if (child instanceof LogicalScanOperator && DBCatalog.useIndex() && visitor != null
 				&& visitor.needIndexScan()) {
-			System.out.println("building");
 			try {
 				ScanOperator indexScanOp = new IndexScanOperator(tableName, scanChild.getAlias(),
 						DBCatalog.getIndexFileLoc(tableName), DBCatalog.getIndexKey(tableName),
