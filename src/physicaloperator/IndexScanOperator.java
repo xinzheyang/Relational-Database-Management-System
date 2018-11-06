@@ -4,6 +4,7 @@
 package physicaloperator;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -37,31 +38,37 @@ public class IndexScanOperator extends ScanOperator {
 	private boolean unclusterExceedHigh = false;
 
 	/**
+	 * @throws FileNotFoundException 
 	 * @throws IOException
 	 * 
 	 */
-	public IndexScanOperator(String tablename, String alias, String indexColumn, int cluster, int low, int high)
-			throws IOException {
+	public IndexScanOperator(String tablename, String alias, String path, String indexColumn, int cluster, int low, int high) throws FileNotFoundException
+			{
 		super(tablename, alias);
-		//TODO: initialize indexPath
-		lowKey = low;
-		highKey = high;
-		indexCol = indexColumn;
-		cluster = clustered;
-		fin = new FileInputStream(indexPath);
-		channel = fin.getChannel();
-		buffer = ByteBuffer.allocate(PAGE_SIZE);
-		deserializeHeader();
-
-		initLeaf = currLeaf = findLowkey(rootIndex);
-		initRid = findFirstKeyInLeaf(currLeaf);
-		if (clustered == 1) {
-			if (initRid != null) {
-				reader.reset(initRid[0], initRid[1]);
+		try {
+			indexPath = path;
+			lowKey = low;
+			highKey = high;
+			indexCol = indexColumn;
+			cluster = clustered;
+			fin = new FileInputStream(indexPath);
+			channel = fin.getChannel();
+			buffer = ByteBuffer.allocate(PAGE_SIZE);
+			deserializeHeader();
+			initLeaf = currLeaf = findLowkey(rootIndex);
+			initRid = findFirstKeyInLeaf(currLeaf);
+			if (clustered == 1) {
+				if (initRid != null) {
+					reader.reset(initRid[0], initRid[1]);
+				}
+			} else {
+				readLeaf(initLeaf);
 			}
-		} else {
-			readLeaf(initLeaf);
+		} catch (IOException e) {
+			System.err.println("err occured when constructing IndexScan");
+			e.printStackTrace();
 		}
+			
 	}
 
 	/**
@@ -73,6 +80,7 @@ public class IndexScanOperator extends ScanOperator {
 		channel.position(currLeaf * PAGE_SIZE);
 		buffer.clear();
 		channel.read(buffer);
+		buffer.position(0);
 		if (buffer.getInt() == 0) {
 			int numEntry = buffer.getInt();
 			int offset = 8;
@@ -100,6 +108,7 @@ public class IndexScanOperator extends ScanOperator {
 		channel.position(nodeInd * PAGE_SIZE);
 		buffer.clear();
 		channel.read(buffer);
+		buffer.position(0);
 		assert buffer.getInt() == 0;
 		int numEntry = buffer.getInt();
 		int offset = 8;
@@ -110,7 +119,7 @@ public class IndexScanOperator extends ScanOperator {
 			int numRid = buffer.getInt(offset);
 			offset += 4;
 			if (key >= lowKey && key <= highKey) {
-				for (int j = 0; j < numRid; j += 2) {
+				for (int j = 0; j < numRid*2; j += 2) {
 					tempRids.add(new int[] { buffer.getInt(offset + j * 4), buffer.getInt(offset + (j + 1) * 4) });
 				}
 			} else {
@@ -129,6 +138,7 @@ public class IndexScanOperator extends ScanOperator {
 		channel.position(0);
 		buffer.clear();
 		channel.read(buffer);
+		buffer.position(0);
 		rootIndex = buffer.getInt();
 		numLeaf = buffer.getInt();
 		order = buffer.getInt();
@@ -143,6 +153,7 @@ public class IndexScanOperator extends ScanOperator {
 		channel.position(ind * PAGE_SIZE);
 		buffer.clear();
 		channel.read(buffer);
+		buffer.position(0);
 		if (buffer.getInt() == 1) {
 			int numKeys = buffer.getInt();
 			int keys[] = new int[numKeys];

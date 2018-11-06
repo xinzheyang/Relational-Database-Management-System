@@ -63,6 +63,7 @@ public class TupleReader {
 				i++;
 			}
 		} catch (IOException e) {
+			System.err.println("rest pid tid error");
 			e.printStackTrace();
 		}
 	}

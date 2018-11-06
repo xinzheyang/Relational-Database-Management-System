@@ -4,6 +4,7 @@
 package visitor;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Arrays;
 
 import database.DBCatalog;
@@ -118,9 +119,16 @@ public class PhysicalPlanBuilder {
 	public void visit(LogicalScanOperator op) {
 		ScanOperator scanOperator;
 		try {
-			scanOperator = new ScanOperator(op.getTableName(), op.getAlias());
+			if (DBCatalog.useIndex()) {
+				String tableName = op.getTableName();
+				scanOperator = new IndexScanOperator(tableName, op.getAlias(), DBCatalog.getIndexFileLoc(tableName), 
+						DBCatalog.getIndexKey(tableName), DBCatalog.hasClusteredIndex(tableName), Integer.MIN_VALUE, Integer.MAX_VALUE);
+			} else {
+				scanOperator = new ScanOperator(op.getTableName(), op.getAlias());
+			}
 			operator = scanOperator;
 		} catch (FileNotFoundException e) {
+			System.err.println("error occurred during building scan operator, file not found");
 			e.printStackTrace();
 		}
 		
