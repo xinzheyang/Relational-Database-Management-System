@@ -1,3 +1,17 @@
+==================== Project 3 ====================
+
+The top-level class is Main.java in the database package
+
+IndexScanOperator
+- the lowkey and highkey are determined in the class DivideSelectVisitor
+  And they are passed into the IndexScanOperator constructor in the PhysicalPlanBuilder
+
+- In the IndexScanOperator, I handled the clustered and unclustered in the constructor and also in getNextTuple() and reset()
+
+- I performed the root-to-leaf descent by recursively performing binary search on the keys of the index nodes, and return immediately when a leaf node is found.
+
+I separated out the selection in physical plan builder using a visitor called DivideSelectVisitor, which implements the ExpressionVisitor interface. In the visitor, I determined the seperation by doing case analysis on base expressions such as GreaterThan, LessThan and etc.
+
 ==================== Project 2 main submission ====================
 The top-level class is Main.java in the database package
 
