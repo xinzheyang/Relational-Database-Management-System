@@ -116,15 +116,25 @@ public class PhysicalPlanBuilder {
 		operator = joinOperator;
 	}
 
+	/**
+	 * @param op,
+	 *            the logicaiSelectOperator. the method uses a DivideSelectVisitor
+	 *            to determine whether to use index scan operator and it's lower and
+	 *            upper bounds, if any.
+	 */
 	public void visit(LogicalSelectOperator op) {
 		LogicalOperator child = op.getChildOp();
-
 		LogicalScanOperator scanChild = (LogicalScanOperator) child;
 		String tableName = scanChild.getTableName();
-		DivideSelectVisitor visitor = new DivideSelectVisitor(DBCatalog.getIndexKey(tableName));
-		op.getEx().accept(visitor);
+		DivideSelectVisitor visitor = null;
+		if (DBCatalog.useIndex()) {
+			visitor = new DivideSelectVisitor(DBCatalog.getIndexKey(tableName));
+			op.getEx().accept(visitor);
+		}
 
-		if (child instanceof LogicalScanOperator && DBCatalog.useIndex() && visitor.needIndexScan()) {
+		if (child instanceof LogicalScanOperator && DBCatalog.useIndex() && visitor != null
+				&& visitor.needIndexScan()) {
+			System.out.println("building");
 			try {
 				ScanOperator indexScanOp = new IndexScanOperator(tableName, scanChild.getAlias(),
 						DBCatalog.getIndexFileLoc(tableName), DBCatalog.getIndexKey(tableName),

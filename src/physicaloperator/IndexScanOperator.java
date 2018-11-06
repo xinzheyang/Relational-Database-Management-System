@@ -121,10 +121,10 @@ public class IndexScanOperator extends ScanOperator {
 			int numRid = buffer.getInt(offset);
 			offset += 4;
 			if (key >= lowKey && key <= highKey) {
-//				System.out.println("key: "+key);
+				// System.out.println("key: "+key);
 				for (int j = 0; j < numRid * 2; j += 2) {
-//					System.out.println("pid: "+buffer.getInt(offset + j * 4));
-//					System.out.println("rid: "+buffer.getInt(offset + (j + 1) * 4));
+					// System.out.println("pid: "+buffer.getInt(offset + j * 4));
+					// System.out.println("rid: "+buffer.getInt(offset + (j + 1) * 4));
 					tempRids.add(new int[] { buffer.getInt(offset + j * 4), buffer.getInt(offset + (j + 1) * 4) });
 				}
 			} else {
