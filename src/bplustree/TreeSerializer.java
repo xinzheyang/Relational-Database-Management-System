@@ -3,6 +3,7 @@
  */
 package bplustree;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,9 +20,11 @@ public class TreeSerializer {
 	private ByteBuffer buffer;
 	private FileOutputStream fout;
 	private static final int PAGE_SIZE = 4096;
+	private String fileout; //output or input path
 //	private int pageCount; //page address
 	
 	public TreeSerializer(String fileout) throws FileNotFoundException {
+		this.fileout = fileout;
 		fout = new FileOutputStream(fileout);
 		fc = fout.getChannel();
 		buffer = ByteBuffer.allocate(PAGE_SIZE);
@@ -30,6 +33,18 @@ public class TreeSerializer {
 	public void close() throws IOException {
 		fc.close();
 		fout.close();
+	}
+	
+	public void serializeHeader(int order) throws IOException {
+		buffer.clear();
+		buffer.putInt(0); //placeholder for root address
+		buffer.putInt(0);
+		buffer.putInt(order);
+//		while (buffer.position() < buffer.capacity()) {
+//			buffer.put((byte) 0);
+//		}
+		buffer.position(0);
+		fc.write(buffer);
 	}
 	
 	/** Serializes the header page of the tree, in order of:
@@ -41,15 +56,17 @@ public class TreeSerializer {
 	 * @param order
 	 * @throws IOException
 	 */
-	public void serializeHeader(int rootAddress, int numberOfLeaves, int order) throws IOException {
+	public void updateHeader(int rootAddress, int numberOfLeaves) throws IOException {
 		fc.position(0);
 		buffer.clear();
+		FileInputStream fin = new FileInputStream(fileout);
+		FileChannel readChannel = fin.getChannel();
+		readChannel.read(buffer);
+		readChannel.close();
+		fin.close();
+		buffer.flip();
 		buffer.putInt(rootAddress);
 		buffer.putInt(numberOfLeaves);
-		buffer.putInt(order);
-		while (buffer.position() < buffer.capacity()) {
-			buffer.put((byte) 0);
-		}
 		buffer.position(0);
 		fc.write(buffer);
 	}
@@ -74,6 +91,9 @@ public class TreeSerializer {
 		
 		for (Integer addr : childAddresses) {
 			buffer.putInt(addr);
+		}
+		while (buffer.position() < buffer.capacity()) {
+			buffer.put((byte) 0);
 		}
 		
 		buffer.position(0);
@@ -106,6 +126,9 @@ public class TreeSerializer {
 				buffer.putInt(rid[0]);
 				buffer.putInt(rid[1]);
 			}
+		}
+		while (buffer.position() < buffer.capacity()) {
+			buffer.put((byte) 0);
 		}
 //		List<DataEntry> entries = ln.getEntries();
 //		buffer.putInt(entries.size());

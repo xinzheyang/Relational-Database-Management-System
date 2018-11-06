@@ -101,11 +101,12 @@ public class BPlusTree {
 			//			}
 			//		});
 		}
-
+		serializer.serializeHeader(order);
 		buildLeafNodes(keyValues, rids);
 //		System.out.println("finished leaf nodes");
 		buildIndexNodes();
-		serializer.serializeHeader(counter, keyValues.size(), order);
+		System.out.println(counter);
+		serializer.updateHeader(counter-1, leafNodes.size());
 		serializer.close();
 		//		return rids;
 	}
@@ -120,7 +121,7 @@ public class BPlusTree {
 		int numOfEntries = allKeys.size();
 		int numOfNodes = (int) Math.ceil(numOfEntries/(2.0*order)); //number of remaining nodes
 		int curr=0;
-		System.out.println(numOfNodes);
+//		System.out.println(numOfNodes);
 
 		//		int leafTotalCount = numOfNodes; 
 		//address of node should be from 1 to leafTotalCount;
@@ -166,8 +167,8 @@ public class BPlusTree {
 		//		counter++;
 		List<Node> curr = new ArrayList<>();
 		List<Node> prev = leafNodes;
-		System.out.println(prev.size());
-		System.out.println(order);
+//		System.out.println(prev.size());
+//		System.out.println(order);
 
 		if(leafNodes.size() == 1) { 
 			IndexNode node= new IndexNode(leafNodes, counter);
@@ -175,12 +176,12 @@ public class BPlusTree {
 		}
 
 		while(prev.size() > 1) {
-			System.out.println("begin the inner while loop");
+//			System.out.println("begin the inner while loop");
 
 			int numOfChild = prev.size();//number of children from the previous lift
-			System.out.println("number of children" + numOfChild);
+//			System.out.println("number of children" + numOfChild);
 			int numOfNodes = (int) Math.ceil(numOfChild/(2.0*order+1)); //number of index nodes in the level
-			System.out.println("number of nodes" + numOfNodes);
+//			System.out.println("number of nodes" + numOfNodes);
 			int indexCurr=0; //the index of the current children
 			//get the bottom layer of index nodes
 			while(numOfNodes > 0) {
@@ -195,7 +196,7 @@ public class BPlusTree {
 					node= new IndexNode(prev.subList(indexCurr, indexCurr+n), counter);
 					//					curr.add(node);
 					indexCurr += n;
-					System.out.println("is the second last node");
+//					System.out.println("is the second last node");
 				}
 				else {
 					node= new IndexNode(prev.subList(indexCurr, Math.min(indexCurr+2*order+1, numOfChild)), counter);
@@ -203,18 +204,18 @@ public class BPlusTree {
 					indexCurr += 2*order+1;
 				}
 				curr.add(node);
-				System.out.println("curr size" + curr.size());
-				System.out.println("indexCurr" + indexCurr);
+//				System.out.println("curr size" + curr.size());
+//				System.out.println("indexCurr" + indexCurr);
 				serializer.serialize(node);
 				//serialize this node
 				counter++;
 				numOfNodes--;	
-				System.out.println("number of nodes" + numOfNodes);
+//				System.out.println("number of nodes" + numOfNodes);
 			}
 			//write the serializing code here
 //			prev=curr;
 			prev=new ArrayList<>(curr);
-			System.out.println("end the inner while loop"+prev.size());
+//			System.out.println("end the inner while loop"+prev.size());
 			curr.clear();
 		}
 		//		IndexNode d = new IndexNode();
