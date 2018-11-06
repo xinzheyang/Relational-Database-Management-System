@@ -63,6 +63,26 @@ public class IndexNode extends Node {
 	public List<Integer> getKeys() {
 		return keys;
 	}
+	
+	public String toString() {
+		String prefix = "IndexNode with keys [";
+		String middle = "] and child addresses [";
+		StringBuilder build = new StringBuilder(prefix);
+		for (int i = 0; i < keys.size(); i++) {
+			build.append(keys.get(i));
+			if (i < keys.size() - 1 )
+				build.append(", ");
+		}
+		build.append(middle);
+		List<Integer> addresses = getChildAddresses();
+		for (int i = 0; i < addresses.size(); i++) {
+			build.append(addresses.get(i));
+			if (i < addresses.size() - 1 )
+				build.append(", ");
+		}
+		build.append("]\n");
+		return build.toString();
+	}
 
 }
 
