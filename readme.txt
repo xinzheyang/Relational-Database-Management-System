@@ -6,9 +6,9 @@ IndexScanOperator
 - the lowkey and highkey are determined in the class DivideSelectVisitor
   And they are passed into the IndexScanOperator constructor in the PhysicalPlanBuilder
 
-- In the IndexScanOperator, I handled the clustered and unclustered in the constructor and also in getNextTuple() and reset()
+- In the IndexScanOperator, I handled the clustered and unclustered with if statements in the constructor and also in getNextTuple() and reset(). Basically, I only had to find the first key for clustered, but for unclustered, I deserialize the leaf nodes one node each time, and store the rid pairs in a temporary Queue, when the queue is empty, I read the next leaf page.
 
-- I performed the root-to-leaf descent by recursively performing binary search on the keys of the index nodes, and return immediately when a leaf node is found.
+- I performed the root-to-leaf descent by recursively performing binary search on the keys of the index nodes, and return immediately when a leaf node is found. The index nodes that just satisfy the lower bound in the root-to-leaf descent path and the leaf node are deserialized.
 
 I separated out the selection in physical plan builder using a visitor called DivideSelectVisitor, which implements the ExpressionVisitor interface. In the visitor, I determined the seperation by doing case analysis on base expressions such as GreaterThan, LessThan and etc.
 
