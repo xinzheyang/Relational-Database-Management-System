@@ -30,11 +30,18 @@ public class TreeSerializer {
 		buffer = ByteBuffer.allocate(PAGE_SIZE);
 	}
 
+	/**
+	 * @throws IOException
+	 */
 	public void close() throws IOException {
 		fc.close();
 		fout.close();
 	}
 
+	/**
+	 * @param order
+	 * @throws IOException
+	 */
 	public void serializeHeader(int order) throws IOException {
 		buffer.clear();
 		buffer.putInt(0); // placeholder for root address

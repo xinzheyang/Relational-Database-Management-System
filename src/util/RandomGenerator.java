@@ -62,7 +62,7 @@ public class RandomGenerator {
 			if(j==index) {
 				int randomNum = rand.nextInt((hi - lo) + 1) + lo;
 				while(map.containsKey(randomNum) && map.get(randomNum)>=4) {
-					randomNum=rand.nextInt();
+					randomNum=rand.nextInt((hi - lo) + 1) + lo;
 				};
 				map.put(randomNum, map.getOrDefault(randomNum, 0)+1);
 				sb.append(randomNum);
@@ -88,7 +88,7 @@ public class RandomGenerator {
 	 */
 	public static void main(String[] args) {
 		RandomGenerator randomGenerator = new RandomGenerator("random");
-		randomGenerator.generate("Boats", 1000, 3, 0, 800, 0);
+		randomGenerator.generate("Boats", 1000, 3, 0, 1000, 1);
 
 	}
 

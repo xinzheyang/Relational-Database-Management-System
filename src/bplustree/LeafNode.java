@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * @author xinqi
- *
+ * The class that represent the leaf node in the B+ tree containing data entries
  */
 public class LeafNode extends Node {
 //	private List<DataEntry> dataEntries;
@@ -20,6 +20,11 @@ public class LeafNode extends Node {
 ////		dataEntries = entries;
 //	}
 	
+	/**
+	 * @param keys the list of keys the node contains
+	 * @param listOfRids the list of record ids the node contains
+	 * @param address the number of the page of the node
+	 */
 	public LeafNode(List<Integer> keys, List<List<int[]>> listOfRids, int address) {
 		super(keys, address);
 		assert keys.size() == listOfRids.size();
@@ -27,15 +32,24 @@ public class LeafNode extends Node {
 	}
 	
 	
+	/**
+	 * @return the list of record ids
+	 */
 	public List<List<int[]>> getListOfRids() {
 		return listOfRids;
 	}
 	
+	/* (non-Javadoc)
+	 * @see bplustree.Node#getMin()
+	 */
 	public int getMin() {
 //		return dataEntries.get(0).getKey();
 		return this.keys.size() > 0 ? keys.get(0) : null;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	public String toString() {
 		String prefix = "LeafNode[\n";
 		StringBuilder build = new StringBuilder(prefix);

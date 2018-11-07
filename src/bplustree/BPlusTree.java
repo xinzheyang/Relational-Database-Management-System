@@ -30,6 +30,13 @@ public class BPlusTree {
 	private boolean isClustered;
 	private BufferedWriter logger;
 
+	/**
+	 * @param tableIn the name of the file to process
+	 * @param serializeLoc the path to put the serialized files
+	 * @param isClustered if the index is clustered or not for the file
+	 * @param order the order(d) of the B+ tree
+	 * @throws IOException
+	 */
 	public BPlusTree(String tableIn, String serializeLoc, boolean isClustered, int order) throws IOException {
 		fileName = DBCatalog.getTableLoc(tableIn);
 		serializer = new TreeSerializer(serializeLoc);
@@ -48,6 +55,11 @@ public class BPlusTree {
 		colIndex=Arrays.asList(DBCatalog.getTableColumns(tableIn)).indexOf(DBCatalog.getIndexKey(tableIn));
 	}
 
+	/**
+	 * Reads each tuple from the file and fetch all the keys of in the 
+	 * index column and records ids(page id, tuple id) corresponding to the keys
+	 * @throws IOException
+	 */
 	public void scanAndConstructAll() throws IOException {
 		List<List<int []>> rids = new LinkedList<List<int []>>();
 		List<Integer> keyValues = new LinkedList<Integer>();
@@ -119,9 +131,9 @@ public class BPlusTree {
 		//		return rids;
 	}
 
-	/** Builds and serializes all leaf nodes of this BPlusTree.
-	 * @param entries
-	 * @return
+	/**
+	 * @param allKeys all the unique keys from the file
+	 * @param allRids all the record ids corresponding to each key
 	 * @throws IOException
 	 */
 	private void buildLeafNodes(List<Integer> allKeys, List<List<int []>> allRids) throws IOException {
@@ -163,17 +175,14 @@ public class BPlusTree {
 		//		return lst;
 	}
 
-	/** Builds and serializes all index node of this tree.
-	 * @param leafNodes
+	
+	/**
+	 * Build the index nodes of the tree layer by layer, from the
+	 * very bottom pointing at the leaf nodes. Serialize each layer
+	 * at the same time.
 	 * @throws IOException
 	 */
 	private void buildIndexNodes() throws IOException {
-		//prev is null, construct the bottom layer: list of IndexNodes
-
-		//prev not null 
-
-		//BottomIndexNode
-		//OtherIndexNode
 		//		counter++;
 		List<Node> curr = new ArrayList<>();
 		List<Node> prev = leafNodes;
@@ -242,15 +251,5 @@ public class BPlusTree {
 		//		
 		//		
 	}
-	//<Node>children,address,keys,min
-	//	public Node buildIndexNode(lst,start,end) {
-	//		List<Integer> tmp = new ArrayList<>();
-	//		address=counter;
-	//		min=prev.get(0).get
-	//		tmp.add(e)(leafNodes.get(0));
-	//		for(int i=curr;i<n;i++) {
-	//			
-	//		}	
-	//	}
 
 }
