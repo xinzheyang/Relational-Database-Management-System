@@ -32,11 +32,15 @@ public class IndexScanOperator extends ScanOperator {
 	private int numLeaf;
 	private int order;
 
+	// state variables for unclustered
 	private Queue<int[]> tempRids = new LinkedList<>();
+	private Queue<int[]> initRids = new LinkedList<>();
 	private int initLeaf;
 	private int currLeaf;
-	private int[] initRid;
 	private boolean unclusterExceedHigh = false;
+	
+	private int[] initRid; // for clusterd
+	
 
 	/**
 	 * @throws FileNotFoundException
@@ -51,7 +55,7 @@ public class IndexScanOperator extends ScanOperator {
 			lowKey = low;
 			highKey = high;
 			indexCol = indexColumn;
-			cluster = clustered;
+			clustered = cluster;
 			fin = new FileInputStream(indexPath);
 			channel = fin.getChannel();
 			buffer = ByteBuffer.allocate(PAGE_SIZE);
@@ -64,6 +68,7 @@ public class IndexScanOperator extends ScanOperator {
 				}
 			} else {
 				readLeaf(initLeaf);
+				initRids = tempRids;
 			}
 		} catch (IOException e) {
 			System.err.println("err occured when constructing IndexScan");
@@ -195,7 +200,8 @@ public class IndexScanOperator extends ScanOperator {
 				return null;
 			} else {
 				Tuple tuple = reader.getNextTuple();
-				if (tuple.getColumnValue(getColumnIndex(indexCol)) > highKey) {
+				String ref = this.alias == null ? tb : this.alias;
+				if (tuple.getColumnValue(getColumnIndex(ref + "." + indexCol)) > highKey) {
 					return null;
 				} else {
 					return tuple;
@@ -221,7 +227,8 @@ public class IndexScanOperator extends ScanOperator {
 			}
 		}
 	}
-
+	
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -232,7 +239,9 @@ public class IndexScanOperator extends ScanOperator {
 		if (clustered == 1) {
 			reader.reset(initRid[0], initRid[1]);
 		} else {
+			tempRids = new LinkedList<>(initRids);
 			currLeaf = initLeaf;
+			unclusterExceedHigh = false;
 		}
 	}
 
