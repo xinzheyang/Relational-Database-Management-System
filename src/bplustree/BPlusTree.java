@@ -28,7 +28,7 @@ public class BPlusTree {
 	private int counter;
 	private TreeSerializer serializer;
 	private boolean isClustered;
-	private BufferedWriter logger;
+//	private BufferedWriter logger;
 
 	/**
 	 * @param tableIn the name of the file to process
@@ -45,12 +45,10 @@ public class BPlusTree {
 		//if clustered, sort and replace relation file, we use in memory sort for now.
 		if (isClustered) {
 			ScanOperator scan = new ScanOperator(tableIn, null);
-//			InMemorySort Operator sort = new InMemorySortOperator(scan, new String[]{scan.getReference() + "." + DBCatalog.getIndexKey(tableIn)});
 			ClusteredIndexSortOperator sort = new ClusteredIndexSortOperator(scan, DBCatalog.getIndexKey(tableIn));
 			sort.dump(fileName);
 		}
 		this.order = order;
-		logger = new BufferedWriter(new FileWriter("log.txt"));
 		
 		colIndex=Arrays.asList(DBCatalog.getTableColumns(tableIn)).indexOf(DBCatalog.getIndexKey(tableIn));
 	}
@@ -102,33 +100,12 @@ public class BPlusTree {
 			for (Integer key : keyValues) {
 				rids.add(leafEntries.get(key)); //don't need to sort rids with this key because they're added in order of occurrence
 			}
-			//		List<DataEntry> dataEntries = new ArrayList<>();
-			//		for (Map.Entry<Integer, List<int []>> entry : leafEntries.entrySet()) {
-			//		    int key = entry.getKey();
-			//		    List<int []> value = entry.getValue();
-			//		    DataEntry dataEntry = new DataEntry(key,value);
-			//		    dataEntries.add(dataEntry);
-			//		}
-			//		dataEntries.sort(new Comparator<DataEntry>() {
-			//			@Override
-			//			public int compare(DataEntry a, DataEntry b) {
-			//	        	if(a.getKey() < b.getKey()) return -1;
-			//	        	else if(a.getKey() > b.getKey()) return 1;
-			//		        return 0;
-			//			}
-			//		});
 		}
-//		System.out.println(keyValues);
 		serializer.serializeHeader(order);
 		buildLeafNodes(keyValues, rids);
-//		System.out.println("finished leaf nodes");
 		buildIndexNodes();
-//		System.out.println(counter);
 		serializer.updateHeader(counter-1, leafNodes.size());
-//		System.out.println(leafNodes.size());
-		logger.close();
 		serializer.close();
-		//		return rids;
 	}
 
 	/**
@@ -141,9 +118,7 @@ public class BPlusTree {
 		int numOfEntries = allKeys.size();
 		int numOfNodes = (int) Math.ceil(numOfEntries/(2.0*order)); //number of remaining nodes
 		int curr=0;
-//		System.out.println(numOfNodes);
 
-		//		int leafTotalCount = numOfNodes; 
 		//address of node should be from 1 to leafTotalCount;
 		while(counter <= numOfNodes) {
 			int k = numOfEntries-curr;
@@ -151,28 +126,20 @@ public class BPlusTree {
 			if(numOfNodes - counter == 1 && k>2*order && k<3*order) {
 				int n = (int) Math.floor((double) k / 2);
 				leaf = new LeafNode(allKeys.subList(curr, curr+n), allRids.subList(curr, curr+n), counter);
-				//				leaf = new LeafNode(entries.subList(curr, curr+n));
 				lst.add(leaf);
 				curr += n;
 			}
 			else {
 				int curEnd = Math.min(curr+2*order, numOfEntries);
 				leaf = new LeafNode(allKeys.subList(curr, curEnd), allRids.subList(curr, curEnd), counter);
-				//				leaf = new LeafNode(entries.subList(curr, Math.min(curr+2*order, numOfEntries)));
 				lst.add(leaf);
-//				curr += 2*order;
 				curr = curEnd;
-				//				numOfEntries -= order;
 			}
-			logger.write(leaf.toString());
 			this.serializer.serialize(leaf);
-			//			numOfNodes--;
 			counter++;
 		}
 		//counter equals numOfNodes + 1 when exiting the while loop, ready for counting the index nodes. 
-		//		counter = lst.size()+1; //the 
 		leafNodes = lst;
-		//		return lst;
 	}
 
 	
@@ -183,11 +150,8 @@ public class BPlusTree {
 	 * @throws IOException
 	 */
 	private void buildIndexNodes() throws IOException {
-		//		counter++;
 		List<Node> curr = new ArrayList<>();
 		List<Node> prev = leafNodes;
-//		System.out.println(prev.size());
-//		System.out.println(order);
 
 		if(leafNodes.size() == 1) { 
 			IndexNode node= new IndexNode(leafNodes, counter);
@@ -195,12 +159,9 @@ public class BPlusTree {
 		}
 
 		while(prev.size() > 1) {
-//			System.out.println("begin the inner while loop");
 
 			int numOfChild = prev.size();//number of children from the previous lift
-//			System.out.println("number of children" + numOfChild);
 			int numOfNodes = (int) Math.ceil(numOfChild/(2.0*order+1)); //number of index nodes in the level
-//			System.out.println("number of nodes" + numOfNodes);
 			int indexCurr=0; //the index of the current children
 			//get the bottom layer of index nodes
 			while(numOfNodes > 0) {
@@ -213,43 +174,23 @@ public class BPlusTree {
 					//get the minimum value
 					int n = (int) Math.floor((double) m / 2);
 					node= new IndexNode(prev.subList(indexCurr, indexCurr+n), counter);
-					//					curr.add(node);
 					indexCurr += n;
-//					System.out.println("is the second last node");
 				}
 				else {
 					int indexCurrEnd = Math.min(indexCurr+2*order+1, numOfChild);
-//					System.out.println(indexCurrEnd);
 					node= new IndexNode(prev.subList(indexCurr, Math.min(indexCurr+2*order+1, numOfChild)), counter);
-					//					curr.add(node);
-//					indexCurr += 2*order+1;
 					indexCurr = indexCurrEnd;
 				}
 				curr.add(node);
-//				System.out.println("curr size" + curr.size());
-//				System.out.println("indexCurr" + indexCurr);s
-//				System.out.println(node.toString());
-				logger.write(node.toString());
 				serializer.serialize(node);
 				//serialize this node
 				counter++;
 				numOfNodes--;	
-//				System.out.println("number of nodes" + numOfNodes);
 			}
 			//write the serializing code here
-//			prev=curr;
 			prev=new ArrayList<>(curr);
-//			System.out.println("end the inner while loop"+prev.size());
 			curr.clear();
-		}
-		//		IndexNode d = new IndexNode();
-		//		d.addPointer(leafNodes.get(0));
-		//		for(int i=1;i<2*order+1;i++) {
-		//			d.addKey(leafNodes.get(i).getMin());
-		//			d.addPointer(leafNodes.get(i));
-		//		}
-		//		
-		//		
+		}	
 	}
 
 }
