@@ -32,7 +32,6 @@ public class ClusteredIndexSortOperator extends Operator {
 		Tuple tuple;
 		columnIndexMap = childOp.getColumnIndexMap();
 		allTuples = new LinkedList<Tuple>();
-		System.out.println(columnIndexMap);
 		
 		int keyIndex = columnIndexMap.get(childOp.getReference() + "." + searchKey);
 		while((tuple = childOp.getNextTuple()) != null) {
