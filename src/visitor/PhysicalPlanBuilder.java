@@ -74,23 +74,18 @@ public class PhysicalPlanBuilder {
 		JoinOperator joinOperator;
 		if (DBCatalog.getJoinMethod().equals("0")) { // TNLJ
 			joinOperator = new TNLJoinOperator(left, right, op.getJoinCondition());
-			// joinOperator = op.getJoinCondition() == null ?
-			// new TNLJoinOperator(left, right) : new TNLJoinOperator(left, right,
-			// op.getJoinCondition());
 		} else {
 			if (DBCatalog.getJoinMethod().equals("1")) { // BNLJ
 				int bufferSize = DBCatalog.getJoinBufferSize();
 				joinOperator = new BNLJoinOperator(left, right, op.getJoinCondition(), bufferSize);
-				// joinOperator = op.getJoinCondition() == null ?
-				// new BNLJoinOperator(left, right, bufferSize) :
-				// new BNLJoinOperator(left, right, op.getJoinCondition(), bufferSize);
 			} else if (DBCatalog.getJoinMethod().equals("2")) { // SMJ
 				Expression smjCondition = op.getJoinCondition();
 				EquiConjunctVisitor equiVisit = new EquiConjunctVisitor();
-				smjCondition.accept(equiVisit); /*
-												 * by accepting, the visitor processes the join condition and extract
-												 * left and right column names in the sorting order.
-												 */
+				/*
+				 * by accepting, the visitor processes the join condition and extract left and
+				 * right column names in the sorting order.
+				 */
+				smjCondition.accept(equiVisit);
 				Object[] sortLeftObj = equiVisit.getLeftCompareCols().toArray();
 				Object[] sortRightObj = equiVisit.getRightCompareCols().toArray();
 
@@ -100,19 +95,10 @@ public class PhysicalPlanBuilder {
 				SortOperator leftSort = getSortOperator(left, sortOrderLeft);
 				SortOperator rightSort = getSortOperator(right, sortOrderRight);
 				joinOperator = new SMJoinOperator(leftSort, rightSort, smjCondition);
-				// joinOperator = op.getJoinCondition() == null ? new SMJoinOperator(leftSort,
-				// rightSort) :
-				// new SMJoinOperator(leftSort, rightSort, smjCondition);
 			} else { // invalid input, default to TNLJ
 				joinOperator = new TNLJoinOperator(left, right, op.getJoinCondition());
-				// joinOperator = op.getJoinCondition() == null ?
-				// new TNLJoinOperator(left, right) : new TNLJoinOperator(left, right,
-				// op.getJoinCondition());
 			}
 		}
-		// TNLJoinOperator joinOperator = op.getJoinCondition() == null ?
-		// new TNLJoinOperator(left, right) : new TNLJoinOperator(left, right,
-		// op.getJoinCondition());
 		operator = joinOperator;
 	}
 
