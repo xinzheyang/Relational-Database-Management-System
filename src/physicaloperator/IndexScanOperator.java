@@ -38,14 +38,13 @@ public class IndexScanOperator extends ScanOperator {
 	private int initLeaf;
 	private int currLeaf;
 	private boolean unclusterExceedHigh = false;
-	
-	private int[] initRid; // for clusterd
-	
+
+	private int[] initRid; // for clustered
 
 	/**
 	 * @throws FileNotFoundException
-	 * @throws IOException
-	 * 
+	 *             constructs an IndexScanOperater, it calls the super constructor
+	 *             from ScanOperator it performs the first root-to-leaf descent
 	 */
 	public IndexScanOperator(String tablename, String alias, String path, String indexColumn, int cluster, int low,
 			int high) throws FileNotFoundException {
@@ -227,8 +226,7 @@ public class IndexScanOperator extends ScanOperator {
 			}
 		}
 	}
-	
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
