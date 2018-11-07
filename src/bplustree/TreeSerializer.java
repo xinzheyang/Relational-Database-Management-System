@@ -21,7 +21,6 @@ public class TreeSerializer {
 	private FileOutputStream fout;
 	private static final int PAGE_SIZE = 4096;
 	private String fileout; // output or input path
-	// private int pageCount; //page address
 
 	public TreeSerializer(String fileout) throws FileNotFoundException {
 		this.fileout = fileout;
@@ -30,7 +29,7 @@ public class TreeSerializer {
 		buffer = ByteBuffer.allocate(PAGE_SIZE);
 	}
 
-	/**
+	/** Closes the current serializer.
 	 * @throws IOException
 	 */
 	public void close() throws IOException {
@@ -38,7 +37,7 @@ public class TreeSerializer {
 		fout.close();
 	}
 
-	/**
+	/** Serializes the header of this tree.
 	 * @param order
 	 * @throws IOException
 	 */
@@ -47,9 +46,6 @@ public class TreeSerializer {
 		buffer.putInt(0); // placeholder for root address
 		buffer.putInt(0);
 		buffer.putInt(order);
-		// while (buffer.position() < buffer.capacity()) {
-		// buffer.put((byte) 0);
-		// }
 		buffer.position(0);
 		fc.write(buffer);
 	}
@@ -140,21 +136,6 @@ public class TreeSerializer {
 		while (buffer.position() < buffer.capacity()) {
 			buffer.put((byte) 0);
 		}
-		// List<DataEntry> entries = ln.getEntries();
-		// buffer.putInt(entries.size());
-		//
-		// for (DataEntry e: entries) {
-		//
-		// buffer.putInt(e.getKey());
-		// List<int[]> rids = e.getRids();
-		// buffer.putInt(rids.size());
-		//
-		// for (int[] rid: rids) {
-		// buffer.putInt(rid[0]);
-		// buffer.putInt(rid[1]);
-		// }
-
-		// }
 
 		buffer.position(0);
 		fc.write(buffer);
