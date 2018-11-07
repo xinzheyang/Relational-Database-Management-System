@@ -93,7 +93,6 @@ public class TupleWriter {
 	 */
 	public void writeMetaData() {
 		buffer.putInt(numAttribs);
-//		System.out.println(numAttribs);
 		buffer.putInt(0); //number of tuples initialized as 0
 	}
 
@@ -121,9 +120,7 @@ public class TupleWriter {
 	 * @param fileout: the file path to be written out to
 	 */
 	public void writeToBuffer() {
-		//clear buffer if exceed limit/capacity??? if limit exceed capacity
 		if (buffer.position() + numAttribs * 4 > buffer.capacity()) {
-//			System.out.println("hi");
 			buffer.putInt(4, numTuples); //second int to be written
 			//flush this page to the buffer
 			buffer.position(0);
@@ -137,7 +134,6 @@ public class TupleWriter {
 			numTuples = 0;
 		}
 		for(int val : tuple.getColValues()) {
-//			System.out.println(tuple);
 			buffer.putInt(val);
 		}
 		++numTuples;

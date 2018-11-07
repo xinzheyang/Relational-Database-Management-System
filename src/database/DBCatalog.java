@@ -157,6 +157,13 @@ public class DBCatalog {
 			if (sortMethod.length < 1 || sortMethod.length > 2) {
 				sortMethod = new String[]{"0"}; //set default to in memory sort if invalid input
 			}
+			line = configIn.readLine();
+			if ("1".equals(line)) {
+				useIndex &= true;
+			}
+			else { //default to 0
+				useIndex = false;
+			}
 			configIn.close();
 		} catch (Exception e) {
 			System.out.println("An error occurred in processing the Physical Plan Configuration file.");
@@ -176,7 +183,6 @@ public class DBCatalog {
 		while ((line = schemaIn.readLine()) != null) {
 			String[] schemaInfo = line.split(" ");
 			schemaMap.put(schemaInfo[0], Arrays.copyOfRange(schemaInfo, 1, schemaInfo.length)); //key=table name, value=col names array
-//			locMap.put(tableInfo[0], dir + File.separator + "data" + File.separator)
 		}
 		schemaIn.close();
 		
@@ -194,7 +200,6 @@ public class DBCatalog {
 			String curIndexOut = indexDir + File.separator + indexInfo[0] + "." + indexInfo[1];
 			BPlusTree curTree = new BPlusTree(indexInfo[0], curIndexOut, "1".equals(indexInfo[2]), Integer.parseInt(indexInfo[3]));
 			curTree.scanAndConstructAll();
-			//PLACEHOLDER: set up indices by calling BPlusTree methods
 		}
 		indexInfoIn.close();
 		

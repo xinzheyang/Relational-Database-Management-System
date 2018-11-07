@@ -2,22 +2,18 @@ package bplustree;
 import database.DBCatalog;
 import database.TupleReader;
 import physicaloperator.ClusteredIndexSortOperator;
-import physicaloperator.InMemorySortOperator;
 import physicaloperator.ScanOperator;
 
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
+//import java.io.BufferedWriter;
+//import java.io.FileNotFoundException;
+//import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class BPlusTree {
 
@@ -28,7 +24,7 @@ public class BPlusTree {
 	private int counter;
 	private TreeSerializer serializer;
 	private boolean isClustered;
-//	private BufferedWriter logger;
+//	private BufferedWriter logger; //logger for human-readable tree serialization
 
 	/**
 	 * @param tableIn the name of the file to process

@@ -12,9 +12,6 @@ import java.util.List;
  */
 public class IndexNode extends Node {
 	private List<Node> children;
-//	private List<Integer> addresses;
-//	private List<LeafNode> pointers;
-//	private List<Integer> keys;
 	private int min;
 	
 
@@ -22,10 +19,6 @@ public class IndexNode extends Node {
 	 * Constructor of an empty index node
 	 */
 	public IndexNode() {
-//		pointers = new ArrayList<>();
-//		keys = new ArrayList<>();
-		super();
-//		addresses = new ArrayList<>();
 		children = new ArrayList<Node>();
 		min=0;
 	}
@@ -36,7 +29,6 @@ public class IndexNode extends Node {
 	 * @param address the number of page the node is on
 	 */
 	public IndexNode(List<Node> children, int address) {
-//		super(keys);
 		this.children = children;
 		this.address = address;
 		int numOfChildren = children.size();
@@ -72,7 +64,7 @@ public class IndexNode extends Node {
 		return keys;
 	}
 	
-	/* (non-Javadoc)
+	/** Returns the human-readable string representation of this node.
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {

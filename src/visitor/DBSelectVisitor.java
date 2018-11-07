@@ -139,7 +139,6 @@ public class DBSelectVisitor implements SelectVisitor {
 		}
 
 
-		//		System.out.println(selectMap);
 		scanOperator = buildScanFromItem(fromItem);
 
 		selectOperator = buildSelectFromScan(scanOperator);
@@ -157,13 +156,6 @@ public class DBSelectVisitor implements SelectVisitor {
 			Expression conditionFirst = parseConjunctExpVisitor != null ? 
 					parseConjunctExpVisitor.getJoinCondition(fromItemReference, fromRightItemReference) : null;
 			left = new LogicalJoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem), conditionFirst);
-//			if (parseConjunctExpVisitor != null && 
-//					parseConjunctExpVisitor.getJoinCondition(fromItemReference, fromRightItemReference) != null) {
-//				Expression condition = parseConjunctExpVisitor.getJoinCondition(fromItemReference, fromRightItemReference);
-//				left = new LogicalJoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem), condition);
-//			} else {
-//				left = new LogicalJoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem));
-//			}
 
 			leftTable.add(fromItem);
 			leftTable.add(firstRightItem);
@@ -179,17 +171,9 @@ public class DBSelectVisitor implements SelectVisitor {
 							parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference) : null;
 					if (tempCondition != null)
 						condition = condition == null ? tempCondition: new AndExpression(condition, tempCondition);
-//					if (parseConjunctExpVisitor != null && 
-//							parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference) != null) {
-//						Expression tempCondition = parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference);
-//						condition = condition == null ? tempCondition: new AndExpression(condition, tempCondition);
-//
-//					}
 				}
 				leftTable.add(rightItem);
 				left = new LogicalJoinOperator(left, newScanSelect, condition);
-//				left = condition == null ? new LogicalJoinOperator(left, newScanSelect) 
-//						: new LogicalJoinOperator(left, newScanSelect, condition);
 			}
 			joinOperator = left;
 		}

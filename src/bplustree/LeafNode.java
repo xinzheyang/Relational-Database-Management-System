@@ -10,15 +10,7 @@ import java.util.List;
  * The class that represent the leaf node in the B+ tree containing data entries
  */
 public class LeafNode extends Node {
-//	private List<DataEntry> dataEntries;
 	private List<List<int[]>> listOfRids; //shares the same indices as this.keys
-	/**
-	 * 
-	 */
-//	public LeafNode(List<DataEntry> entries) {
-//		super();
-////		dataEntries = entries;
-//	}
 	
 	/**
 	 * @param keys the list of keys the node contains
@@ -43,11 +35,10 @@ public class LeafNode extends Node {
 	 * @see bplustree.Node#getMin()
 	 */
 	public int getMin() {
-//		return dataEntries.get(0).getKey();
 		return this.keys.size() > 0 ? keys.get(0) : null;
 	}
 	
-	/* (non-Javadoc)
+	/**Returns the human-readable string representation of this node.
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
@@ -69,7 +60,5 @@ public class LeafNode extends Node {
 		build.append("]\n");
 		return build.toString();
 	}
-//	public List<DataEntry> getEntries() {
-//		return dataEntries;
-//	}
+	
 }

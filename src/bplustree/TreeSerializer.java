@@ -11,9 +11,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.List;
 
-/**
+/** This class functions as a serializer for a B+ Tree. Serializes different types of
+ * nodes of the tree according to the required format into the relation's index file.
+ * 
  * @author sitianchen
- *
  */
 public class TreeSerializer {
 	private FileChannel fc;
@@ -44,7 +45,7 @@ public class TreeSerializer {
 	public void serializeHeader(int order) throws IOException {
 		buffer.clear();
 		buffer.putInt(0); // placeholder for root address
-		buffer.putInt(0);
+		buffer.putInt(0); //placeholder for number of leaf nodes
 		buffer.putInt(order);
 		buffer.position(0);
 		fc.write(buffer);
