@@ -68,7 +68,7 @@ public class IndexScanOperator extends ScanOperator {
 				}
 			} else {
 				readLeaf(initLeaf);
-				initRids = tempRids;
+				initRids = new LinkedList<>(tempRids);
 			}
 		} catch (IOException e) {
 			System.err.println("err occured when constructing IndexScan");
