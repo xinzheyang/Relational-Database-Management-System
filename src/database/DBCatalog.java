@@ -19,6 +19,7 @@ public class DBCatalog {
 	
 	private static HashMap<String, String[]> schemaMap; //
 	private static HashMap<String, String[]> treeIndexMap;
+	private static String dbDir;
 	private static String locDir;
 	private static String indexDir;
 	private static String outputDir; //path to the directory where the output files to be written are
@@ -28,6 +29,7 @@ public class DBCatalog {
 	private static String[] joinMethod;
 	private static String[] sortMethod;
 	private static boolean useIndex;
+	private static boolean builtIndex;
 	/* A private Constructor prevents any other class
 	 * from instantiating a DBCatalog object.
 	 */
@@ -158,11 +160,11 @@ public class DBCatalog {
 				sortMethod = new String[]{"0"}; //set default to in memory sort if invalid input
 			}
 			line = configIn.readLine();
-			if ("1".equals(line)) {
-				useIndex &= true;
-			}
-			else { //default to 0
-				useIndex = false;
+			useIndex = "1".equals(line);
+			if (useIndex) {
+				if (!builtIndex) {
+					parseIndices(false);
+				}
 			}
 			configIn.close();
 		} catch (Exception e) {
@@ -176,7 +178,7 @@ public class DBCatalog {
 	 * @param dir: path to the /db directory
 	 */
 	public void parseSchema(String dir) throws IOException {
-		
+		dbDir = dir;
 		locDir = dir + File.separator + "data";
 		BufferedReader schemaIn = new BufferedReader(new FileReader(dir + File.separator + "schema.txt"));
 		String line;
@@ -188,22 +190,23 @@ public class DBCatalog {
 		
 	}
 	
-	public static void buildIndices(String dir) throws IOException {
-		
-		indexDir = dir + File.separator + "indexes";
-		BufferedReader indexInfoIn = new BufferedReader(new FileReader(dir + File.separator + "index_info.txt"));
+	public static void parseIndices(boolean buildIndex) throws IOException {
+		indexDir = dbDir + File.separator + "indexes";
+		BufferedReader indexInfoIn = new BufferedReader(new FileReader(dbDir + File.separator + "index_info.txt"));
 		String line;
 		while (((line = indexInfoIn.readLine()) != null)) {
 			String[] indexInfo = line.split(" ");
 			treeIndexMap.put(indexInfo[0], new String[]{indexInfo[1], indexInfo[2]});
 			assert indexInfo.length == 4;
 			String curIndexOut = indexDir + File.separator + indexInfo[0] + "." + indexInfo[1];
-			BPlusTree curTree = new BPlusTree(indexInfo[0], curIndexOut, "1".equals(indexInfo[2]), Integer.parseInt(indexInfo[3]));
-			curTree.scanAndConstructAll();
+			if (buildIndex) {
+				BPlusTree curTree = new BPlusTree(indexInfo[0], curIndexOut, "1".equals(indexInfo[2]), Integer.parseInt(indexInfo[3]));
+				curTree.scanAndConstructAll();
+			}
 		}
+		if (buildIndex)
+			builtIndex = true; //set built index to true whenever this function is called and indices are successfully built.
 		indexInfoIn.close();
-		
-		useIndex = true; //set use index to true whenever this function is called and indices are successfully built.
 	}
 
 }

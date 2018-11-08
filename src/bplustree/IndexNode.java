@@ -19,6 +19,7 @@ public class IndexNode extends Node {
 	 * Constructor of an empty index node
 	 */
 	public IndexNode() {
+		super();
 		children = new ArrayList<Node>();
 		min=0;
 	}

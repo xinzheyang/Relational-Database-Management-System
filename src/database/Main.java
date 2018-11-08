@@ -32,7 +32,7 @@ public class Main {
 			String configFile = dirIn + File.separator + "plan_builder_config.txt";
 			DBCatalog.getCatalog().parseSchema(dbDir); //parse schema
 			if (interpConfigIn.readLine().equals("1")) { //should build indices
-				DBCatalog.buildIndices(dbDir);
+				DBCatalog.parseIndices(true);
 			}
 			if (interpConfigIn.readLine().equals("1")) { //should evaluate SQL queries
 				DBCatalog.getCatalog().parseConfig(configFile); //parse physical plan configuration
