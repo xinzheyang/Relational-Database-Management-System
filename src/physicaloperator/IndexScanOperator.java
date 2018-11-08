@@ -200,7 +200,7 @@ public class IndexScanOperator extends ScanOperator {
 			} else {
 				Tuple tuple = reader.getNextTuple();
 				String ref = this.alias == null ? tb : this.alias;
-				if (tuple.getColumnValue(getColumnIndex(ref + "." + indexCol)) > highKey) {
+				if (tuple == null || tuple.getColumnValue(getColumnIndex(ref + "." + indexCol)) > highKey) {
 					return null;
 				} else {
 					return tuple;
