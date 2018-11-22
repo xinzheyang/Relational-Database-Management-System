@@ -11,8 +11,6 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
 import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import physicaloperator.Operator;
-import physicaloperator.ScanOperator;
 /**
  * @author xinzheyang
  * A visitor that implements the FromItemVisitor.
