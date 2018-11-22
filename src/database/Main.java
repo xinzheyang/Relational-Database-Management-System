@@ -39,7 +39,6 @@ public class Main {
 				QueryParser queryParser = new QueryParser(qFile, dirOut);
 				DBCatalog.setTempDir(dirTemp);
 				queryParser.parse();
-				//TODO: change PPB to use index scan as well if indices built
 			}
 			interpConfigIn.close();
 			
