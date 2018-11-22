@@ -145,53 +145,37 @@ public class DBSelectVisitor implements SelectVisitor {
 
 
 		if (joins != null && joins.size() > 0) {
-//			LogicalJoinOperator left;
-//			FromItem firstRightItem = joins.get(0).getRightItem();
-//			ArrayList<FromItem> leftTable = new ArrayList<>();
-//			LogicalOperator initLeftOp = selectOperator == null ? scanOperator : selectOperator;
-//
-//			String fromItemReference = fromItem.getAlias() != null ? fromItem.getAlias() : fromItem.toString();
-//			String fromRightItemReference = firstRightItem.getAlias() != null ? firstRightItem.getAlias() : firstRightItem.toString();
-//			
-//			Expression conditionFirst = parseConjunctExpVisitor != null ? 
-//					parseConjunctExpVisitor.getJoinCondition(fromItemReference, fromRightItemReference) : null;
-//			left = new LogicalJoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem), conditionFirst);
-//
-//			leftTable.add(fromItem);
-//			leftTable.add(firstRightItem);
-//
-//			for (int i=1; i<joins.size(); i++) {
-//				Expression condition = null;
-//				FromItem rightItem = joins.get(i).getRightItem();
-//				LogicalOperator newScanSelect = buildScanSelectFromItem(rightItem);
-//				for (FromItem table:leftTable) {
-//					String tableItemReference = table.getAlias() != null ? table.getAlias() : table.toString();
-//					String rightItemReference = rightItem.getAlias() != null ? rightItem.getAlias() : rightItem.toString();
-//					Expression tempCondition = parseConjunctExpVisitor != null ? 
-//							parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference) : null;
-//					if (tempCondition != null)
-//						condition = condition == null ? tempCondition: new AndExpression(condition, tempCondition);
-//				}
-//				leftTable.add(rightItem);
-//				left = new LogicalJoinOperator(left, newScanSelect, condition);
-//			}
-//			joinOperator = left;
-//			
+			LogicalJoinOperator left;
+			FromItem firstRightItem = joins.get(0).getRightItem();
+			ArrayList<FromItem> leftTable = new ArrayList<>();
+			LogicalOperator initLeftOp = selectOperator == null ? scanOperator : selectOperator;
+
+			String fromItemReference = fromItem.getAlias() != null ? fromItem.getAlias() : fromItem.toString();
+			String fromRightItemReference = firstRightItem.getAlias() != null ? firstRightItem.getAlias() : firstRightItem.toString();
 			
-			ArrayList<LogicalOperator> joinChildren = new ArrayList<>();
-//			ArrayList<FromItem> leftTable = new ArrayList<>();
-			LogicalOperator initOp = selectOperator == null ? scanOperator : selectOperator;
-			joinChildren.add(initOp);
-//			leftTable.add(fromItem);
-			
-			
-			for (int i=0; i<joins.size(); i++) {
-//				Expression condition = null;
+			Expression conditionFirst = parseConjunctExpVisitor != null ? 
+					parseConjunctExpVisitor.getJoinCondition(fromItemReference, fromRightItemReference) : null;
+			left = new LogicalJoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem), conditionFirst);
+
+			leftTable.add(fromItem);
+			leftTable.add(firstRightItem);
+
+			for (int i=1; i<joins.size(); i++) {
+				Expression condition = null;
 				FromItem rightItem = joins.get(i).getRightItem();
 				LogicalOperator newScanSelect = buildScanSelectFromItem(rightItem);
-				joinChildren.add(newScanSelect);
+				for (FromItem table:leftTable) {
+					String tableItemReference = table.getAlias() != null ? table.getAlias() : table.toString();
+					String rightItemReference = rightItem.getAlias() != null ? rightItem.getAlias() : rightItem.toString();
+					Expression tempCondition = parseConjunctExpVisitor != null ? 
+							parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference) : null;
+					if (tempCondition != null)
+						condition = condition == null ? tempCondition: new AndExpression(condition, tempCondition);
+				}
+				leftTable.add(rightItem);
+				left = new LogicalJoinOperator(left, newScanSelect, condition);
 			}
-			joinOperator = new LogicalJoinOperator(joinChildren, expression);
+			joinOperator = left;
 		}
 
 		if (selectItems != null && selectItems.size() > 0) {

@@ -3,8 +3,6 @@
  */
 package logicaloperator;
 
-import java.util.List;
-
 import net.sf.jsqlparser.expression.Expression;
 import visitor.PhysicalPlanBuilder;
 
@@ -14,40 +12,33 @@ import visitor.PhysicalPlanBuilder;
  * to be visited by PhysicalPlanBuilder to transform into a physical plan builder
  */
 public class LogicalJoinOperator extends LogicalOperator {
-//	private LogicalOperator leftChild;
-//	private LogicalOperator rightChild;
-	private List<LogicalOperator> joinChildren;
+	private LogicalOperator leftChild;
+	private LogicalOperator rightChild;
 	private Expression joinCondition;
-	
-	public LogicalJoinOperator(List<LogicalOperator> joinCh, Expression condition) {
+	/**
+	 * 
+	 */
+//	public LogicalJoinOperator(LogicalOperator left, LogicalOperator right) {
 //		leftChild = left;
 //		rightChild = right;
-		joinChildren = joinCh;
+//	}
+	
+	public LogicalJoinOperator(LogicalOperator left, LogicalOperator right, Expression condition) {
+		leftChild = left;
+		rightChild = right;
 		joinCondition = condition;
 	}
 
-//	public LogicalOperator getLeftChild() {
-//		return leftChild;
-//	}
-//
-//	public LogicalOperator getRightChild() {
-//		return rightChild;
-//	}
-	
-	
-
-	/**
-	 * @return the joinCondition
-	 */
-	public Expression getJoinCondition() {
-		return joinCondition;
+	public LogicalOperator getLeftChild() {
+		return leftChild;
 	}
 
-	/**
-	 * @return the joinChildren
-	 */
-	public List<LogicalOperator> getJoinChildren() {
-		return joinChildren;
+	public LogicalOperator getRightChild() {
+		return rightChild;
+	}
+
+	public Expression getJoinCondition() {
+		return joinCondition;
 	}
 
 	/* (non-Javadoc)
