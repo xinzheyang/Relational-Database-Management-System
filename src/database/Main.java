@@ -31,6 +31,7 @@ public class Main {
 			String qFile = dirIn + File.separator + "queries.sql";
 			String configFile = dirIn + File.separator + "plan_builder_config.txt";
 			DBCatalog.getCatalog().parseSchema(dbDir); //parse schema
+			DBCatalog.gatherStats(); //gather stats
 			if (interpConfigIn.readLine().equals("1")) { //should build indices
 				DBCatalog.parseIndices(true);
 			}

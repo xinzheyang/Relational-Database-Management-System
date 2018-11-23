@@ -208,5 +208,41 @@ public class DBCatalog {
 			builtIndex = true; //set built index to true whenever this function is called and indices are successfully built.
 		indexInfoIn.close();
 	}
+	
+	/** Gathers statistics of all relations in this database, put statistics in db/stats.txt.
+	 * @throws IOException 
+	 * 
+	 */
+	public static void gatherStats() throws IOException {
+		BufferedWriter stats = new BufferedWriter(new FileWriter(dbDir + File.separator + "stats.txt"));
+		assert DBCatalog.schemaMap != null;
+		for (String tb : DBCatalog.schemaMap.keySet()) {
+			String[] schema = DBCatalog.schemaMap.get(tb);
+			TupleReader read = new TupleReader(DBCatalog.getTableLoc(tb));
+			Tuple tup;
+			int[][] colValBounds = new int[schema.length][2]; //for each column, correspond to [upper, lower]
+			for (int i = 0; i < colValBounds.length; i++) {
+				colValBounds[i] = new int[] {Integer.MIN_VALUE, Integer.MAX_VALUE};
+			}
+			int tupCount = 0;
+			while ((tup = read.getNextTuple()) != null) {
+				for (int j = 0; j < tup.getColValues().length; j++) {
+					int colVal = tup.getColumnValue(j);
+					if (colVal > colValBounds[j][0]) colValBounds[j][0] = colVal; //update upper bound
+					if (colVal < colValBounds[j][1]) colValBounds[j][1] = colVal; //update lower bound
+				}
+				tupCount++;
+			}
+			read.close();
+			StringBuilder buildStr = new StringBuilder(tb + " " + tupCount + " ");
+			
+			for (int i = 0; i < schema.length; i++) {
+				buildStr.append(schema[i] + "," + colValBounds[i][1] + "," + colValBounds[i][0]);
+			}
+			
+			stats.write(buildStr.toString());
+		}
+		stats.close();
+	}
 
 }
