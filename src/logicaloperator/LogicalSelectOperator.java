@@ -13,6 +13,9 @@ import visitor.PhysicalPlanBuilder;
  */
 public class LogicalSelectOperator extends LogicalOperator {
 	private LogicalOperator childOp;
+	private int reductionFactor; //reduction factor calculated from select condition
+	private Expression ex;
+	
 	public LogicalOperator getChildOp() {
 		return childOp;
 	}
@@ -20,14 +23,28 @@ public class LogicalSelectOperator extends LogicalOperator {
 	public Expression getEx() {
 		return ex;
 	}
-
-	private Expression ex;
+	
 	/**
 	 * 
 	 */
 	public LogicalSelectOperator(LogicalOperator child, Expression exp) {
 		childOp = child;
 		ex = exp;
+	}
+	
+	/** Sets the reduction factor of this instance.
+	 * @param reductionFactor
+	 */
+	public void setReductionFactor(int reductionFactor) {
+		this.reductionFactor = reductionFactor;
+	}
+	
+	/** Gets the relation size of this select operator.
+	 * @return
+	 * @throws Exception 
+	 */
+	public int getRelationSize() throws Exception {
+		return ((LogicalScanOperator) childOp).getRelationSize() * reductionFactor;
 	}
 
 	/* (non-Javadoc)

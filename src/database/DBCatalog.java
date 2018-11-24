@@ -91,6 +91,10 @@ public class DBCatalog {
 		return indexDir + File.separator + tableName + "." + getIndexKey(tableName);
 	}
 	
+	public static String getStatsFileLoc() {
+		return dbDir + File.separator + "stats.txt";
+	}
+	
 	public static String getOutputDir() {
 		return outputDir;
 	}
