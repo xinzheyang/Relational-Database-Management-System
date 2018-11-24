@@ -13,7 +13,7 @@ import visitor.PhysicalPlanBuilder;
  */
 public class LogicalSelectOperator extends LogicalOperator {
 	private LogicalOperator childOp;
-	private int reductionFactor; //reduction factor calculated from select condition
+	private int totalReductionFactor; //reduction factor calculated from select condition
 	private Expression ex;
 	
 	public LogicalOperator getChildOp() {
@@ -32,11 +32,16 @@ public class LogicalSelectOperator extends LogicalOperator {
 		ex = exp;
 	}
 	
+	public int computeReductionFactor(String attrib) {
+		//TODO: xinqi: implement this
+		return -1;
+	}
+	
 	/** Sets the reduction factor of this instance.
 	 * @param reductionFactor
 	 */
 	public void setReductionFactor(int reductionFactor) {
-		this.reductionFactor = reductionFactor;
+		this.totalReductionFactor = reductionFactor;
 	}
 	
 	/** Gets the relation size of this select operator.
@@ -44,7 +49,20 @@ public class LogicalSelectOperator extends LogicalOperator {
 	 * @throws Exception 
 	 */
 	public int getRelationSize() throws Exception {
-		return ((LogicalScanOperator) childOp).getRelationSize() * reductionFactor;
+		return ((LogicalScanOperator) childOp).getRelationSize() * totalReductionFactor;
+	}
+	
+	/** Computes and returns the V-value of this selection on the given attribute
+	 * from its base table's V-value on the attribute multiplied by the reduction factor
+	 * of this attribute, adding an upper bound of the selection's output relation size.
+	 * @param attrib
+	 * @return
+	 * @throws Exception 
+	 */
+	public int getVValue(String attrib) throws Exception {
+		//TODO: implement this
+		int reductionFactor = computeReductionFactor(attrib);
+		return Math.min(getRelationSize(),  ((LogicalScanOperator) childOp).getVValue(attrib) * reductionFactor);
 	}
 
 	/* (non-Javadoc)

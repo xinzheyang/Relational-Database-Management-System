@@ -54,6 +54,10 @@ public class JoinOrderOptimizer {
 		subsetCostMetrics.add(sizeOneMap);
 	}
 	
+	public List<LogicalOperator> getBestOrder() {
+		return finalOrder;
+	}
+	
 	/** Chooses the best join order of the instance's logical operator by the bottom-up
 	 * dynamic programming approach.
 	 */
@@ -123,11 +127,11 @@ public class JoinOrderOptimizer {
 			this.rightOp = rightOp;
 		}
 		
-		/** Computes recursively the plan cost of this instance from the cost of its left child
-		 * (joinOrder[:-1]) plus the size of the relation produced as the result of 
-		 * the left child.
+		/** Computes the plan cost of this join from the left child's best plan cost and its
+		 * relation size.
 		 */
 		public void computePlanCost() {
+			planCost = leftRelations.bestPlanCost + leftRelations.relationSize; 
 //			if (joinOrder.size() <= 2) {
 //				planCost = 0;
 //				if (joinOrder.size() == 2) {
@@ -152,12 +156,20 @@ public class JoinOrderOptimizer {
 			//TODO: calculate relation size of current join order
 		}
 		
-		/** Computes the intermediate relation size of left-deep-joining the first n-1 tables as
+		/** 3.4.3 Computes the intermediate relation size of left-deep-joining the first n-1 tables as
 		 * the left relation and the nth table as the right relation. Stores the result in the 
 		 * relationSize field.
 		 */
 		public void computeJoinSize() {
+			//TODO: implement this
 			relationSize = 0;
+		}
+		
+		/** 3.4.4 Computes the V value of this join relation on the given attribute.
+		 * @param attrib
+		 */
+		public void computeVValue(String attrib) {
+			//TODO: implement this
 		}
 		
 		public int getPlanCost() {

@@ -241,10 +241,10 @@ public class DBCatalog {
 			StringBuilder buildStr = new StringBuilder(tb + " " + tupCount + " ");
 			
 			for (int i = 0; i < schema.length; i++) {
-				buildStr.append(schema[i] + "," + colValBounds[i][1] + "," + colValBounds[i][0]);
+				buildStr.append(schema[i] + "," + colValBounds[i][1] + "," + colValBounds[i][0] + " ");
 			}
 			
-			stats.write(buildStr.toString());
+			stats.write(buildStr.toString().trim());
 		}
 		stats.close();
 	}
