@@ -67,7 +67,7 @@ public class PhysicalPlanBuilder {
 	 *            which physical Join operators to construct
 	 */
 	public void visit(LogicalJoinOperator op) {
-		// TODO: refractor PPB to left deep
+		// TODO: refractor PPB to left deep join tree
 		op.getLeftChild().accept(this);
 		Operator left = operator;
 		op.getRightChild().accept(this);

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import datastructure.UnionFind;
 import logicaloperator.*;
 
 /**
@@ -183,6 +184,12 @@ public class DBSelectVisitor implements SelectVisitor {
 			joinChildren.add(initOp);
 //			leftTable.add(fromItem);
 			
+			UnionFindVisitor unionFindVisitor = new UnionFindVisitor();
+			if (expression != null) {
+				expression.accept(unionFindVisitor);
+			}
+			UnionFind uFind = unionFindVisitor.getUnionFind();
+			Expression unusable = unionFindVisitor.getNormalSelect();
 			
 			for (int i=0; i<joins.size(); i++) {
 //				Expression condition = null;
