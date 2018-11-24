@@ -58,7 +58,7 @@ public class JoinOrderOptimizer {
 		return finalOrder;
 	}
 	
-	/** Chooses the best join order of the instance's logical operator by the bottom-up
+	/** 3.4.1 Chooses the best join order of the instance's logical operator by the bottom-up
 	 * dynamic programming approach.
 	 */
 	private void dpChooseBestPlan() {
@@ -76,7 +76,7 @@ public class JoinOrderOptimizer {
 				HashSet<LogicalOperator> leftRelations = new HashSet<LogicalOperator>(subsetsBySize.get(i));
 				leftRelations.remove(op);
 				CostMetric lastBest = subsetCostMetrics.get(i - 1).get(leftRelations);
-				PlanCostCompute comp = new PlanCostCompute(lastBest, op);
+				PlanCostCompute comp = new PlanCostCompute(lastBest, leftRelations, op);
 				comp.computePlanCost();
 				comp.computeJoinSize();
 				if (comp.getPlanCost() < bestPlanCost) {
@@ -117,51 +117,39 @@ public class JoinOrderOptimizer {
 	private class PlanCostCompute {
 		
 		private CostMetric leftRelations; //all logical operators are either scan or select
+		private HashSet<LogicalOperator> leftChildren;
 		private LogicalOperator rightOp;
-//		private List<Expression> joinCondition; //join conditions of left deep joins in order
 		private int planCost;
 		private int relationSize;
 		
-		public PlanCostCompute(CostMetric leftRelations, LogicalOperator rightOp) {
-			this.leftRelations = leftRelations;
+		public PlanCostCompute(CostMetric leftCostMetric, HashSet<LogicalOperator> leftChildren, LogicalOperator rightOp) {
+			this.leftRelations = leftCostMetric;
+			this.leftChildren = leftChildren;
 			this.rightOp = rightOp;
 		}
 		
-		/** Computes the plan cost of this join from the left child's best plan cost and its
+		/** 3.4.2 Computes the plan cost of this join from the left child's best plan cost and its
 		 * relation size.
 		 */
 		public void computePlanCost() {
 			planCost = leftRelations.bestPlanCost + leftRelations.relationSize; 
-//			if (joinOrder.size() <= 2) {
-//				planCost = 0;
-//				if (joinOrder.size() == 2) {
-//					JoinSizeCompute comp = new JoinSizeCompute(joinOrder.get(0), joinOrder.get(1), joinConditions.get(0));
-//					relationSize = comp.computeJoinSize();
-//					CostMetric curCostMetric = new CostMetric();
-//					curCostMetric.bestPlanCost = planCost;
-//					curCostMetric.relationSize = relationSize;
-//					if (subsetCostMetrics.size() == 2) { //size 2 subset uninitialized, create a new one
-//						HashMap<HashSet<LogicalOperator>, CostMetric> newSubset = new HashMap<HashSet<LogicalOperator>, CostMetric>();
-//						newSubset.put(joinOrder, curCostMetric);
-//						subsetCostMetrics.add(newSubset);
-//					} else if (subsetCostMetrics.size() == 3) {//size 2 subset already initialized, create
-//						subsetCostMetrics.get(2).put(joinOrder, curCostMetric);
-//					}
-//				}
-//				return;
-//			}
-//			PlanCostCompute leftCompute = new PlanCostCompute(joinOrder.subList(0, joinOrder.size() - 1));
-//			leftCompute.computePlanCost();
-//			planCost = leftCompute.getPlanCost() + leftCompute.getJoinRelationSize();
+
 			//TODO: calculate relation size of current join order
 		}
 		
-		/** 3.4.3 Computes the intermediate relation size of left-deep-joining the first n-1 tables as
-		 * the left relation and the nth table as the right relation. Stores the result in the 
-		 * relationSize field.
+		/** 3.4.3 Computes the intermediate relation size of the left relation joining the right logical
+		 * operator. The estimate of the join size is computed by dividing the product of the left and 
+		 * right relation sizes by product of V-values on all attributes the two relations are joined with.
 		 */
 		public void computeJoinSize() {
 			//TODO: implement this
+			int rightRelationSize = -1;
+			if (rightOp instanceof LogicalScanOperator) {
+				rightRelationSize = ((LogicalScanOperator) rightOp).getRelationSize();
+			} else if (rightOp instanceof LogicalSelectOperator) {
+				rightRelationSize = ((LogicalSelectOperator) rightOp).getRelationSize();
+			}
+			int leftRelationSize = leftRelations.relationSize;
 			relationSize = 0;
 		}
 		

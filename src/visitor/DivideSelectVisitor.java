@@ -106,29 +106,19 @@ public class DivideSelectVisitor implements ExpressionVisitor {
 	}
 
 	@Override
-	public void visit(NullValue nullValue) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(NullValue nullValue) { throw new UnsupportedOperationException("not supported"); }
 
 	@Override
-	public void visit(Function function) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(Function function) { throw new UnsupportedOperationException("not supported"); }
 
 	@Override
-	public void visit(InverseExpression inverseExpression) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(InverseExpression inverseExpression) { throw new UnsupportedOperationException("not supported"); }
 
 	@Override
-	public void visit(JdbcParameter jdbcParameter) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(JdbcParameter jdbcParameter) { throw new UnsupportedOperationException("not supported"); }
 
 	@Override
-	public void visit(DoubleValue doubleValue) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(DoubleValue doubleValue) { throw new UnsupportedOperationException("not supported"); }
 
 	/*
 	 * (non-Javadoc)
@@ -144,71 +134,46 @@ public class DivideSelectVisitor implements ExpressionVisitor {
 	}
 
 	@Override
-	public void visit(DateValue dateValue) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(DateValue dateValue) { throw new UnsupportedOperationException("not supported"); }
 
 	@Override
-	public void visit(TimeValue timeValue) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(TimeValue timeValue) { throw new UnsupportedOperationException("not supported"); }
 
 	@Override
-	public void visit(TimestampValue timestampValue) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(TimestampValue timestampValue) { throw new UnsupportedOperationException("not supported"); }
 
 	@Override
-	public void visit(Parenthesis parenthesis) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(Parenthesis parenthesis) { throw new UnsupportedOperationException("not supported"); }
 
 	@Override
-	public void visit(StringValue stringValue) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(StringValue stringValue) { throw new UnsupportedOperationException("not supported"); }
 
 	@Override
-	public void visit(Addition addition) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(Addition addition) { throw new UnsupportedOperationException("not supported"); }
 
 	@Override
-	public void visit(Division division) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(Division division) { throw new UnsupportedOperationException("not supported"); }
 
 	@Override
-	public void visit(Multiplication multiplication) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(Multiplication multiplication) { throw new UnsupportedOperationException("not supported"); }
 
 	@Override
-	public void visit(Subtraction subtraction) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(Subtraction subtraction) { throw new UnsupportedOperationException("not supported"); }
 
+	/* (non-Javadoc)
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.conditional.AndExpression)
+	 */
 	@Override
 	public void visit(AndExpression andExpression) {
 		andExpression.getLeftExpression().accept(this);
 		andExpression.getRightExpression().accept(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.
-	 * expression.operators.conditional.OrExpression)
-	 */
 	@Override
-	public void visit(OrExpression orExpression) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(OrExpression orExpression) { throw new UnsupportedOperationException("not supported"); }
 
 	@Override
-	public void visit(Between between) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(Between between) { throw new UnsupportedOperationException("not supported"); }
 
 	/*
 	 * (non-Javadoc)
@@ -290,27 +255,14 @@ public class DivideSelectVisitor implements ExpressionVisitor {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.
-	 * expression.operators.relational.InExpression)
-	 */
 	@Override
-	public void visit(InExpression inExpression) {
-		throw new UnsupportedOperationException("not supported");
-	}
-
+	public void visit(InExpression inExpression) { throw new UnsupportedOperationException("not supported"); }
+	
 	@Override
-	public void visit(IsNullExpression isNullExpression) {
-		throw new UnsupportedOperationException("not supported");
-	}
-
+	public void visit(IsNullExpression isNullExpression) { throw new UnsupportedOperationException("not supported"); }
+	
 	@Override
-	public void visit(LikeExpression likeExpression) {
-		throw new UnsupportedOperationException("not supported");
-	}
-
+	public void visit(LikeExpression likeExpression) { throw new UnsupportedOperationException("not supported"); }
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -384,125 +336,37 @@ public class DivideSelectVisitor implements ExpressionVisitor {
 		isInt = false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.
-	 * statement.select.SubSelect)
-	 */
 	@Override
-	public void visit(SubSelect subSelect) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(SubSelect subSelect) { throw new UnsupportedOperationException("not supported"); }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.
-	 * expression.CaseExpression)
-	 */
 	@Override
-	public void visit(CaseExpression caseExpression) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(CaseExpression caseExpression) { throw new UnsupportedOperationException("not supported"); }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.
-	 * expression.WhenClause)
-	 */
 	@Override
-	public void visit(WhenClause whenClause) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(WhenClause whenClause) { throw new UnsupportedOperationException("not supported"); }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.
-	 * expression.operators.relational.ExistsExpression)
-	 */
 	@Override
-	public void visit(ExistsExpression existsExpression) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(ExistsExpression existsExpression) { throw new UnsupportedOperationException("not supported"); }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.
-	 * expression.AllComparisonExpression)
-	 */
 	@Override
-	public void visit(AllComparisonExpression allComparisonExpression) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(AllComparisonExpression allComparisonExpression) { throw new UnsupportedOperationException("not supported"); }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.
-	 * expression.AnyComparisonExpression)
-	 */
 	@Override
-	public void visit(AnyComparisonExpression anyComparisonExpression) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(AnyComparisonExpression anyComparisonExpression) { throw new UnsupportedOperationException("not supported"); }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.
-	 * expression.operators.arithmetic.Concat)
-	 */
 	@Override
-	public void visit(Concat concat) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(Concat concat) { throw new UnsupportedOperationException("not supported"); }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.
-	 * expression.operators.relational.Matches)
-	 */
 	@Override
-	public void visit(Matches matches) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(Matches matches) { throw new UnsupportedOperationException("not supported"); }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.
-	 * expression.operators.arithmetic.BitwiseAnd)
-	 */
 	@Override
-	public void visit(BitwiseAnd bitwiseAnd) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(BitwiseAnd bitwiseAnd) { throw new UnsupportedOperationException("not supported"); }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.
-	 * expression.operators.arithmetic.BitwiseOr)
-	 */
 	@Override
-	public void visit(BitwiseOr bitwiseOr) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(BitwiseOr bitwiseOr) { throw new UnsupportedOperationException("not supported"); }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.
-	 * expression.operators.arithmetic.BitwiseXor)
-	 */
 	@Override
-	public void visit(BitwiseXor bitwiseXor) {
-		throw new UnsupportedOperationException("not supported");
-	}
+	public void visit(BitwiseXor bitwiseXor) { throw new UnsupportedOperationException("not supported"); }
 
 }

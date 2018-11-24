@@ -44,11 +44,11 @@ public class LogicalSelectOperator extends LogicalOperator {
 		this.totalReductionFactor = reductionFactor;
 	}
 	
-	/** Gets the relation size of this select operator.
+	/** Gets the relation size, in tuples, of this select operator.
 	 * @return
 	 * @throws Exception 
 	 */
-	public int getRelationSize() throws Exception {
+	public int getRelationSize() {
 		return ((LogicalScanOperator) childOp).getRelationSize() * totalReductionFactor;
 	}
 	
