@@ -3,6 +3,10 @@
  */
 package visitor;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+
 import datastructure.UnionElement;
 import datastructure.UnionFind;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
@@ -58,15 +62,34 @@ public class UnionFindVisitor implements ExpressionVisitor {
 	private String attr;
 	private boolean isInt = false;
 	private AndExpression normalSelect = null;
+	/**
+	 * table reference -> list of attributes of the table that appear in equal join
+	 * conditions
+	 */
+	private HashMap<String, List<String>> eqJoinAttrMap;
 
 	/**
 	 * 
 	 */
 	public UnionFindVisitor() {
 		unionFind = new UnionFind();
+		eqJoinAttrMap = new HashMap<>();
 	}
 	
-	
+
+	/**
+	 * @param table
+	 *            the table reference
+	 * @return list of attributes of the table that appear in equal join conditions
+	 */
+	public List<String> getEqJoinAttrByReference(String table) {
+		if (eqJoinAttrMap != null) {
+			return eqJoinAttrMap.get(table);
+		} else {
+			return null;
+		}
+	}
+
 	/**
 	 * @return the unionFind
 	 */
@@ -187,6 +210,22 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		throw new UnsupportedOperationException("not supported");
 	}
 
+	
+	/**
+	 * @param key the attribute that acts as an key in eqJoinAttrMap
+	 * @param val the attribute to be added in the value in eqJoinAttrMap
+	 */
+	private void updateEqJoinAttrMap(String key, String val) {
+		if (eqJoinAttrMap.containsKey(key)) {
+			eqJoinAttrMap.get(key).add(val);
+		} else {
+			List<String> newAttrs = new LinkedList<>();
+			newAttrs.add(val);
+			eqJoinAttrMap.put(key, newAttrs);
+		}
+	}
+	
+	
 	@Override
 	public void visit(EqualsTo equalsTo) {
 		equalsTo.getLeftExpression().accept(this);
@@ -200,6 +239,10 @@ public class UnionFindVisitor implements ExpressionVisitor {
 
 		if (!leftIsInt && !rightIsInt) {
 			unionFind.unite(unionFind.find(leftAttr), unionFind.find(rightAttr));
+			
+			updateEqJoinAttrMap(leftAttr, rightAttr);
+			updateEqJoinAttrMap(rightAttr, leftAttr);
+			
 		} else if (!leftIsInt && rightIsInt) {
 			UnionElement left = unionFind.find(leftAttr);
 			left.setEquality(rightValue);
