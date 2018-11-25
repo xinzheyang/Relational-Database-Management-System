@@ -3,8 +3,6 @@
  */
 package visitor;
 
-import java.io.FileNotFoundException;
-
 import logicaloperator.LogicalOperator;
 import logicaloperator.LogicalScanOperator;
 import net.sf.jsqlparser.schema.Table;
@@ -43,8 +41,9 @@ public class DBFromItemVisitor implements FromItemVisitor {
 			LogicalScanOperator scanOperator;
 			scanOperator = new LogicalScanOperator(tableName.getName(), tableName.getAlias());
 			operator = scanOperator;
-		} catch (FileNotFoundException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			System.err.println("error occurred in visit tablename in DBFromItemVisitor");
 		}
 		
 	}
