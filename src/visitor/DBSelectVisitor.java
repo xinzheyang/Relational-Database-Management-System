@@ -163,10 +163,10 @@ public class DBSelectVisitor implements SelectVisitor {
 //			for (int i=1; i<joins.size(); i++) {
 //				Expression condition = null;
 //				FromItem rightItem = joins.get(i).getRightItem();
+//				String rightItemReference = rightItem.getAlias() != null ? rightItem.getAlias() : rightItem.toString();
 //				LogicalOperator newScanSelect = buildScanSelectFromItem(rightItem);
 //				for (FromItem table:leftTable) {
 //					String tableItemReference = table.getAlias() != null ? table.getAlias() : table.toString();
-//					String rightItemReference = rightItem.getAlias() != null ? rightItem.getAlias() : rightItem.toString();
 //					Expression tempCondition = parseConjunctExpVisitor != null ? 
 //							parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference) : null;
 //					if (tempCondition != null)

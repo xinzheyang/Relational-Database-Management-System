@@ -19,6 +19,8 @@ public class DBCatalog {
 	
 	private static HashMap<String, String[]> schemaMap; //
 	private static HashMap<String, String[]> treeIndexMap;
+	private static HashMap<String, Integer> baseTableTupleCountMap; //table name --> tuple count
+	private static HashMap<String, HashMap<String, int[]>> attributeBoundsMap; //table name --> <attribute --> [min, max]>
 	private static String dbDir;
 	private static String locDir;
 	private static String indexDir;
@@ -143,6 +145,24 @@ public class DBCatalog {
 		return Integer.parseInt(sortMethod[1]);
 	}
 	
+	/** Gets the relation size of the given table name, in number of tuples.
+	 * @param tb
+	 * @return relation size
+	 */
+	public static int getRelationSize(String tb) {
+		assert baseTableTupleCountMap.containsKey(tb);
+		return baseTableTupleCountMap.get(tb);
+	}
+	
+	/** Gets the hashmap storing all attribute bounds of the given table.
+	 * @param tb
+	 * @return
+	 */
+	public static HashMap<String, int[]> getAttribBounds(String tb) {
+		assert attributeBoundsMap.containsKey(tb);
+		return (HashMap<String, int[]>) attributeBoundsMap.get(tb).clone();
+	}
+	
 	public static boolean useIndex() {
 		return useIndex;
 	}
@@ -238,11 +258,15 @@ public class DBCatalog {
 				tupCount++;
 			}
 			read.close();
+			DBCatalog.baseTableTupleCountMap.put(tb, tupCount);
 			StringBuilder buildStr = new StringBuilder(tb + " " + tupCount + " ");
 			
+			HashMap<String, int[]> curAttribBounds = new HashMap<String, int[]>(); //storing all attribute bounds for this table
 			for (int i = 0; i < schema.length; i++) {
+				curAttribBounds.put(schema[i], colValBounds[i].clone());
 				buildStr.append(schema[i] + "," + colValBounds[i][1] + "," + colValBounds[i][0] + " ");
 			}
+			DBCatalog.attributeBoundsMap.put(tb, curAttribBounds);
 			
 			stats.write(buildStr.toString().trim());
 		}
