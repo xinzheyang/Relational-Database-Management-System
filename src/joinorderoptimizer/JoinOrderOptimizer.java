@@ -6,6 +6,7 @@ package joinorderoptimizer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 
 import logicaloperator.LogicalJoinOperator;
@@ -13,6 +14,8 @@ import logicaloperator.LogicalOperator;
 import logicaloperator.LogicalScanOperator;
 import logicaloperator.LogicalSelectOperator;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import visitor.ParseConjunctExpVisitor;
 
 /**
  * @author sitianchen
@@ -23,12 +26,14 @@ public class JoinOrderOptimizer {
 	private LogicalJoinOperator joinOp;
 	private List<HashMap<HashSet<LogicalOperator>, CostMetric>> subsetCostMetrics; //cost and relation size of best plan for all subsets 
 	private List<LogicalOperator> finalOrder;
+	private ParseConjunctExpVisitor visitor;
+//	private HashMap<List<String>, Expression> joinMap;
 	
-	/**
+	/** Given the logical join operator and join map (or construct one if null)
 	 * @param joinOperator
 	 * @throws Exception
 	 */
-	public JoinOrderOptimizer(LogicalJoinOperator joinOperator) throws Exception {
+	public JoinOrderOptimizer(LogicalJoinOperator joinOperator, ParseConjunctExpVisitor visitor) throws Exception {
 		joinOp = joinOperator;
 		subsetCostMetrics = new ArrayList<HashMap<HashSet<LogicalOperator>, CostMetric>>();
 		subsetCostMetrics.add(null); //initialize 0th denoting size 0 subset, and is null
@@ -83,7 +88,7 @@ public class JoinOrderOptimizer {
 					bestPlanCost = comp.getPlanCost();
 					relationSize = comp.getJoinRelationSize();
 					optimalRightOp = op;
-					leftBestOrder = new ArrayList<LogicalOperator>(lastBest.bestJoinOrder);
+					leftBestOrder = new LinkedList<LogicalOperator>(lastBest.bestJoinOrder);
 				}
 			}
 			
@@ -114,6 +119,11 @@ public class JoinOrderOptimizer {
 		enumerateSubsets(lst, tmp, res, currElemIndex + 1);
 	}
 	
+	/** A private class belongs to the join order optimizer to assist with plan cost and intermediate relation size
+	 * computation.
+	 * @author sitianchen
+	 *
+	 */
 	private class PlanCostCompute {
 		
 		private CostMetric leftRelations; //all logical operators are either scan or select
@@ -121,11 +131,33 @@ public class JoinOrderOptimizer {
 		private LogicalOperator rightOp;
 		private int planCost;
 		private int relationSize;
+		private Expression joinCondition;
 		
 		public PlanCostCompute(CostMetric leftCostMetric, HashSet<LogicalOperator> leftChildren, LogicalOperator rightOp) {
 			this.leftRelations = leftCostMetric;
 			this.leftChildren = leftChildren;
 			this.rightOp = rightOp;
+			joinCondition = null;
+			//extracts the join condition for this join
+			String rightRef = null;
+			if (rightOp instanceof LogicalScanOperator) {
+				rightRef = ((LogicalScanOperator) rightOp).getReference();
+			} else if (rightOp instanceof LogicalSelectOperator) {
+				rightRef = ((LogicalSelectOperator) rightOp).getReference();
+			}
+			Expression condition = null;
+			for (LogicalOperator leftChild : leftChildren) {
+				String leftRef = null;
+				if (leftChild instanceof LogicalScanOperator) {
+					leftRef = ((LogicalScanOperator) leftChild).getReference();
+				} else if (rightOp instanceof LogicalSelectOperator) {
+					leftRef = ((LogicalSelectOperator) rightOp).getReference();
+				}
+				Expression tempCondition = visitor.getJoinCondition(leftRef, rightRef); 
+				//gets the join exp of every left child with the right child
+				condition = condition == null ? tempCondition : new AndExpression(condition, tempCondition);
+				//AND them all together to get the final join condition
+			}
 		}
 		
 		/** 3.4.2 Computes the plan cost of this join from the left child's best plan cost and its
@@ -150,6 +182,9 @@ public class JoinOrderOptimizer {
 				rightRelationSize = ((LogicalSelectOperator) rightOp).getRelationSize();
 			}
 			int leftRelationSize = leftRelations.relationSize;
+			//use UF to get all mappings of table -> attributes joined on equality in the join condition.
+			//compute V-values on these attributes.
+			//clamp down V-value by relation size
 			relationSize = 0;
 		}
 		

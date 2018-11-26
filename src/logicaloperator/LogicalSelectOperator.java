@@ -19,6 +19,10 @@ public class LogicalSelectOperator extends LogicalOperator {
 	public LogicalOperator getChildOp() {
 		return childOp;
 	}
+	
+	public String getReference() {
+		return ((LogicalScanOperator) childOp).getReference();
+	}
 
 	public Expression getEx() {
 		return ex;
