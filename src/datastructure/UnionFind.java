@@ -4,6 +4,7 @@
 package datastructure;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -34,6 +35,14 @@ public class UnionFind {
 		return i;
 	}
 	
+	
+	/**
+	 * @return the values of rootElementMap, i.e. all UnionElements
+	 */
+	public Collection<UnionElement> getRootElementMap() {
+		return rootElementMap.values();
+	}
+
 	/**
 	 * @param attr
 	 * @return
@@ -75,25 +84,26 @@ public class UnionFind {
 		e.setEquality(eq);
 	}
 	
-//	private void debug() {
-//		System.out.println(idArray);
-//		System.out.println(idMap);
-//		System.out.println(rootElementMap);
-//		System.out.println("=========");
-//	}
-//	public static void main(String[] args) {
-//		UnionFind uFind = new UnionFind();
-//		uFind.find("RA");
-//		uFind.debug();
-//		
-//		UnionElement ra = uFind.find("RA");
-//		UnionElement rb = uFind.find("RB");
-//		System.out.println(ra.getAttributes());
-//		System.out.println(rb.getAttributes());
-//		uFind.debug();
-//		uFind.unite(ra, rb);
-//		uFind.debug();
-//		rb = uFind.find("RB");
+	private void debug() {
+		System.out.println(idArray);
+		System.out.println(idMap);
+		System.out.println(rootElementMap);
+		System.out.println("=========");
+	}
+	public static void main(String[] args) {
+		UnionFind uFind = new UnionFind();
+		uFind.find("RA");
+		uFind.debug();
+		
+		UnionElement ra = uFind.find("RA");
+		UnionElement rb = uFind.find("RB");
+		System.out.println(ra.getAttributes());
+		System.out.println(rb.getAttributes());
+		uFind.debug();
+		uFind.unite(ra, rb);
+		uFind.debug();
+		rb = uFind.find("RB");
+		System.out.println(rb.getAttributes());
 //		UnionElement rc = uFind.find("RC");
 //		uFind.unite(rb, rc);
 //		uFind.debug();
@@ -109,7 +119,7 @@ public class UnionFind {
 //		sd = uFind.find("SD");
 //		uFind.unite(ra, sd);
 //		uFind.debug();
-//	}
+	}
 }
 
 
