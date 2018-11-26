@@ -63,7 +63,7 @@ public class LogicalSelectOperator extends LogicalOperator {
 	 * @return
 	 * @throws Exception 
 	 */
-	public int getVValue(String attrib) throws Exception {
+	public int getVValue(String attrib) {
 		//TODO: implement this
 		int reductionFactor = computeReductionFactor(attrib);
 		return Math.min(getRelationSize(),  ((LogicalScanOperator) childOp).getVValue(attrib) * reductionFactor);

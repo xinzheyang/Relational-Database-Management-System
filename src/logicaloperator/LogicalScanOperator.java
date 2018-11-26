@@ -82,7 +82,7 @@ public class LogicalScanOperator extends LogicalOperator {
 	 * @return
 	 * @throws Exception
 	 */
-	public int getVValue(String attrib) throws Exception {
+	public int getVValue(String attrib) {
 		assert attribBounds.containsKey(attrib); //assert attribute name validity
 		int[] bounds = attribBounds.get(attrib);
 		return bounds[1] - bounds[0] + 1;
