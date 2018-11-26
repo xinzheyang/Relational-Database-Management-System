@@ -6,12 +6,14 @@ package datastructure;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.sf.jsqlparser.schema.Column;
+
 /**
  * @author xinzheyang a protected class that houses information of a union
  *         element
  */
 public class UnionElement {
-	private List<String> attributes;
+	private List<Column> attributes;
 	private Integer lower;
 	private Integer upper;
 	private Integer equality;
@@ -26,21 +28,21 @@ public class UnionElement {
 	/**
 	 * @return the attributes
 	 */
-	public List<String> getAttributes() {
+	public List<Column> getAttributes() {
 		return attributes;
 	}
 
 	/**
 	 * @param attributes the attributes to set
 	 */
-	public void setAttributes(List<String> attributes) {
+	public void setAttributes(List<Column> attributes) {
 		this.attributes = attributes;
 	}
 
 	/**
 	 * @param attr
 	 */
-	public void addAttribute(String attr) {
+	public void addAttribute(Column attr) {
 		attributes.add(attr);
 	}
 	

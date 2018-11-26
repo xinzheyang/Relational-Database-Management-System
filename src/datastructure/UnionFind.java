@@ -8,6 +8,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
+
 
 
 /**
@@ -47,12 +50,12 @@ public class UnionFind {
 	 * @param attr
 	 * @return
 	 */
-	public UnionElement find(String attr) {
-		if (idMap.containsKey(attr)) {
-			return rootElementMap.get(root(idMap.get(attr)));
+	public UnionElement find(Column attr) {
+		if (idMap.containsKey(attr.getWholeColumnName())) {
+			return rootElementMap.get(root(idMap.get(attr.getWholeColumnName())));
 		} else {
 			int newId = idArray.size();
-			idMap.put(attr, newId);
+			idMap.put(attr.getWholeColumnName(), newId);
 			idArray.add(newId);
 			UnionElement newElement = new UnionElement(newId);
 			newElement.addAttribute(attr);
@@ -92,18 +95,19 @@ public class UnionFind {
 	}
 	public static void main(String[] args) {
 		UnionFind uFind = new UnionFind();
-		uFind.find("RA");
+		Column raColumn = new Column(new Table(null, "R"), "A");
+		uFind.find(raColumn);
 		uFind.debug();
 		
-		UnionElement ra = uFind.find("RA");
-		UnionElement rb = uFind.find("RB");
-		System.out.println(ra.getAttributes());
-		System.out.println(rb.getAttributes());
-		uFind.debug();
-		uFind.unite(ra, rb);
-		uFind.debug();
-		rb = uFind.find("RB");
-		System.out.println(rb.getAttributes());
+//		UnionElement ra = uFind.find("RA");
+//		UnionElement rb = uFind.find("RB");
+//		System.out.println(ra.getAttributes());
+//		System.out.println(rb.getAttributes());
+//		uFind.debug();
+//		uFind.unite(ra, rb);
+//		uFind.debug();
+//		rb = uFind.find("RB");
+//		System.out.println(rb.getAttributes());
 //		UnionElement rc = uFind.find("RC");
 //		uFind.unite(rb, rc);
 //		uFind.debug();
