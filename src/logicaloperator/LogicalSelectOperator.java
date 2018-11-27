@@ -56,6 +56,13 @@ public class LogicalSelectOperator extends LogicalOperator {
 		return ((LogicalScanOperator) childOp).getRelationSize() * totalReductionFactor;
 	}
 	
+	/** Setter just for testing, not allowed to be called for other purposes.
+	 * @param newFactor
+	 */
+	public void setTotalReductionFactor(int newFactor) {
+		totalReductionFactor = newFactor;
+	}
+	
 	/** Computes and returns the V-value of this selection on the given attribute
 	 * from its base table's V-value on the attribute multiplied by the reduction factor
 	 * of this attribute, adding an upper bound of the selection's output relation size.

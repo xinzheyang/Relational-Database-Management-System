@@ -76,6 +76,13 @@ public class LogicalScanOperator extends LogicalOperator {
 		return relationSize;
 	}
 	
+	/** Setter just for testing, not allowed to be called for other purposes.
+	 * @param newSize
+	 */
+	public void setRelationSize(int newSize) {
+		relationSize = newSize;
+	}
+	
 	/** Computes the V-value of this base table on the given attribute, which is
 	 * max - min + 1;
 	 * @param attrib

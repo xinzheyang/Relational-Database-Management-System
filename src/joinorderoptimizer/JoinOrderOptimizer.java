@@ -59,8 +59,50 @@ public class JoinOrderOptimizer {
 			HashSet<LogicalOperator> opList = new HashSet<LogicalOperator>();
 			opList.add(child);
 			sizeOneMap.put(opList, currMetric);
-		}	
+		}
 		subsetCostMetrics.add(sizeOneMap);
+
+		initTwoRelationJoins();
+	}
+
+	/**The cost of a two-relation plan is zero; however, 
+	 * you should choose the smaller relation to be the outer in the best plan;
+	 */
+	private void initTwoRelationJoins() {
+		//TODO: two-relation joins, choose smaller relation as outer/left relation
+		HashMap<HashSet<LogicalOperator>, CostMetric> sizeTwoMap = new HashMap<HashSet<LogicalOperator>, CostMetric>();
+		List<LogicalOperator> allChildren = joinOp.getJoinChildren();
+		for (int i = 0; i < allChildren.size(); i++) {
+			for (int j = i+1; j < allChildren.size(); j++) {
+				LogicalOperator child1 = allChildren.get(i);
+				LogicalOperator child2 = allChildren.get(j);
+				
+				HashSet<LogicalOperator> twoList = new HashSet<LogicalOperator>();
+				twoList.add(child1);
+				twoList.add(child2);
+				
+				CostMetric currMetric = new CostMetric();
+				currMetric.planCost = 0; //plan cost for two-relation plan is 0
+				currMetric.bestJoinOrder = new ArrayList<LogicalOperator>();
+				//relation sizes of children
+				int child1Size = (child1 instanceof LogicalScanOperator) ? ((LogicalScanOperator) child1).getRelationSize() 
+						: ((LogicalSelectOperator) child1).getRelationSize();
+				int child2Size = (child1 instanceof LogicalScanOperator) ? ((LogicalScanOperator) child2).getRelationSize() 
+						: ((LogicalSelectOperator) child2).getRelationSize();
+				//set the relation with smaller size to be the left / outer relation of the join
+				if (child1Size > child2Size) {
+					currMetric.bestJoinOrder.add(child1);
+					currMetric.bestJoinOrder.add(child2);
+				} else {
+					currMetric.bestJoinOrder.add(child2);
+					currMetric.bestJoinOrder.add(child1);
+				}
+
+				sizeTwoMap.put(twoList, currMetric);		
+			}
+		}
+
+		subsetCostMetrics.add(sizeTwoMap);
 	}
 
 	public List<LogicalOperator> getBestOrder() {
@@ -70,14 +112,14 @@ public class JoinOrderOptimizer {
 	/** 3.4.1 Chooses the best join order of the instance's logical operator by the bottom-up
 	 * dynamic programming approach.
 	 */
-	private void dpChooseBestPlan() {
+	public void dpChooseBestPlan() {
 		//TODO: implement dp bottom-up.
 		List<LogicalOperator> allChildren = joinOp.getJoinChildren();
 		List<HashSet<LogicalOperator>> subsetsBySize = enumerateSubsets(allChildren);
-		for (int i = 2; i < subsetsBySize.size(); i++) {
+		for (int i = 3; i <= allChildren.size(); i++) { //starts from size = 3
 
 			int bestPlanCost = Integer.MAX_VALUE;
-//			int relationSize = 0;
+			//			int relationSize = 0;
 			CostMetric curBest = null;
 			LogicalOperator optimalRightOp = null;
 			List<LogicalOperator> leftBestOrder = null;
@@ -134,6 +176,7 @@ public class JoinOrderOptimizer {
 		private CostMetric leftRelations; //all logical operators are either scan or select
 		private HashSet<LogicalOperator> leftChildren;
 		private LogicalOperator rightOp;
+		private String rightRef;
 		//		private int planCost;
 		//		private int relationSize;
 		private Expression joinCondition;
@@ -146,14 +189,13 @@ public class JoinOrderOptimizer {
 			this.rightOp = rightOp;
 			costMetric = new CostMetric();
 			joinCondition = null;
-			//extracts the join condition for this join
-			String rightRef = null;
+
 			if (rightOp instanceof LogicalScanOperator) {
 				rightRef = ((LogicalScanOperator) rightOp).getReference();
 			} else if (rightOp instanceof LogicalSelectOperator) {
 				rightRef = ((LogicalSelectOperator) rightOp).getReference();
 			}
-			//			Expression condition = null;
+			//extracts the join condition for this join
 			for (LogicalOperator leftChild : leftChildren) {
 				String leftRef = null;
 				if (leftChild instanceof LogicalScanOperator) {
@@ -181,7 +223,7 @@ public class JoinOrderOptimizer {
 		 * right relation sizes by product of V-values on all attributes the two relations are joined with.
 		 */
 		public void computeJoinSize() {
-			
+
 			int rightRelationSize = -1;
 			if (rightOp instanceof LogicalScanOperator) {
 				rightRelationSize = ((LogicalScanOperator) rightOp).getRelationSize();
@@ -234,14 +276,17 @@ public class JoinOrderOptimizer {
 			int leftRelVValue = leftRelations.getVValue(attrib); //try checking existence in the left relations cost metric
 			if (leftRelVValue != -1) { //found
 				result = Math.min(leftRelVValue, leftRelations.relationSize); //clamp down V-value by left relation size
-			} else { //bad luck, have to recompute from the column's corresponding LogicalOperator (base table or selection on base table)
+			} 
+			else { //bad luck, have to recompute from the column's corresponding LogicalOperator (base table or selection on base table)
 				String attribTableRef = attrib.getTable().getName();
 				String attribColRef = attrib.getColumnName();
 				//checks right
-				if (rightOp instanceof LogicalScanOperator && ((LogicalScanOperator) rightOp).getReference().equals(attribTableRef)) {
-					result = ((LogicalScanOperator) rightOp).getVValue(attribColRef);
-				} else if (rightOp instanceof LogicalSelectOperator && ((LogicalSelectOperator) rightOp).getReference().equals(attribTableRef)) {
-					result = ((LogicalSelectOperator) rightOp).getVValue(attribColRef);
+				if (rightRef.equals(attribTableRef)) {
+					if (rightOp instanceof LogicalScanOperator) {
+						result = ((LogicalScanOperator) rightOp).getVValue(attribColRef);
+					} else if (rightOp instanceof LogicalSelectOperator) {
+						result = ((LogicalSelectOperator) rightOp).getVValue(attribColRef);
+					}
 				}
 				else {
 					//checks left
@@ -253,7 +298,6 @@ public class JoinOrderOptimizer {
 						}
 					}
 				}
-
 			}
 			if (result != -1) return Math.max(1, result); //if valid result, clamp up V-value by 1
 			return result;
@@ -272,6 +316,6 @@ public class JoinOrderOptimizer {
 		public int getPlanCost() {
 			return costMetric.planCost;
 		}
-		
+
 	}
 }
