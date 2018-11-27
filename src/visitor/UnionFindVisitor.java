@@ -59,14 +59,15 @@ public class UnionFindVisitor implements ExpressionVisitor {
 
 	private UnionFind unionFind;
 	private int intValue;
-	private String attr;
 	private boolean isInt = false;
 	private AndExpression normalSelect = null;
+	private AndExpression normalJoin = null;
+	private Column col;
 	/**
 	 * table reference -> list of attributes of the table that appear in equal join
 	 * conditions
 	 */
-	private HashMap<String, List<String>> eqJoinAttrMap;
+	private HashMap<String, List<Column>> eqJoinAttrMap;
 
 	/**
 	 * 
@@ -82,7 +83,7 @@ public class UnionFindVisitor implements ExpressionVisitor {
 	 *            the table reference
 	 * @return list of attributes of the table that appear in equal join conditions
 	 */
-	public List<String> getEqJoinAttrByReference(String table) {
+	public List<Column> getEqJoinAttrByReference(String table) {
 		if (eqJoinAttrMap != null) {
 			return eqJoinAttrMap.get(table);
 		} else {
@@ -112,6 +113,24 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		}
 		return normalSelect;
 	}
+	
+	
+	/**
+	 * @return the normalJoin
+	 */
+	public Expression getNormalJoin() {
+		if (normalJoin == null) {
+			return null;
+		}
+		Expression left = normalJoin.getLeftExpression();
+		Expression right = normalJoin.getRightExpression();
+		if (right == null) {
+			return left;
+		}
+		return normalSelect;
+	}
+
+
 	@Override
 	public void visit(NullValue nullValue) {
 		throw new UnsupportedOperationException("not supported");
@@ -215,11 +234,11 @@ public class UnionFindVisitor implements ExpressionVisitor {
 	 * @param key the attribute that acts as an key in eqJoinAttrMap
 	 * @param val the attribute to be added in the value in eqJoinAttrMap
 	 */
-	private void updateEqJoinAttrMap(String key, String val) {
+	private void updateEqJoinAttrMap(String key, Column val) {
 		if (eqJoinAttrMap.containsKey(key)) {
 			eqJoinAttrMap.get(key).add(val);
 		} else {
-			List<String> newAttrs = new LinkedList<>();
+			List<Column> newAttrs = new LinkedList<>();
 			newAttrs.add(val);
 			eqJoinAttrMap.put(key, newAttrs);
 		}
@@ -230,24 +249,24 @@ public class UnionFindVisitor implements ExpressionVisitor {
 	public void visit(EqualsTo equalsTo) {
 		equalsTo.getLeftExpression().accept(this);
 		int leftValue = intValue;
-		String leftAttr = attr;
+		Column leftCol = col;
 		boolean leftIsInt = isInt;
 		equalsTo.getRightExpression().accept(this);
 		int rightValue = intValue;
-		String rightAttr = attr;
+		Column rightCol = col;
 		boolean rightIsInt = isInt;
 
-		if (!leftIsInt && !rightIsInt) {
-			unionFind.unite(unionFind.find(leftAttr), unionFind.find(rightAttr));
+		if (!leftIsInt && !rightIsInt) { //S.A = S.B
+			unionFind.unite(unionFind.find(leftCol), unionFind.find(rightCol));
 			
-			updateEqJoinAttrMap(leftAttr, rightAttr);
-			updateEqJoinAttrMap(rightAttr, leftAttr);
+			updateEqJoinAttrMap(leftCol.getTable().getName(), leftCol);
+			updateEqJoinAttrMap(rightCol.getTable().getName(), rightCol);
 			
-		} else if (!leftIsInt && rightIsInt) {
-			UnionElement left = unionFind.find(leftAttr);
+		} else if (!leftIsInt && rightIsInt) { // S.A = 2
+			UnionElement left = unionFind.find(leftCol);
 			left.setEquality(rightValue);
-		} else if (leftIsInt && !rightIsInt) {
-			UnionElement right = unionFind.find(rightAttr);
+		} else if (leftIsInt && !rightIsInt) { // 2 = S.A
+			UnionElement right = unionFind.find(rightCol);
 			right.setEquality(leftValue);
 		} else {
 			normalSelect = new AndExpression(equalsTo, normalSelect);
@@ -265,18 +284,20 @@ public class UnionFindVisitor implements ExpressionVisitor {
 	public void visit(GreaterThan greaterThan) {
 		greaterThan.getLeftExpression().accept(this);
 		int leftValue = intValue;
-		String leftAttr = attr;
+		Column leftCol = col;
 		boolean leftIsInt = isInt;
 		greaterThan.getRightExpression().accept(this);
 		int rightValue = intValue;
-		String rightAttr = attr;
+		Column rightCol = col;
 		boolean rightIsInt = isInt;
-
-		if (!leftIsInt && rightIsInt) {
-			UnionElement left = unionFind.find(leftAttr);
+		
+		if (!leftIsInt && !rightIsInt) { // normal Join
+			normalJoin = new AndExpression(greaterThan, normalJoin);
+		} else if (!leftIsInt && rightIsInt) {
+			UnionElement left = unionFind.find(leftCol);
 			left.setLower(rightValue + 1);
 		} else if (leftIsInt && !rightIsInt) {
-			UnionElement right = unionFind.find(rightAttr);
+			UnionElement right = unionFind.find(rightCol);
 			right.setUpper(leftValue - 1);
 		} else {
 			normalSelect = new AndExpression(greaterThan, normalSelect);
@@ -294,18 +315,20 @@ public class UnionFindVisitor implements ExpressionVisitor {
 	public void visit(GreaterThanEquals greaterThanEquals) {
 		greaterThanEquals.getLeftExpression().accept(this);
 		int leftValue = intValue;
-		String leftAttr = attr;
+		Column leftCol = col;
 		boolean leftIsInt = isInt;
 		greaterThanEquals.getRightExpression().accept(this);
 		int rightValue = intValue;
-		String rightAttr = attr;
+		Column rightCol = col;
 		boolean rightIsInt = isInt;
 
-		if (!leftIsInt && rightIsInt) {
-			UnionElement left = unionFind.find(leftAttr);
+		if (!leftIsInt && !rightIsInt) { // normal Join
+			normalJoin = new AndExpression(greaterThanEquals, normalJoin);
+		} else if (!leftIsInt && rightIsInt) {
+			UnionElement left = unionFind.find(leftCol);
 			left.setLower(rightValue);
 		} else if (leftIsInt && !rightIsInt) {
-			UnionElement right = unionFind.find(rightAttr);
+			UnionElement right = unionFind.find(rightCol);
 			right.setUpper(leftValue);
 		} else {
 			normalSelect = new AndExpression(greaterThanEquals, normalSelect);
@@ -337,18 +360,20 @@ public class UnionFindVisitor implements ExpressionVisitor {
 	public void visit(MinorThan minorThan) {
 		minorThan.getLeftExpression().accept(this);
 		int leftValue = intValue;
-		String leftAttr = attr;
+		Column leftCol = col;
 		boolean leftIsInt = isInt;
 		minorThan.getRightExpression().accept(this);
 		int rightValue = intValue;
-		String rightAttr = attr;
+		Column rightCol = col;
 		boolean rightIsInt = isInt;
 
-		if (!leftIsInt && rightIsInt) {
-			UnionElement left = unionFind.find(leftAttr);
+		if (!leftIsInt && !rightIsInt) { // normal Join
+			normalJoin = new AndExpression(minorThan, normalJoin);
+		} else if (!leftIsInt && rightIsInt) {
+			UnionElement left = unionFind.find(leftCol);
 			left.setUpper(rightValue - 1);
 		} else if (leftIsInt && !rightIsInt) {
-			UnionElement right = unionFind.find(rightAttr);
+			UnionElement right = unionFind.find(rightCol);
 			right.setLower(leftValue + 1);
 		} else {
 			normalSelect = new AndExpression(minorThan, normalSelect);
@@ -366,18 +391,20 @@ public class UnionFindVisitor implements ExpressionVisitor {
 	public void visit(MinorThanEquals minorThanEquals) {
 		minorThanEquals.getLeftExpression().accept(this);
 		int leftValue = intValue;
-		String leftAttr = attr;
+		Column leftCol = col;
 		boolean leftIsInt = isInt;
 		minorThanEquals.getRightExpression().accept(this);
 		int rightValue = intValue;
-		String rightAttr = attr;
+		Column rightCol = col;
 		boolean rightIsInt = isInt;
 
-		if (!leftIsInt && rightIsInt) {
-			UnionElement left = unionFind.find(leftAttr);
+		if (!leftIsInt && !rightIsInt) { // normal Join
+			normalJoin = new AndExpression(minorThanEquals, normalJoin);
+		} else if (!leftIsInt && rightIsInt) {
+			UnionElement left = unionFind.find(leftCol);
 			left.setUpper(rightValue);
 		} else if (leftIsInt && !rightIsInt) {
-			UnionElement right = unionFind.find(rightAttr);
+			UnionElement right = unionFind.find(rightCol);
 			right.setLower(leftValue);
 		} else {
 			normalSelect = new AndExpression(minorThanEquals, normalSelect);
@@ -393,7 +420,16 @@ public class UnionFindVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(NotEqualsTo notEqualsTo) {
-		normalSelect = new AndExpression(notEqualsTo, normalSelect);
+		notEqualsTo.getLeftExpression().accept(this);
+		boolean leftIsInt = isInt;
+		notEqualsTo.getRightExpression().accept(this);
+		boolean rightIsInt = isInt;
+		
+		if (!leftIsInt && !rightIsInt) { // normal Join
+			normalJoin = new AndExpression(notEqualsTo, normalJoin);
+		} else {
+			normalSelect = new AndExpression(notEqualsTo, normalSelect);
+		}
 	}
 
 	/*
@@ -402,7 +438,7 @@ public class UnionFindVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(Column tableColumn) {
-		attr = tableColumn.getColumnName();
+		col = tableColumn;
 		isInt = false;
 	}
 
