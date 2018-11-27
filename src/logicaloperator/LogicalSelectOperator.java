@@ -3,7 +3,11 @@
  */
 package logicaloperator;
 
+import java.util.HashMap;
+
+import database.DBCatalog;
 import net.sf.jsqlparser.expression.Expression;
+import visitor.DivideSelectVisitor;
 import visitor.PhysicalPlanBuilder;
 
 /**
@@ -15,6 +19,8 @@ public class LogicalSelectOperator extends LogicalOperator {
 	private LogicalOperator childOp;
 	private int totalReductionFactor; //reduction factor calculated from select condition
 	private Expression ex;
+	private HashMap<String, int[]> attribBounds;
+	private HashMap<String, Integer> reductionFactorMap;
 	
 	public LogicalOperator getChildOp() {
 		return childOp;
@@ -22,6 +28,10 @@ public class LogicalSelectOperator extends LogicalOperator {
 	
 	public String getReference() {
 		return ((LogicalScanOperator) childOp).getReference();
+	}
+	
+	public String getBaseTableName() {
+		return ((LogicalScanOperator) childOp).getTableName();
 	}
 
 	public Expression getEx() {
@@ -34,14 +44,38 @@ public class LogicalSelectOperator extends LogicalOperator {
 	public LogicalSelectOperator(LogicalOperator child, Expression exp) {
 		childOp = child;
 		ex = exp;
+		attribBounds = new HashMap<String, int[]>(((LogicalScanOperator) child).getAttribBounds());
+		//builds the reduction factor map and computes the total reduction factor for relation size calculation
+		reductionFactorMap = new HashMap<String, Integer>();
+		totalReductionFactor = 1;
+		for (String attrib : DBCatalog.getTableColumns(getBaseTableName())) {
+			int curReductionFactor = computeReductionFactor(attrib);
+			totalReductionFactor *= curReductionFactor;
+			reductionFactorMap.put(attrib, curReductionFactor);
+		}
+		
 	}
 	
+	/** Computes the reduction factor of this attribute.
+	 * @param attrib
+	 * @return
+	 */
 	public int computeReductionFactor(String attrib) {
-		//TODO: xinqi: implement this
-		return -1;
+		DivideSelectVisitor visitor = new DivideSelectVisitor(attrib);
+		ex.accept(visitor);
+		int[] bounds = attribBounds.get(attrib);
+		int selectLow = Math.max(visitor.getLowKey(), bounds[0]);
+		int selectHigh = Math.min(visitor.getHighKey(), bounds[1]);
+		int r = (selectHigh-selectLow+1)/(bounds[1]-bounds[0]+1);
+		return r;
 	}
 	
-	/** Sets the reduction factor of this instance.
+	public int getReductionFactor(String attrib) {
+		assert reductionFactorMap.containsKey(attrib);
+		return reductionFactorMap.get(attrib);
+	}
+	
+	/** Sets the reduction factor of this instance. Used for testing only.
 	 * @param reductionFactor
 	 */
 	public void setReductionFactor(int reductionFactor) {
@@ -72,7 +106,7 @@ public class LogicalSelectOperator extends LogicalOperator {
 	 */
 	public int getVValue(String attrib) {
 		//TODO: implement this
-		int reductionFactor = computeReductionFactor(attrib);
+		int reductionFactor = getReductionFactor(attrib);
 		return Math.min(getRelationSize(),  ((LogicalScanOperator) childOp).getVValue(attrib) * reductionFactor);
 	}
 

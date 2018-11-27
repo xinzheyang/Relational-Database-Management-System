@@ -76,6 +76,10 @@ public class LogicalScanOperator extends LogicalOperator {
 		return relationSize;
 	}
 	
+	public HashMap<String, int[]> getAttribBounds() {
+		return this.attribBounds;
+	}
+	
 	/** Setter just for testing, not allowed to be called for other purposes.
 	 * @param newSize
 	 */

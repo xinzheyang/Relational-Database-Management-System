@@ -127,12 +127,13 @@ public class PhysicalPlanBuilder {
 		for(String[] info: infos) {
 			//compute the index scan cost for each possible index
 			String index= info[0];//A
-			visitor = new DivideSelectVisitor(index);
-			op.getEx().accept(visitor);
-			int[] bounds = DBCatalog.getAttribBounds(tableName).get(index);
-			int indexLow = Math.max(visitor.getLowKey(), bounds[0]);
-			int indexHigh = Math.min(visitor.getHighKey(), bounds[1]);
-			int r = (indexHigh-indexLow+1)/(bounds[1]-bounds[0]+1); //the reduction factor
+//			visitor = new DivideSelectVisitor(index);
+//			op.getEx().accept(visitor);
+//			int[] bounds = DBCatalog.getAttribBounds(tableName).get(index);
+//			int indexLow = Math.max(visitor.getLowKey(), bounds[0]);
+//			int indexHigh = Math.min(visitor.getHighKey(), bounds[1]);
+//			int r = (indexHigh-indexLow+1)/(bounds[1]-bounds[0]+1); //the reduction factor
+			int r = op.getReductionFactor(index); //the reduction factor of this index
 			int l = DBCatalog.getNumOfLeaves(tableName+"."+index); //the number of leaves in the index
 			int costTraversal = DBCatalog.getTraversalCost(tableName+"."+index);
 			int cost;
