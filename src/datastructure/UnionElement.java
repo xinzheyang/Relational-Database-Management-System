@@ -24,7 +24,14 @@ public class UnionElement {
 		rootId = root;
 	}
 
-	
+	public List<Column> getAttrByTable(String tbReference) {
+		List<Column> res = new LinkedList<>();
+		for (Column col : attributes) {
+			if (tbReference.equals(col.getTable().getName()))
+				res.add(col);
+		}
+		return res;
+	}
 	/**
 	 * @return the attributes
 	 */
