@@ -6,6 +6,7 @@ package visitor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 import database.DBCatalog;
 import logicaloperator.*;
@@ -114,34 +115,97 @@ public class PhysicalPlanBuilder {
 		LogicalScanOperator scanChild = (LogicalScanOperator) child;
 		String tableName = scanChild.getTableName();
 		DivideSelectVisitor visitor = null;
-		if (DBCatalog.useIndex()) {
-			visitor = new DivideSelectVisitor(DBCatalog.getIndexKey(tableName));
+		
+		//the number of pages in the relation
+		int p = DBCatalog.getRelationSize(tableName)*(DBCatalog.getTableColumns(tableName).length * 4)/4096;
+		int t = DBCatalog.getRelationSize(tableName); //the number of tuples
+		int minIndexCost=Integer.MAX_VALUE;
+		String minIndex=null;
+		int isMinClustered=0;
+		DivideSelectVisitor minVisitor=null;
+		List<String[]> infos = DBCatalog.getIndexInfo(tableName);
+		for(String[] info: infos) {
+			//compute the index scan cost for each possible index
+			String index= info[0];//A
+			visitor = new DivideSelectVisitor(index);
 			op.getEx().accept(visitor);
+			int[] bounds = DBCatalog.getAttribBounds(tableName).get(index);
+			int indexLow = Math.max(visitor.getLowKey(), bounds[0]);
+			int indexHigh = Math.min(visitor.getHighKey(), bounds[1]);
+			int r = (indexHigh-indexLow+1)/(bounds[1]-bounds[0]+1); //the reduction factor
+			int l = DBCatalog.getNumOfLeaves(tableName+"."+index); //the number of leaves in the index
+			int costTraversal = DBCatalog.getTraversalCost(tableName+"."+index);
+			int cost;
+			if(info[1] == "0") { //unclustered
+				cost = costTraversal + l*r + t*r;
+			}
+			else {
+				cost = costTraversal + p*r;
+			}
+			if(cost < minIndexCost) {
+				minIndexCost = cost;
+				minIndex = index;
+				isMinClustered = Integer.parseInt(info[1]);
+				minVisitor = visitor;
+			}
 		}
-
-		if (child instanceof LogicalScanOperator && DBCatalog.useIndex() && visitor != null
-				&& visitor.needIndexScan()) {
+		if(minIndex != null && minIndexCost<p) {
+//			visitor = new DivideSelectVisitor(minIndex);
+//			op.getEx().accept(visitor);
+			ScanOperator indexScanOp;
 			try {
-				ScanOperator indexScanOp = new IndexScanOperator(tableName, scanChild.getAlias(),
-						DBCatalog.getIndexFileLoc(tableName), DBCatalog.getIndexKey(tableName),
-						DBCatalog.hasClusteredIndex(tableName), visitor.getLowKey(), visitor.getHighKey());
-
-				if (visitor.getNormalSelect() == null) {
+				indexScanOp = new IndexScanOperator(tableName, scanChild.getAlias(),
+				DBCatalog.getIndexFileLoc(tableName, minIndex), minIndex, isMinClustered, 
+				minVisitor.getLowKey(), minVisitor.getHighKey());
+				if (minVisitor.getNormalSelect() == null) {
 					operator = indexScanOp;
 				} else {
-					SelectOperator selectOperator = new SelectOperator(indexScanOp, visitor.getNormalSelect());
+					SelectOperator selectOperator = new SelectOperator(indexScanOp, minVisitor.getNormalSelect());
 					operator = selectOperator;
 				}
 			} catch (FileNotFoundException e) {
-				System.err.println("error occurred during construcuting IndexScanOp");
 				e.printStackTrace();
 			}
 
-		} else {
+
+		}
+		else {
 			child.accept(this);
 			SelectOperator selectOperator = new SelectOperator(operator, op.getEx());
 			operator = selectOperator;
 		}
+		
+		
+		
+		
+//		if (DBCatalog.useIndex()) {
+//			visitor = new DivideSelectVisitor(DBCatalog.getIndexKey(tableName));
+//			op.getEx().accept(visitor);
+//		}
+//
+//		if (child instanceof LogicalScanOperator && DBCatalog.useIndex() && visitor != null
+//				&& visitor.needIndexScan()) {
+//			try {
+//				ScanOperator indexScanOp = new IndexScanOperator(tableName, scanChild.getAlias(),
+//						DBCatalog.getIndexFileLoc(tableName), DBCatalog.getIndexKey(tableName),
+//						DBCatalog.hasClusteredIndex(tableName), visitor.getLowKey(), visitor.getHighKey());
+//
+//				if (visitor.getNormalSelect() == null) {
+//					operator = indexScanOp;
+//				} else {
+//					SelectOperator selectOperator = new SelectOperator(indexScanOp, visitor.getNormalSelect());
+//					operator = selectOperator;
+//				}
+//			} catch (FileNotFoundException e) {
+//				System.err.println("error occurred during construcuting IndexScanOp");
+//				e.printStackTrace();
+//			}
+//
+//		} else {
+//			child.accept(this);
+//			SelectOperator selectOperator = new SelectOperator(operator, op.getEx());
+//			operator = selectOperator;
+//		}
 	}
 
 	public void visit(LogicalScanOperator op) {

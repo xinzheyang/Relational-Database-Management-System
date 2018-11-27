@@ -18,7 +18,11 @@ import bplustree.BPlusTree;
 public class DBCatalog {
 	
 	private static HashMap<String, String[]> schemaMap; //
-	private static HashMap<String, String[]> treeIndexMap;
+//	private static HashMap<String, String[]> treeIndexMap;
+//	private static HashMap<String, Integer> treeIndexMap; //	R.A->1,15
+	private static HashMap<String, Integer> indexLeafNumber; 	//R.A->50
+	private static HashMap<String, Integer> indexDepth; //R.A->3
+	private static HashMap<String, List<String[]>> treeIndexMap;
 	private static HashMap<String, Integer> baseTableTupleCountMap; //table name --> tuple count
 	private static HashMap<String, HashMap<String, int[]>> attributeBoundsMap; //table name --> <attribute --> [min, max]>
 	private static String dbDir;
@@ -32,13 +36,14 @@ public class DBCatalog {
 	private static String[] sortMethod;
 	private static boolean useIndex;
 	private static boolean builtIndex;
+	private static int numOfColumns;
 	/* A private Constructor prevents any other class
 	 * from instantiating a DBCatalog object.
 	 */
 	private DBCatalog() {
 		//key=table name, value=col names array
 		schemaMap = new HashMap<String, String[]>();
-		treeIndexMap = new HashMap<String, String[]>();
+		treeIndexMap = new HashMap<String, List<String[]>>();
 	}
 
 	/** Static get instance method, gets the singleton instance
@@ -69,28 +74,41 @@ public class DBCatalog {
 		return locDir + File.separator + tableName;
 	}
 	
-	/** Gets the attribute name that serve as an index key for the table.
-	 * @param tableNamethe actual table name (not alias)
-	 * @return
-	 */
-	public static String getIndexKey(String tableName) {
-		return treeIndexMap.get(tableName)[0];
+//	/** Gets the attribute names that serve as index keys for the table.
+//	 * @param tableNamethe actual table name (not alias)
+//	 * @return
+//	 */
+	public static List<String[]> getIndexInfo(String tableName) {
+//		return treeIndexMap.get(tableName);
+//		List<String> result = new ArrayList<>();
+		return treeIndexMap.get(tableName);
+//		for(String[] info: treeIndexMap.get(tableName)) {
+//			result.add(info[1]);
+//		}
+//		return result;
 	}
 	
-	/** Returns 1 if this table has clustered index, 0 otherwise.
-	 * @param tableName the actual table name (not alias)
-	 * @return
-	 */
-	public static int hasClusteredIndex(String tableName) {
-		return Integer.parseInt(treeIndexMap.get(tableName)[1]);
+	public static int getNumOfLeaves(String name) {
+		return indexLeafNumber.get(name);
 	}
+	
+	public static int getTraversalCost(String name) { //R.A
+		return indexDepth.get(name);
+	}
+//	/** Returns 1 if this table has clustered index, 0 otherwise.
+//	 * @param tableName the actual table name (not alias)
+//	 * @return
+//	 */
+//	public static int hasClusteredIndex(String tableName) {
+//		return Integer.parseInt(treeIndexMap.get(tableName)[1]);
+//	}
 	
 	/** Gets the index file location of this table.
 	 * @param tableName the actual table name (not alias)
 	 * @return
 	 */
-	public static String getIndexFileLoc(String tableName) {
-		return indexDir + File.separator + tableName + "." + getIndexKey(tableName);
+	public static String getIndexFileLoc(String tableName, String attrName) {
+		return indexDir + File.separator + tableName + "." + attrName;
 	}
 	
 	public static String getStatsFileLoc() {
@@ -220,11 +238,25 @@ public class DBCatalog {
 		String line;
 		while (((line = indexInfoIn.readLine()) != null)) {
 			String[] indexInfo = line.split(" ");
-			treeIndexMap.put(indexInfo[0], new String[]{indexInfo[1], indexInfo[2]});
+			String tableName = indexInfo[0];
+			String attrName = indexInfo[1];
+			String ifClustered = indexInfo[2];
+//			String order = indexInfo[3];
+//			treeIndexMap.put(indexInfo[0]+"."+indexInfo[1], Integer.parseInt(indexInfo[2]));
+			if(treeIndexMap.containsKey(indexInfo[0])) {
+				treeIndexMap.get(tableName).add(new String[]{attrName, ifClustered});
+			}
+			else {
+				List<String[]> value = new ArrayList<>();
+				value.add(new String[]{indexInfo[1], indexInfo[2]});
+				treeIndexMap.put(tableName, value);
+			}
 			assert indexInfo.length == 4;
-			String curIndexOut = indexDir + File.separator + indexInfo[0] + "." + indexInfo[1];
+			String curIndexOut = indexDir + File.separator + tableName + "." + attrName;
 			if (buildIndex) {
-				BPlusTree curTree = new BPlusTree(indexInfo[0], curIndexOut, "1".equals(indexInfo[2]), Integer.parseInt(indexInfo[3]));
+				BPlusTree curTree = new BPlusTree(tableName, curIndexOut, "1".equals(indexInfo[2]), Integer.parseInt(indexInfo[3]), attrName);
+				indexLeafNumber.put(tableName+"."+attrName, curTree.getNumOfLeafs());
+				indexDepth.put(tableName+"."+attrName, curTree.getDepth());
 				curTree.scanAndConstructAll();
 			}
 		}

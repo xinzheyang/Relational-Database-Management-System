@@ -24,6 +24,7 @@ public class BPlusTree {
 	private int counter;
 	private TreeSerializer serializer;
 	private boolean isClustered;
+	private int depth;
 //	private BufferedWriter logger; //logger for human-readable tree serialization
 
 	/**
@@ -33,7 +34,7 @@ public class BPlusTree {
 	 * @param order the order(d) of the B+ tree
 	 * @throws IOException
 	 */
-	public BPlusTree(String tableIn, String serializeLoc, boolean isClustered, int order) throws IOException {
+	public BPlusTree(String tableIn, String serializeLoc, boolean isClustered, int order, String indexCol) throws IOException {
 		fileName = DBCatalog.getTableLoc(tableIn);
 		serializer = new TreeSerializer(serializeLoc);
 		counter = 1; //counter initialized to 1
@@ -41,12 +42,13 @@ public class BPlusTree {
 		//if clustered, sort and replace relation file, we use in memory sort for now.
 		if (isClustered) {
 			ScanOperator scan = new ScanOperator(tableIn, null);
-			ClusteredIndexSortOperator sort = new ClusteredIndexSortOperator(scan, DBCatalog.getIndexKey(tableIn));
+			ClusteredIndexSortOperator sort = new ClusteredIndexSortOperator(scan, indexCol);
 			sort.dump(fileName);
 		}
 		this.order = order;
 		
-		colIndex=Arrays.asList(DBCatalog.getTableColumns(tableIn)).indexOf(DBCatalog.getIndexKey(tableIn));
+		colIndex=Arrays.asList(DBCatalog.getTableColumns(tableIn)).indexOf(indexCol);
+		depth=0;
 	}
 
 	/**
@@ -104,6 +106,13 @@ public class BPlusTree {
 		serializer.close();
 	}
 
+	public int getNumOfLeafs() {
+		return leafNodes.size();
+	}
+	
+	public int getDepth() {
+		return depth;
+	}
 	/**
 	 * @param allKeys all the unique keys from the file
 	 * @param allRids all the record ids corresponding to each key
@@ -136,6 +145,7 @@ public class BPlusTree {
 		}
 		//counter equals numOfNodes + 1 when exiting the while loop, ready for counting the index nodes. 
 		leafNodes = lst;
+		depth++;
 	}
 
 	
@@ -152,10 +162,10 @@ public class BPlusTree {
 		if(leafNodes.size() == 1) { 
 			IndexNode node= new IndexNode(leafNodes, counter);
 			this.serializer.serialize(node);//serialize
+			counter++;
 		}
 
 		while(prev.size() > 1) {
-
 			int numOfChild = prev.size();//number of children from the previous lift
 			int numOfNodes = (int) Math.ceil(numOfChild/(2.0*order+1)); //number of index nodes in the level
 			int indexCurr=0; //the index of the current children
@@ -186,6 +196,7 @@ public class BPlusTree {
 			//write the serializing code here
 			prev=new ArrayList<>(curr);
 			curr.clear();
+			depth++;
 		}	
 	}
 
