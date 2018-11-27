@@ -8,6 +8,7 @@ import java.util.List;
 
 import datastructure.UnionElement;
 import net.sf.jsqlparser.expression.Expression;
+import visitor.ParseConjunctExpVisitor;
 import visitor.PhysicalPlanBuilder;
 
 /**
@@ -21,15 +22,15 @@ public class LogicalJoinOperator extends LogicalOperator {
 	private List<LogicalOperator> joinChildren; // a list of select of scan operators as children of this join operator
 	private Expression joinCondition; // the join condition
 	private Collection<UnionElement> unionElements; // the collections of UnionElements, if any
-	private Expression originalExp; // original expression as in the SQL (includes both select and join)
+	private ParseConjunctExpVisitor visitor; // the visited visitor of the original expression
 	
-	public LogicalJoinOperator(List<LogicalOperator> joinCh, Expression condition, Collection<UnionElement> unions, Expression origin) {
+	public LogicalJoinOperator(List<LogicalOperator> joinCh, Expression condition, Collection<UnionElement> unions, ParseConjunctExpVisitor parseConjunctExpVisitor) {
 //		leftChild = left;
 //		rightChild = right;
 		joinChildren = joinCh;
 		joinCondition = condition;
 		unionElements = unions;
-		originalExp = origin;
+		visitor = parseConjunctExpVisitor;
 	}
 
 //	public LogicalOperator getLeftChild() {

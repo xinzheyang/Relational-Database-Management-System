@@ -21,6 +21,7 @@ import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.Union;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -45,7 +46,7 @@ public class DBSelectVisitor implements SelectVisitor {
 	private LogicalDupElimOperator dupElimOperator;
 
 	private ParseConjunctExpVisitor parseConjunctExpVisitor;
-	private HashMap<String, Expression> selectMap;
+	private HashMap<String, HashSet<Expression>> selectMap;
 	private UnionFindVisitor unionFindVisitor;
 	public LogicalOperator getOperator() {
 		return operator;
@@ -55,6 +56,21 @@ public class DBSelectVisitor implements SelectVisitor {
 		this.operator = operator;
 	}
 
+	
+	private Expression concatExp(Collection<Expression> expressions) {
+		if (expressions == null || expressions.isEmpty()) {
+			return null;
+		} else {
+			Expression temp = null;
+			for (Expression e : expressions) {
+				if (temp == null)
+					temp = e;
+				else
+					temp = new AndExpression(e, temp);
+			}
+			return temp;
+		}
+	}
 	/**
 	 * @param fromItem
 	 * @return an scanOperator that builds from an FromItem
@@ -78,7 +94,8 @@ public class DBSelectVisitor implements SelectVisitor {
 				tableName = scanOperator.getAlias();
 			}
 			if (selectMap.containsKey(tableName)) {
-				selectOp = new LogicalSelectOperator(scanOperator, selectMap.get(tableName));
+				Expression exp = concatExp(selectMap.get(tableName));
+				selectOp = new LogicalSelectOperator(scanOperator, exp);
 			}
 		}
 		return selectOp;
@@ -101,7 +118,6 @@ public class DBSelectVisitor implements SelectVisitor {
 	
 	private LogicalSelectOperator ufBuildSelectFromScan(LogicalScanOperator scanOperator) {
 		UnionFind uFind = unionFindVisitor.getUnionFind();
-		
 		LogicalSelectOperator selectOp = null;
 		String tableReference = scanOperator.getAlias() != null ? scanOperator.getAlias() : scanOperator.getTableName();
 		
@@ -110,7 +126,7 @@ public class DBSelectVisitor implements SelectVisitor {
 		// process unused normal select
 		if (selectMap != null && selectMap.size() > 0) {
 			if (selectMap.containsKey(tableReference)) {
-				set.add(selectMap.get(tableReference));
+				set.addAll(selectMap.get(tableReference));
 //				tempCondition = new AndExpression(selectMap.get(tableReference), tempCondition);
 			}
 		}
@@ -144,13 +160,10 @@ public class DBSelectVisitor implements SelectVisitor {
 				set.add(sameTableEq);
 			}
 		}
-		AndExpression tempCondition = null;
-		for (Expression ex : set) {
-			tempCondition = new AndExpression(ex, tempCondition);
-		}
 		
-		if (tempCondition != null) {
-			selectOp = new LogicalSelectOperator(scanOperator, tempCondition);
+		Expression selectCondition = concatExp(set);
+		if (selectCondition != null) {
+			selectOp = new LogicalSelectOperator(scanOperator, selectCondition);
 		}
 		return selectOp;
 	}
@@ -268,7 +281,8 @@ public class DBSelectVisitor implements SelectVisitor {
 					LogicalOperator newScanSelect = ufBuildScanSelectFromItem(rightItem);
 					joinChildren.add(newScanSelect);
 				}
-				joinOperator = new LogicalJoinOperator(joinChildren, unionFindVisitor.getNormalJoin());
+				UnionFind uFind = unionFindVisitor.getUnionFind();
+				joinOperator = new LogicalJoinOperator(joinChildren, unionFindVisitor.getNormalJoin(), uFind.getRootElementMap(), parseConjunctExpVisitor);
 			} else {
 				LogicalOperator initOp = selectOperator == null ? scanOperator : selectOperator;
 				joinChildren.add(initOp);
@@ -277,7 +291,7 @@ public class DBSelectVisitor implements SelectVisitor {
 					LogicalOperator newScanSelect = buildScanSelectFromItem(rightItem);
 					joinChildren.add(newScanSelect);
 				}
-				joinOperator = new LogicalJoinOperator(joinChildren, expression);
+				joinOperator = new LogicalJoinOperator(joinChildren, expression, null, parseConjunctExpVisitor);
 			}
 
 			

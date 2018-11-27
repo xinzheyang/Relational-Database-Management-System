@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 
@@ -98,7 +99,10 @@ public class UnionFind {
 		Column raColumn = new Column(new Table(null, "R"), "A");
 		uFind.find(raColumn);
 		uFind.debug();
-		
+		AndExpression andExpression = new AndExpression(raColumn, null);
+		System.out.println(andExpression);
+		AndExpression newand = new AndExpression(raColumn, andExpression);
+		System.out.println(newand.getLeftExpression());
 //		UnionElement ra = uFind.find("RA");
 //		UnionElement rb = uFind.find("RB");
 //		System.out.println(ra.getAttributes());
