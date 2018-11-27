@@ -31,7 +31,7 @@ public class JoinOrderOptimizerTest {
 		List<LogicalOperator> listAB = new LinkedList<LogicalOperator>();
 		listAB.add(scanA);
 		listAB.add(scanB);
-		LogicalJoinOperator joinAB = new LogicalJoinOperator(listAB, null);
+		LogicalJoinOperator joinAB = new LogicalJoinOperator(listAB, null, null, null);
 		JoinOrderOptimizer optAB = new JoinOrderOptimizer(joinAB, null);
 		optAB.dpChooseBestPlan();
 		List<LogicalOperator> bestAB = optAB.getBestOrder();
@@ -42,7 +42,7 @@ public class JoinOrderOptimizerTest {
 		listCB.add(scanC);
 		listCB.add(scanB);
 		
-		LogicalJoinOperator joinCB = new LogicalJoinOperator(listCB, null);
+		LogicalJoinOperator joinCB = new LogicalJoinOperator(listCB, null, null, null);
 		JoinOrderOptimizer optCB = new JoinOrderOptimizer(joinCB, null);
 		optCB.dpChooseBestPlan();
 		List<LogicalOperator> bestCB = optCB.getBestOrder();
@@ -54,7 +54,7 @@ public class JoinOrderOptimizerTest {
 		listABC.add(scanB);
 		listABC.add(scanC);
 		
-		LogicalJoinOperator joinABC = new LogicalJoinOperator(listABC, null);
+		LogicalJoinOperator joinABC = new LogicalJoinOperator(listABC, null, null, null);
 		JoinOrderOptimizer optABC = new JoinOrderOptimizer(joinABC, null);
 		optABC.dpChooseBestPlan();
 		List<LogicalOperator> bestABC = optABC.getBestOrder();
