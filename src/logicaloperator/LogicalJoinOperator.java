@@ -21,12 +21,15 @@ public class LogicalJoinOperator extends LogicalOperator {
 	private List<LogicalOperator> joinChildren;
 	private Expression joinCondition;
 	private Collection<UnionElement> unionElements;
-	public LogicalJoinOperator(List<LogicalOperator> joinCh, Expression condition, Collection<UnionElement> unions) {
+	private Expression originalExp;
+	
+	public LogicalJoinOperator(List<LogicalOperator> joinCh, Expression condition, Collection<UnionElement> unions, Expression origin) {
 //		leftChild = left;
 //		rightChild = right;
 		joinChildren = joinCh;
 		joinCondition = condition;
 		unionElements = unions;
+		originalExp = origin;
 	}
 
 //	public LogicalOperator getLeftChild() {
@@ -38,12 +41,19 @@ public class LogicalJoinOperator extends LogicalOperator {
 //	}
 	
 	
-
+	
 	/**
 	 * @return the joinCondition
 	 */
 	public Expression getJoinCondition() {
 		return joinCondition;
+	}
+
+	/**
+	 * @return the originalExp
+	 */
+	public Expression getOriginalExp() {
+		return originalExp;
 	}
 
 	/**
