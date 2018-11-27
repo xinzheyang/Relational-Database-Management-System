@@ -31,8 +31,6 @@ public class JoinOrderOptimizer {
 	private List<HashMap<HashSet<LogicalOperator>, CostMetric>> subsetCostMetrics; //cost and relation size of best plan for all subsets 
 	private List<LogicalOperator> finalOrder;
 	private ParseConjunctExpVisitor visitor;
-	//	private List<HashSet<LogicalOperator>> subsetsBySize;
-	//	private HashMap<List<String>, Expression> joinMap;
 
 	/** Given the logical join operator and join map (or construct one if null)
 	 * @param joinOperator
@@ -120,10 +118,10 @@ public class JoinOrderOptimizer {
 	 * dynamic programming approach.
 	 */
 	public void dpChooseBestPlan() {
-		//TODO: implement dp bottom-up.
+		//implement dp bottom-up.
 		List<LogicalOperator> allChildren = joinOp.getJoinChildren();
 		List<HashSet<LogicalOperator>> subsetsBySize = enumerateSubsets(allChildren);
-		for (int i = 3; i <= allChildren.size(); i++) { //starts from size = 3
+		for (int i = 3; i <= allChildren.size(); i++) { //starts from size = 3, since 0,1,2 already initialized
 
 			int bestPlanCost = Integer.MAX_VALUE;
 			CostMetric curBest = null;
@@ -168,7 +166,6 @@ public class JoinOrderOptimizer {
 	private void enumerateSubsets(List<LogicalOperator> lst, HashSet<LogicalOperator> tmp, List<HashSet<LogicalOperator>> res, int currElemIndex) {
 		if (currElemIndex >= lst.size()) {
 			res.set(tmp.size(), (HashSet<LogicalOperator>) tmp.clone());
-			//			System.out.println(res[tmp.size()]);
 			return;
 		}
 		tmp.add(lst.get(currElemIndex));
@@ -188,8 +185,6 @@ public class JoinOrderOptimizer {
 		private HashSet<LogicalOperator> leftChildren;
 		private LogicalOperator rightOp;
 		private String rightRef;
-		//		private int planCost;
-		//		private int relationSize;
 		private Expression joinCondition;
 		private Collection<UnionElement> allUnions;
 		private CostMetric costMetric; //the cost metric to be returned
