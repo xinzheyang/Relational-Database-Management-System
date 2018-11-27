@@ -3,8 +3,10 @@
  */
 package logicaloperator;
 
+import java.util.Collection;
 import java.util.List;
 
+import datastructure.UnionElement;
 import net.sf.jsqlparser.expression.Expression;
 import visitor.PhysicalPlanBuilder;
 
@@ -18,12 +20,13 @@ public class LogicalJoinOperator extends LogicalOperator {
 //	private LogicalOperator rightChild;
 	private List<LogicalOperator> joinChildren;
 	private Expression joinCondition;
-	
-	public LogicalJoinOperator(List<LogicalOperator> joinCh, Expression condition) {
+	private Collection<UnionElement> unionElements;
+	public LogicalJoinOperator(List<LogicalOperator> joinCh, Expression condition, Collection<UnionElement> unions) {
 //		leftChild = left;
 //		rightChild = right;
 		joinChildren = joinCh;
 		joinCondition = condition;
+		unionElements = unions;
 	}
 
 //	public LogicalOperator getLeftChild() {
@@ -41,6 +44,13 @@ public class LogicalJoinOperator extends LogicalOperator {
 	 */
 	public Expression getJoinCondition() {
 		return joinCondition;
+	}
+
+	/**
+	 * @return the unionElements
+	 */
+	public Collection<UnionElement> getUnionElements() {
+		return unionElements;
 	}
 
 	/**
