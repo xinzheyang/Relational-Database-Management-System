@@ -68,11 +68,13 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	private HashMap<String, HashSet<Expression>> selectMap; //mapping tables referenced --> Select Condition (not concat tgt)
 	private boolean alwaysFalse; //checker for a false constant boolean conjunct in the where clause - if one of the
 	//conjunct is false, the where clause is always false
+	private boolean allEqualityJoins; //flag for all equality joins in this expression
 
 	public ParseConjunctExpVisitor() {
 		tbStack = new Stack<String>();
 		joinMap = new HashMap<List<String>, Expression>();
 		selectMap = new HashMap<String, HashSet<Expression>>();
+		allEqualityJoins = true;
 	}
 
 	/** Getter for joinMap.
@@ -143,6 +145,9 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 			}
 		}
 		if (!tb1.isEmpty() && !tb2.isEmpty() && ! tb1.equals(tb2)) { //Join Condition, stack had two tables
+			if (!(op instanceof EqualsTo) && allEqualityJoins) { //bop not an equality join condition
+				allEqualityJoins = false;
+			}
 			List<String> key = new ArrayList<String>();
 			key.add(tb1);
 			key.add(tb2);

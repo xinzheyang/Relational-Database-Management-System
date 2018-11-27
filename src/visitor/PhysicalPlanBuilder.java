@@ -7,12 +7,15 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import database.DBCatalog;
 import datastructure.UnionElement;
+import joinorderoptimizer.JoinOrderOptimizer;
 import logicaloperator.*;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import physicaloperator.*;
 
 /**
@@ -85,6 +88,70 @@ public class PhysicalPlanBuilder {
 			e.printStackTrace();
 		}
 	}
+	
+	private String getScanOrSelectRef(Operator op) {
+		String ref;
+		if (op instanceof ScanOperator) {
+			ref = ((ScanOperator) op).getReference();
+		} else {
+			ref = ((SelectOperator) op).getReference();
+		}
+		return ref;
+	}
+	
+	/** Creates a SMJ operator from the left and right operator along with the join condition.
+	 * @param left
+	 * @param right
+	 * @param cond
+	 * @return
+	 */
+	private SMJoinOperator createSMJ(Operator left, Operator right, Expression cond) {
+		EquiConjunctVisitor equiVisit = new EquiConjunctVisitor();
+		cond.accept(equiVisit);
+		Object[] sortLeftObj = equiVisit.getLeftCompareCols().toArray();
+		Object[] sortRightObj = equiVisit.getRightCompareCols().toArray();
+		String[] sortOrderLeft = Arrays.copyOf(sortLeftObj, sortLeftObj.length, String[].class);
+		String[] sortOrderRight = Arrays.copyOf(sortRightObj, sortRightObj.length, String[].class);
+		// push down left and right sort operator to sort relations before merging
+		SortOperator leftSort = getSortOperator(left, sortOrderLeft);
+		SortOperator rightSort = getSortOperator(right, sortOrderRight);
+		return new SMJoinOperator(leftSort, rightSort, cond);
+	}
+	
+	/** Creates a BNLJ operator from the left and right operator along with the join condition.
+	 * @param left
+	 * @param right
+	 * @param cond
+	 * @return
+	 */
+	private BNLJoinOperator createBNLJ(Operator left, Operator right, Expression cond) {
+		int bufferSize = DBCatalog.getJoinBufferSize();
+		return new BNLJoinOperator(left, right, cond, bufferSize);
+	}
+	
+	/** Creates a join operator by choosing the better join by following the principle of always using SMJ for
+	 * joins with all equality conditions and BNLJ otherwise.
+	 * @param left
+	 * @param right
+	 * @param cond
+	 * @param checkEquity
+	 * @return
+	 */
+	private JoinOperator createBestJoin(Operator left, Operator right, Expression cond, CheckAllEquityExpVisitor checkEquity) {
+		JoinOperator op;
+		if (cond != null) {
+			cond.accept(checkEquity);
+			if (checkEquity.isAllEquity()) {
+				op = createSMJ(left, right, cond);
+			}
+			else {
+				op = createBNLJ(left, right, cond);
+			}
+		} else { //condition null, default to use BNLJ
+			op = createBNLJ(left, right, cond);
+		}
+		return op;
+	}
 
 	/**
 	 * @param op
@@ -92,40 +159,74 @@ public class PhysicalPlanBuilder {
 	 *            which physical Join operators to construct
 	 */
 	public void visit(LogicalJoinOperator op) {
-		// TODO: refractor PPB to left deep join tree
-		op.getLeftChild().accept(this);
-		Operator left = operator;
-		op.getRightChild().accept(this);
-		Operator right = operator;
-		JoinOperator joinOperator;
-		if (DBCatalog.getJoinMethod().equals("0")) { // TNLJ
-			joinOperator = new TNLJoinOperator(left, right, op.getJoinCondition());
-		} else {
-			if (DBCatalog.getJoinMethod().equals("1")) { // BNLJ
-				int bufferSize = DBCatalog.getJoinBufferSize();
-				joinOperator = new BNLJoinOperator(left, right, op.getJoinCondition(), bufferSize);
-			} else if (DBCatalog.getJoinMethod().equals("2")) { // SMJ
-				Expression smjCondition = op.getJoinCondition();
-				EquiConjunctVisitor equiVisit = new EquiConjunctVisitor();
-				/*
-				 * by accepting, the visitor processes the join condition and extract left and
-				 * right column names in the sorting order.
-				 */
-				smjCondition.accept(equiVisit);
-				Object[] sortLeftObj = equiVisit.getLeftCompareCols().toArray();
-				Object[] sortRightObj = equiVisit.getRightCompareCols().toArray();
+		// refactor PPB to left deep join tree
+		JoinOrderOptimizer opt = new JoinOrderOptimizer(op, op.getVisitor());
+		ParseConjunctExpVisitor visitor = op.getVisitor();
+		opt.dpChooseBestPlan();
+		List<LogicalOperator> optOrder = opt.getBestOrder(); //best join order
+		//use parse conjunct visitor to build left deep join tree
+		assert optOrder.size() > 1;
+		JoinOperator left;
+		optOrder.get(0).accept(this);
+		Operator firstLeft = operator;
+		optOrder.get(1).accept(this);
+		Operator secondLeft = operator;
+		
+		List<String> leftTableRefs = new LinkedList<String>();
+		leftTableRefs.add(getScanOrSelectRef(firstLeft));
+		leftTableRefs.add(getScanOrSelectRef(secondLeft));
+		
+		Expression firstCond = visitor == null ? null : visitor.getJoinCondition(leftTableRefs.get(0), leftTableRefs.get(1));
+		CheckAllEquityExpVisitor checkEquity = new CheckAllEquityExpVisitor();
 
-				String[] sortOrderLeft = Arrays.copyOf(sortLeftObj, sortLeftObj.length, String[].class);
-				String[] sortOrderRight = Arrays.copyOf(sortRightObj, sortRightObj.length, String[].class);
-				// push down left and right sort operator to sort relations before merging
-				SortOperator leftSort = getSortOperator(left, sortOrderLeft);
-				SortOperator rightSort = getSortOperator(right, sortOrderRight);
-				joinOperator = new SMJoinOperator(leftSort, rightSort, smjCondition);
-			} else { // invalid input, default to TNLJ
-				joinOperator = new TNLJoinOperator(left, right, op.getJoinCondition());
+		left = createBestJoin(firstLeft, secondLeft, firstCond, checkEquity);
+		
+		for (int i = 2; i < optOrder.size(); i++) {
+			Expression condition = null;
+			LogicalOperator currRight = optOrder.get(i);
+			currRight.accept(this);
+			String currRef = getScanOrSelectRef(operator);
+			for (String leftRef: leftTableRefs) {
+				Expression tempCondition = visitor != null ? visitor.getJoinCondition(leftRef, currRef) : null;
+				if (tempCondition != null)
+					condition = condition == null ? tempCondition: new AndExpression(condition, tempCondition);
 			}
+			leftTableRefs.add(currRef);
+			left = createBestJoin(left, operator, condition, checkEquity);
 		}
-		operator = joinOperator;
+//		op.getLeftChild().accept(this);
+//		Operator left = operator;
+//		op.getRightChild().accept(this);
+//		Operator right = operator;
+//		JoinOperator joinOperator;
+//		if (DBCatalog.getJoinMethod().equals("0")) { // TNLJ
+//			joinOperator = new TNLJoinOperator(left, right, op.getJoinCondition());
+//		} else {
+//			if (DBCatalog.getJoinMethod().equals("1")) { // BNLJ
+//				int bufferSize = DBCatalog.getJoinBufferSize();
+//				joinOperator = new BNLJoinOperator(left, right, op.getJoinCondition(), bufferSize);
+//			} else if (DBCatalog.getJoinMethod().equals("2")) { // SMJ
+//				Expression smjCondition = op.getJoinCondition();
+//				EquiConjunctVisitor equiVisit = new EquiConjunctVisitor();
+//				/*
+//				 * by accepting, the visitor processes the join condition and extract left and
+//				 * right column names in the sorting order.
+//				 */
+//				smjCondition.accept(equiVisit);
+//				Object[] sortLeftObj = equiVisit.getLeftCompareCols().toArray();
+//				Object[] sortRightObj = equiVisit.getRightCompareCols().toArray();
+//
+//				String[] sortOrderLeft = Arrays.copyOf(sortLeftObj, sortLeftObj.length, String[].class);
+//				String[] sortOrderRight = Arrays.copyOf(sortRightObj, sortRightObj.length, String[].class);
+//				// push down left and right sort operator to sort relations before merging
+//				SortOperator leftSort = getSortOperator(left, sortOrderLeft);
+//				SortOperator rightSort = getSortOperator(right, sortOrderRight);
+//				joinOperator = new SMJoinOperator(leftSort, rightSort, smjCondition);
+//			} else { // invalid input, default to TNLJ
+//				joinOperator = new TNLJoinOperator(left, right, op.getJoinCondition());
+//			}
+//		}
+		operator = left;
 		
 		//create logical plan
 		try {

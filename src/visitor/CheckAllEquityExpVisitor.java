@@ -3,21 +3,11 @@
  */
 package visitor;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Stack;
-
-import database.Tuple;
-import logicaloperator.LogicalOperator;
-import logicaloperator.LogicalScanOperator;
-import logicaloperator.LogicalSelectOperator;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
 import net.sf.jsqlparser.expression.CaseExpression;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
-import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.InverseExpression;
 import net.sf.jsqlparser.expression.JdbcParameter;
@@ -52,48 +42,26 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import physicaloperator.Operator;
+import net.sf.jsqlparser.expression.ExpressionVisitor;
 
-/** An ExpressionVisitor only used for processing join condition in Sort Merge Join.
- * Visit every conjunct in the equality expression and record all columns names and values
- * referenced in left and right relations.
+/**
  * @author sitianchen
  *
  */
-public class EquiAttribExtractVisitor implements ExpressionVisitor {
-	private HashSet<LogicalOperator> leftChildren;
-	private HashSet<String> leftTableRefs;
-	private LogicalOperator rightOp;
-	private String rightTableRef;
-	private Stack<Column> columnStack;
-	private List<String[]> extractedAttribs;
+public class CheckAllEquityExpVisitor implements ExpressionVisitor{
 	
-	public EquiAttribExtractVisitor(HashSet<LogicalOperator> leftChildren, LogicalOperator rightOp) {
-		this.leftChildren = leftChildren;
-		this.rightOp = rightOp;
-		leftTableRefs = new HashSet<String>();
-		for (LogicalOperator child : leftChildren) {
-			String ref = "";
-			if (child instanceof LogicalScanOperator) {
-				ref = ((LogicalScanOperator) child).getReference();
-			} else if (child instanceof LogicalSelectOperator) {
-				ref = ((LogicalSelectOperator) child).getReference();
-			} 
-			leftTableRefs.add(ref);
-		}
-		
-		if (rightOp instanceof LogicalScanOperator) {
-			rightTableRef = ((LogicalScanOperator) rightOp).getReference();
-		} else if (rightOp instanceof LogicalSelectOperator) {
-			rightTableRef = ((LogicalSelectOperator) rightOp).getReference();
-		}
-		extractedAttribs = new ArrayList<String[]>();
+	private int numAnds; //number of expressions and-ed together
+	private int numEquiExps; //number of equality expressions
+	
+	public CheckAllEquityExpVisitor() {
+		numAnds = 1;
+		numEquiExps = 0;
 	}
 	
-	//--SETTERS AND GETTERS--
-
-	//--SETTERS AND GETTERS--
-
+	public boolean isAllEquity() {
+		return numAnds == numEquiExps;
+	}
+	
 	@Override
 	public void visit(NullValue nullValue) { throw new UnsupportedOperationException("not supported"); }
 
@@ -109,9 +77,6 @@ public class EquiAttribExtractVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(DoubleValue doubleValue) { throw new UnsupportedOperationException("not supported"); }
 
-	/** No-op
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.LongValue)
-	 */
 	@Override
 	public void visit(LongValue longValue) { }
 
@@ -142,11 +107,9 @@ public class EquiAttribExtractVisitor implements ExpressionVisitor {
 	@Override
 	public void visit(Subtraction subtraction) { throw new UnsupportedOperationException("not supported"); }
 
-	/**
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.conditional.AndExpression)
-	 */
 	@Override
 	public void visit(AndExpression andExpression) {
+		numAnds++;
 		andExpression.getLeftExpression().accept(this);
 		andExpression.getRightExpression().accept(this);
 	}
@@ -162,26 +125,14 @@ public class EquiAttribExtractVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(EqualsTo equalsTo) {
-		//TODO
-		equalsTo.getLeftExpression().accept(this);
-		equalsTo.getRightExpression().accept(this);
-		if (columnStack.size() == 2) {
-			Column colAttrib1 = columnStack.pop();
-			Column colAttrib2 = columnStack.pop();
-			if (colAttrib1.getTable().getName().equals(rightTableRef)) {
-				if (this.leftTableRefs.contains(colAttrib2.getTable().getName())) {
-					String[] a
-				}
-			}
-		}
-		
+		this.numEquiExps++;
 	}
 
 	@Override
-	public void visit(GreaterThan greaterThan) { throw new UnsupportedOperationException("not supported"); }
+	public void visit(GreaterThan greaterThan) { }
 
 	@Override
-	public void visit(GreaterThanEquals greaterThanEquals) { throw new UnsupportedOperationException("not supported"); }
+	public void visit(GreaterThanEquals greaterThanEquals) { }
 
 	@Override
 	public void visit(InExpression inExpression) { throw new UnsupportedOperationException("not supported"); }
@@ -193,19 +144,16 @@ public class EquiAttribExtractVisitor implements ExpressionVisitor {
 	public void visit(LikeExpression likeExpression) { throw new UnsupportedOperationException("not supported"); }
 
 	@Override
-	public void visit(MinorThan minorThan) { throw new UnsupportedOperationException("not supported"); }
+	public void visit(MinorThan minorThan) { }
 
 	@Override
-	public void visit(MinorThanEquals minorThanEquals) { throw new UnsupportedOperationException("not supported"); }
+	public void visit(MinorThanEquals minorThanEquals) { }
 
 	@Override
-	public void visit(NotEqualsTo notEqualsTo) { throw new UnsupportedOperationException("not supported"); }
+	public void visit(NotEqualsTo notEqualsTo) { }
 
 	@Override
-	public void visit(Column tableColumn) {
-		//TODO
-		columnStack.push(tableColumn);
-	}
+	public void visit(Column tableColumn) { }
 
 	@Override
 	public void visit(SubSelect subSelect) { throw new UnsupportedOperationException("not supported"); }

@@ -30,6 +30,10 @@ public class SelectOperator extends Operator {
 	public Operator getChildOp() {
 		return childOp;
 	}
+	
+	public String getReference() {
+		return ((ScanOperator) childOp).getReference();
+	}
 
 	/**
 	 * Setter for the childOp

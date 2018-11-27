@@ -41,7 +41,12 @@ public class LogicalJoinOperator extends LogicalOperator {
 //		return rightChild;
 //	}
 	
-	
+	/**
+	 * @return
+	 */
+	public ParseConjunctExpVisitor getVisitor() {
+		return visitor;
+	}
 	
 	/**
 	 * @return the joinCondition
@@ -50,12 +55,12 @@ public class LogicalJoinOperator extends LogicalOperator {
 		return joinCondition;
 	}
 
-	/**
-	 * @return the originalExp
-	 */
-	public Expression getOriginalExp() {
-		return originalExp;
-	}
+//	/**
+//	 * @return the originalExp
+//	 */
+//	public Expression getOriginalExp() {
+//		return originalExp;
+//	}
 
 	/**
 	 * @return the unionElements
