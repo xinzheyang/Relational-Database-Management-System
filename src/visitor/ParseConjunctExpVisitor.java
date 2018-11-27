@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Stack;
 
@@ -63,15 +64,15 @@ import physicaloperator.Operator;
 public class ParseConjunctExpVisitor implements ExpressionVisitor {
 
 	private Stack<String> tbStack; //stack keeping record of tables last involved
-	private HashMap<List<String>, Expression> joinMap; //mapping tables referenced --> Join Condition
-	private HashMap<String, Expression> selectMap; //mapping tables referenced --> Select Condition
+	private HashMap<List<String>, Expression> joinMap; //mapping tables referenced --> Join Condition (concat tgt)
+	private HashMap<String, HashSet<Expression>> selectMap; //mapping tables referenced --> Select Condition (not concat tgt)
 	private boolean alwaysFalse; //checker for a false constant boolean conjunct in the where clause - if one of the
 	//conjunct is false, the where clause is always false
 
 	public ParseConjunctExpVisitor() {
 		tbStack = new Stack<String>();
 		joinMap = new HashMap<List<String>, Expression>();
-		selectMap = new HashMap<String, Expression>();
+		selectMap = new HashMap<String, HashSet<Expression>>();
 	}
 
 	/** Getter for joinMap.
@@ -84,7 +85,7 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	/** Getter for selectMap.
 	 * @return selectMap
 	 */
-	public HashMap<String, Expression> getSelectMap() {
+	public HashMap<String, HashSet<Expression>> getSelectMap() {
 		return selectMap;
 	}
 
@@ -108,7 +109,7 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 	 * @return tb as key, the key's mapped value (the existing select condition of the table)
 	 * or null if key non-existent
 	 */
-	public Expression getSelectCondition(String tb) {
+	public HashSet<Expression> getSelectCondition(String tb) {
 		return selectMap.get(tb);
 	}
 
@@ -157,11 +158,14 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 		else if (!tb1.isEmpty() || !tb2.isEmpty()) { //Select Condition, stack had one table
 			String key = !tb1.isEmpty() ? tb1 : tb2;
 			if (!selectMap.containsKey(key)) {
-				selectMap.put(key, op);
+				HashSet<Expression> exSet = new HashSet<Expression>();
+				exSet.add(op);
+				selectMap.put(key, exSet);
 			}
 			else {
-				Expression newExp = new AndExpression(selectMap.get(key), op);
-				selectMap.put(key, newExp);
+//				Expression newExp = new AndExpression(selectMap.get(key), op);
+//				selectMap.put(key, newExp);
+				selectMap.get(key).add(op);
 			}
 		}
 		else { //stack was empty, neither select or join, both sides are long values

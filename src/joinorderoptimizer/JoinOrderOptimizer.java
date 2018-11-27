@@ -245,11 +245,12 @@ public class JoinOrderOptimizer {
 				rightRelationSize = ((LogicalSelectOperator) rightOp).getRelationSize();
 			}
 			int leftRelationSize = leftRelations.relationSize;
-			//use UF to get all unions of table attributes joined on equality in the join condition.
-			//compute denominators on these unions (max of all v-values of union attributes).
-			UnionFindVisitor findVisit = new UnionFindVisitor();
-			int relationSize = leftRelationSize * rightRelationSize;
-			if (joinCondition != null) {
+			int relationSize = leftRelationSize * rightRelationSize; //cross product relation size
+			
+			if (joinCondition != null) {//if there is join condition
+				//use UF to get all unions of table attributes joined on equality in the join condition.
+				//compute denominators on these unions (max of all v-values of union attributes).
+				UnionFindVisitor findVisit = new UnionFindVisitor();
 				joinCondition.accept(findVisit);
 				allUnions = findVisit.getUnionFind().getRootElementMap();
 				for (UnionElement union : allUnions) {
