@@ -27,8 +27,8 @@ public class LogicalScanOperator extends LogicalOperator {
 	public LogicalScanOperator(String table, String alias) {
 		this.tb = table;
 		this.alias = alias;
-		relationSize = DBCatalog.getRelationSize(table);
-		attribBounds = DBCatalog.getAttribBounds(table); 
+//		relationSize = DBCatalog.getRelationSize(table);
+//		attribBounds = DBCatalog.getAttribBounds(table); 
 //		BufferedReader readStats = new BufferedReader(new FileReader(DBCatalog.getStatsFileLoc()));
 //		String line;
 //		while ((line = readStats.readLine()) != null) {

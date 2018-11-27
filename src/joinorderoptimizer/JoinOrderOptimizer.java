@@ -31,16 +31,16 @@ public class JoinOrderOptimizer {
 	private List<HashMap<HashSet<LogicalOperator>, CostMetric>> subsetCostMetrics; //cost and relation size of best plan for all subsets 
 	private List<LogicalOperator> finalOrder;
 	private ParseConjunctExpVisitor visitor;
-	//	private HashMap<List<String>, Expression> joinMap;
 
 	/** Given the logical join operator and join map (or construct one if null)
 	 * @param joinOperator
 	 * @throws Exception
 	 */
-	public JoinOrderOptimizer(LogicalJoinOperator joinOperator, ParseConjunctExpVisitor visitor) throws Exception {
+	public JoinOrderOptimizer(LogicalJoinOperator joinOperator, ParseConjunctExpVisitor visitor) {
 		joinOp = joinOperator;
 		subsetCostMetrics = new ArrayList<HashMap<HashSet<LogicalOperator>, CostMetric>>();
 		subsetCostMetrics.add(null); //initialize 0th denoting size 0 subset, and is null
+		this.visitor = visitor;
 		HashMap<HashSet<LogicalOperator>, CostMetric> sizeOneMap = new HashMap<HashSet<LogicalOperator>, CostMetric>();
 		//initialize cost metric for size one subsets
 		for (LogicalOperator child : joinOp.getJoinChildren()) {
@@ -69,28 +69,33 @@ public class JoinOrderOptimizer {
 	 * you should choose the smaller relation to be the outer in the best plan;
 	 */
 	private void initTwoRelationJoins() {
-		//TODO: two-relation joins, choose smaller relation as outer/left relation
 		HashMap<HashSet<LogicalOperator>, CostMetric> sizeTwoMap = new HashMap<HashSet<LogicalOperator>, CostMetric>();
 		List<LogicalOperator> allChildren = joinOp.getJoinChildren();
 		for (int i = 0; i < allChildren.size(); i++) {
 			for (int j = i+1; j < allChildren.size(); j++) {
 				LogicalOperator child1 = allChildren.get(i);
 				LogicalOperator child2 = allChildren.get(j);
-				
+
 				HashSet<LogicalOperator> twoList = new HashSet<LogicalOperator>();
 				twoList.add(child1);
 				twoList.add(child2);
-				
-				CostMetric currMetric = new CostMetric();
-				currMetric.planCost = 0; //plan cost for two-relation plan is 0
-				currMetric.bestJoinOrder = new ArrayList<LogicalOperator>();
+
 				//relation sizes of children
 				int child1Size = (child1 instanceof LogicalScanOperator) ? ((LogicalScanOperator) child1).getRelationSize() 
 						: ((LogicalSelectOperator) child1).getRelationSize();
 				int child2Size = (child1 instanceof LogicalScanOperator) ? ((LogicalScanOperator) child2).getRelationSize() 
 						: ((LogicalSelectOperator) child2).getRelationSize();
 				//set the relation with smaller size to be the left / outer relation of the join
-				if (child1Size > child2Size) {
+
+				HashSet<LogicalOperator> leftSet = new HashSet<LogicalOperator>();
+				leftSet.add(child1);
+				CostMetric leftCost = this.subsetCostMetrics.get(1).get(leftSet);
+				PlanCostCompute comp = new PlanCostCompute(leftCost, leftSet, child2);
+				comp.computeJoinSize();
+				CostMetric currMetric = comp.getResultCostMetric();
+				currMetric.bestJoinOrder = new ArrayList<LogicalOperator>();
+
+				if (child1Size < child2Size) {
 					currMetric.bestJoinOrder.add(child1);
 					currMetric.bestJoinOrder.add(child2);
 				} else {
@@ -113,13 +118,12 @@ public class JoinOrderOptimizer {
 	 * dynamic programming approach.
 	 */
 	public void dpChooseBestPlan() {
-		//TODO: implement dp bottom-up.
+		//implement dp bottom-up.
 		List<LogicalOperator> allChildren = joinOp.getJoinChildren();
 		List<HashSet<LogicalOperator>> subsetsBySize = enumerateSubsets(allChildren);
-		for (int i = 3; i <= allChildren.size(); i++) { //starts from size = 3
+		for (int i = 3; i <= allChildren.size(); i++) { //starts from size = 3, since 0,1,2 already initialized
 
 			int bestPlanCost = Integer.MAX_VALUE;
-			//			int relationSize = 0;
 			CostMetric curBest = null;
 			LogicalOperator optimalRightOp = null;
 			List<LogicalOperator> leftBestOrder = null;
@@ -150,14 +154,18 @@ public class JoinOrderOptimizer {
 	}
 
 	private List<HashSet<LogicalOperator>> enumerateSubsets(List<LogicalOperator> lst) {
-		List<HashSet<LogicalOperator>> subsets = new ArrayList<HashSet<LogicalOperator>>(lst.size() + 1);
-		enumerateSubsets(lst, new HashSet<LogicalOperator>(), subsets, 0);
-		return subsets;
+		List<HashSet<LogicalOperator>> subsetsBySize = new ArrayList<HashSet<LogicalOperator>>();
+		for (int i = 0; i < lst.size() + 1; i++) {
+			subsetsBySize.add(null);
+		}
+		enumerateSubsets(lst, new HashSet<LogicalOperator>(), subsetsBySize, 0);
+		//		System.out.println(subsets[1]);
+		return subsetsBySize;
 	}
 
 	private void enumerateSubsets(List<LogicalOperator> lst, HashSet<LogicalOperator> tmp, List<HashSet<LogicalOperator>> res, int currElemIndex) {
 		if (currElemIndex >= lst.size()) {
-			res.set(tmp.size(), tmp);
+			res.set(tmp.size(), (HashSet<LogicalOperator>) tmp.clone());
 			return;
 		}
 		tmp.add(lst.get(currElemIndex));
@@ -177,8 +185,6 @@ public class JoinOrderOptimizer {
 		private HashSet<LogicalOperator> leftChildren;
 		private LogicalOperator rightOp;
 		private String rightRef;
-		//		private int planCost;
-		//		private int relationSize;
 		private Expression joinCondition;
 		private Collection<UnionElement> allUnions;
 		private CostMetric costMetric; //the cost metric to be returned
@@ -196,17 +202,19 @@ public class JoinOrderOptimizer {
 				rightRef = ((LogicalSelectOperator) rightOp).getReference();
 			}
 			//extracts the join condition for this join
-			for (LogicalOperator leftChild : leftChildren) {
-				String leftRef = null;
-				if (leftChild instanceof LogicalScanOperator) {
-					leftRef = ((LogicalScanOperator) leftChild).getReference();
-				} else if (rightOp instanceof LogicalSelectOperator) {
-					leftRef = ((LogicalSelectOperator) rightOp).getReference();
+			if (visitor != null) {
+				for (LogicalOperator leftChild : leftChildren) {
+					String leftRef = null;
+					if (leftChild instanceof LogicalScanOperator) {
+						leftRef = ((LogicalScanOperator) leftChild).getReference();
+					} else if (rightOp instanceof LogicalSelectOperator) {
+						leftRef = ((LogicalSelectOperator) rightOp).getReference();
+					}
+					Expression tempCondition = visitor.getJoinCondition(leftRef, rightRef); 
+					//gets the join exp of every left child with the right child
+					joinCondition = joinCondition == null ? tempCondition : new AndExpression(joinCondition, tempCondition);
+					//AND them all together to get the final join condition
 				}
-				Expression tempCondition = visitor.getJoinCondition(leftRef, rightRef); 
-				//gets the join exp of every left child with the right child
-				joinCondition = joinCondition == null ? tempCondition : new AndExpression(joinCondition, tempCondition);
-				//AND them all together to get the final join condition
 			}
 
 		}
@@ -215,7 +223,13 @@ public class JoinOrderOptimizer {
 		 * relation size.
 		 */
 		public void computePlanCost() {
-			costMetric.planCost = leftRelations.planCost + leftRelations.relationSize; 
+			if (this.leftChildren.size() == 1) { //two-relation join plan, plan cost is 0
+				System.out.println("hi");
+				costMetric.planCost = 0;
+			}
+			else {
+				costMetric.planCost = leftRelations.planCost + leftRelations.relationSize; 
+			}
 		}
 
 		/** 3.4.3 Computes the intermediate relation size of the left relation joining the right logical
@@ -234,12 +248,14 @@ public class JoinOrderOptimizer {
 			//use UF to get all unions of table attributes joined on equality in the join condition.
 			//compute denominators on these unions (max of all v-values of union attributes).
 			UnionFindVisitor findVisit = new UnionFindVisitor();
-			joinCondition.accept(findVisit);
-			allUnions = findVisit.getUnionFind().getRootElementMap();
 			int relationSize = leftRelationSize * rightRelationSize;
-			for (UnionElement union : allUnions) {
-				//compute max of all v-values on this union
-				relationSize = (int) Math.ceil(((double) relationSize) / ((double) computeMaxVValue(union)));
+			if (joinCondition != null) {
+				joinCondition.accept(findVisit);
+				allUnions = findVisit.getUnionFind().getRootElementMap();
+				for (UnionElement union : allUnions) {
+					//compute max of all v-values on this union
+					relationSize = (int) Math.ceil(((double) relationSize) / ((double) computeMaxVValue(union)));
+				}
 			}
 			costMetric.relationSize = Math.max(relationSize, 1); //clamp up relation size by 1
 		}
