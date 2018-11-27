@@ -3,6 +3,7 @@
  */
 package datastructure;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,6 +38,17 @@ public class UnionElement {
 	 */
 	public List<Column> getAttributes() {
 		return attributes;
+	}
+	
+	/**
+	 * @return the attributes as strings
+	 */
+	public List<String> getAttributeStrings() {
+		List<String> lst = new ArrayList<>();
+		for(Column i:attributes) {
+			lst.add(i.toString());
+		}
+		return lst;
 	}
 
 	/**

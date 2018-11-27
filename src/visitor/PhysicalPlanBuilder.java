@@ -3,12 +3,14 @@
  */
 package visitor;
 
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 import database.DBCatalog;
+import datastructure.UnionElement;
 import logicaloperator.*;
 import net.sf.jsqlparser.expression.Expression;
 import physicaloperator.*;
@@ -19,8 +21,10 @@ import physicaloperator.*;
  */
 public class PhysicalPlanBuilder {
 	Operator operator;
+	BufferedWriter logicalWriter;
 
-	public PhysicalPlanBuilder() {
+	public PhysicalPlanBuilder(BufferedWriter logicalPlan) {
+		logicalWriter=logicalPlan;
 	}
 
 	/**
@@ -33,13 +37,13 @@ public class PhysicalPlanBuilder {
 	 * @return the right sort operator constructed
 	 */
 	private SortOperator getSortOperator(Operator child, String[] cols) {
-		SortOperator sortOperator;
-		if (DBCatalog.getSortMethod().equals("0")) {
-			sortOperator = new InMemorySortOperator(child, cols);
-		} else {
-			assert DBCatalog.getSortMethod().equals("1");
-			sortOperator = new ExternalSortOperator(child, cols, DBCatalog.getSortBufferSize());
-		}
+		SortOperator sortOperator=new ExternalSortOperator(child, cols, DBCatalog.getSortBufferSize());
+//		if (DBCatalog.getSortMethod().equals("0")) {
+//			sortOperator = new InMemorySortOperator(child, cols);
+//		} else {
+//			assert DBCatalog.getSortMethod().equals("1");
+//			sortOperator = new ExternalSortOperator(child, cols, DBCatalog.getSortBufferSize());
+//		}
 
 		return sortOperator;
 	}
@@ -48,18 +52,38 @@ public class PhysicalPlanBuilder {
 		op.getChildOp().accept(this);
 		DupElimOperator dupElimOperator = new DupElimOperator(operator);
 		operator = dupElimOperator;
+		//create logical plan
+		try {
+			logicalWriter.write("DupElim");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void visit(LogicalSortOperator op) {
 		op.getChildOp().accept(this);
 		SortOperator sortOperator = getSortOperator(operator, op.getCols());
 		operator = sortOperator;
+		
+		//create logical plan
+		try {
+			logicalWriter.write("Sort"+"["+String.join(", ", op.getCols())+"]");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void visit(LogicalProjectOperator op) {
 		op.getChildOp().accept(this);
 		ProjectOperator projectOperator = new ProjectOperator(operator, op.getCols());
 		operator = projectOperator;
+		
+		//create logical plan
+		try {
+			logicalWriter.write("Project"+"["+String.join(", ", op.getCols())+"]");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -102,10 +126,24 @@ public class PhysicalPlanBuilder {
 			}
 		}
 		operator = joinOperator;
+		
+		//create logical plan
+		try {
+			logicalWriter.write("Join"+"["+String.join(", ", op.getJoinCondition().toString())+"]");
+			for(UnionElement elt: op.getUnionElements()) {
+				logicalWriter.write("["+String.join(", ", elt.getAttributeStrings())+"], equals "+
+						elt.getEquality()+", min "+elt.getLower()+", max "+elt.getUpper());
+			}
+			for (LogicalOperator child : op.getJoinChildren()) {
+				child.accept(this);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
-	 * @param op,
+	 * @param op
 	 *            the logicaiSelectOperator. the method uses a DivideSelectVisitor
 	 *            to determine whether to use index scan operator and it's lower and
 	 *            upper bounds, if any.
@@ -177,7 +215,12 @@ public class PhysicalPlanBuilder {
 		}
 		
 		
-		
+		//create logical plan
+		try {
+			logicalWriter.write("Select["+op.getEx().toString()+"]");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 //		if (DBCatalog.useIndex()) {
 //			visitor = new DivideSelectVisitor(DBCatalog.getIndexKey(tableName));
@@ -218,7 +261,13 @@ public class PhysicalPlanBuilder {
 			System.err.println("error occurred during building scan operator, file not found");
 			e.printStackTrace();
 		}
-
+		
+		//create logical plan
+		try {
+			logicalWriter.write("Leaf["+op.getTableName()+"]");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
