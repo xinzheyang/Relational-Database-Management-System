@@ -18,10 +18,10 @@ import visitor.PhysicalPlanBuilder;
 public class LogicalJoinOperator extends LogicalOperator {
 //	private LogicalOperator leftChild;
 //	private LogicalOperator rightChild;
-	private List<LogicalOperator> joinChildren;
-	private Expression joinCondition;
-	private Collection<UnionElement> unionElements;
-	private Expression originalExp;
+	private List<LogicalOperator> joinChildren; // a list of select of scan operators as children of this join operator
+	private Expression joinCondition; // the join condition
+	private Collection<UnionElement> unionElements; // the collections of UnionElements, if any
+	private Expression originalExp; // original expression as in the SQL (includes both select and join)
 	
 	public LogicalJoinOperator(List<LogicalOperator> joinCh, Expression condition, Collection<UnionElement> unions, Expression origin) {
 //		leftChild = left;
