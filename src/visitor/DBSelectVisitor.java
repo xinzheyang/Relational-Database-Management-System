@@ -48,6 +48,8 @@ public class DBSelectVisitor implements SelectVisitor {
 	private ParseConjunctExpVisitor parseConjunctExpVisitor;
 	private HashMap<String, HashSet<Expression>> selectMap;
 	private UnionFindVisitor unionFindVisitor;
+	
+	private HashMap<String, HashSet<Expression>> ufSelectMap;
 	public LogicalOperator getOperator() {
 		return operator;
 	}
@@ -124,9 +126,9 @@ public class DBSelectVisitor implements SelectVisitor {
 
 		HashSet<Expression> set = new HashSet<>();
 		// process unused normal select
-		if (selectMap != null && selectMap.size() > 0) {
-			if (selectMap.containsKey(tableReference)) {
-				set.addAll(selectMap.get(tableReference));
+		if (ufSelectMap != null && ufSelectMap.size() > 0) {
+			if (ufSelectMap.containsKey(tableReference)) {
+				set.addAll(ufSelectMap.get(tableReference));
 			}
 		}
 
@@ -247,6 +249,11 @@ public class DBSelectVisitor implements SelectVisitor {
 			if (expression != null) {
 				unionFindVisitor = new UnionFindVisitor();
 				expression.accept(unionFindVisitor);
+				ParseConjunctExpVisitor ufParseConjunctExpVisitor = new ParseConjunctExpVisitor();
+				if (unionFindVisitor.getNormalSelect() != null) {
+					unionFindVisitor.getNormalSelect().accept(ufParseConjunctExpVisitor);
+					ufSelectMap = ufParseConjunctExpVisitor.getSelectMap();
+				}
 				LogicalOperator initOp = ufBuildScanSelectFromItem(fromItem);
 				joinChildren.add(initOp);
 
