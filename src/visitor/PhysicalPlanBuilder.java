@@ -178,8 +178,8 @@ public class PhysicalPlanBuilder {
 			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+"Join"
 		+"["+joinCond+"]\n");
 			for(UnionElement elt: op.getUnionElements()) {
-				logicalWriter.write("["+String.join(", ", elt.getAttributeStrings())+"], equals "+
-						elt.getEquality()+", min "+elt.getLower()+", max "+elt.getUpper()+"\n");
+				logicalWriter.write("[["+String.join(", ", elt.getAttributeStrings())+"], equals "+
+						elt.getEquality()+", min "+elt.getLower()+", max "+elt.getUpper()+"]\n");
 			}
 			counter++;
 			beforeSelect=counter;
@@ -271,10 +271,11 @@ public class PhysicalPlanBuilder {
 
 		//create logical plan
 		try {
+			counter=beforeSelect;
 			String ex = op.getEx() == null ? "" : op.getEx().toString();
-			logicalWriter.write(String.join("", Collections.nCopies(beforeSelect, DASH))
+			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
 					+ "Select["+ex+"]\n");
-			beforeSelect++;
+			counter++;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -377,9 +378,8 @@ public class PhysicalPlanBuilder {
 
 		//create logical plan
 		try {
-			logicalWriter.write(String.join("", Collections.nCopies(beforeSelect, DASH)) +
+			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH)) +
 					"Leaf["+op.getTableName()+"]\n");
-			beforeSelect++;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
