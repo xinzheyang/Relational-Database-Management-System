@@ -127,13 +127,13 @@ public class DBSelectVisitor implements SelectVisitor {
 		if (selectMap != null && selectMap.size() > 0) {
 			if (selectMap.containsKey(tableReference)) {
 				set.addAll(selectMap.get(tableReference));
-//				tempCondition = new AndExpression(selectMap.get(tableReference), tempCondition);
 			}
 		}
 		
 		// process union-find
 		List<Column> cols = unionFindVisitor.getEqJoinAttrByReference(tableReference); // the attributes of this table
-		HashSet<Column> sameTableColSet = new HashSet<>();
+		HashSet<Column> allEqColSet = new HashSet<>();
+		HashSet<Column> eqColSet = new HashSet<>();
 		if (cols != null) {
 			for (Column col : cols) {
 				UnionElement uElement = uFind.find(col);
@@ -149,16 +149,18 @@ public class DBSelectVisitor implements SelectVisitor {
 					Expression leq = new MinorThanEquals(col, new LongValue(uElement.getUpper()));
 					set.add(leq);
 				}
-				if (!sameTableColSet.contains(col)) {
+				if (!allEqColSet.contains(col)) {
 					List<Column> attrsSameTable = uElement.getAttrByTable(tableReference);
-					sameTableColSet.addAll(attrsSameTable);
-					Expression sameTableEq = col;
-					for (Column column : attrsSameTable) {
-						if (!column.getWholeColumnName().equals(col.getWholeColumnName())) {
-							sameTableEq = new AndExpression(column, sameTableEq);
+					eqColSet = new HashSet<>(attrsSameTable);
+					allEqColSet.addAll(attrsSameTable);
+					
+					if (eqColSet.size() > 1) {
+						ArrayList<Column> lst = new ArrayList<>(eqColSet);
+						for (int i=0; i<lst.size()-1; i++) { // not including the last one, generating n-1 equals
+							EqualsTo equalsTo = new EqualsTo(lst.get(i), lst.get(i+1));
+							set.add(equalsTo);
 						}
 					}
-					set.add(sameTableEq);
 				}
 			}
 		}
@@ -241,37 +243,6 @@ public class DBSelectVisitor implements SelectVisitor {
 
 
 		if (joins != null && joins.size() > 0) {
-//			LogicalJoinOperator left;
-//			FromItem firstRightItem = joins.get(0).getRightItem();
-//			ArrayList<FromItem> leftTable = new ArrayList<>();
-//			LogicalOperator initLeftOp = selectOperator == null ? scanOperator : selectOperator;
-//
-//			String fromItemReference = fromItem.getAlias() != null ? fromItem.getAlias() : fromItem.toString();
-//			String fromRightItemReference = firstRightItem.getAlias() != null ? firstRightItem.getAlias() : firstRightItem.toString();
-//			
-//			Expression conditionFirst = parseConjunctExpVisitor != null ? 
-//					parseConjunctExpVisitor.getJoinCondition(fromItemReference, fromRightItemReference) : null;
-//			left = new LogicalJoinOperator(initLeftOp, buildScanSelectFromItem(firstRightItem), conditionFirst);
-//
-//			leftTable.add(fromItem);
-//			leftTable.add(firstRightItem);
-//
-//			for (int i=1; i<joins.size(); i++) {
-//				Expression condition = null;
-//				FromItem rightItem = joins.get(i).getRightItem();
-//				String rightItemReference = rightItem.getAlias() != null ? rightItem.getAlias() : rightItem.toString();
-//				LogicalOperator newScanSelect = buildScanSelectFromItem(rightItem);
-//				for (FromItem table:leftTable) {
-//					String tableItemReference = table.getAlias() != null ? table.getAlias() : table.toString();
-//					Expression tempCondition = parseConjunctExpVisitor != null ? 
-//							parseConjunctExpVisitor.getJoinCondition(tableItemReference, rightItemReference) : null;
-//					if (tempCondition != null)
-//						condition = condition == null ? tempCondition: new AndExpression(condition, tempCondition);
-//				}
-//				leftTable.add(rightItem);
-//				left = new LogicalJoinOperator(left, newScanSelect, condition);
-//			}
-//			joinOperator = left;
 			ArrayList<LogicalOperator> joinChildren = new ArrayList<>();
 			if (expression != null) {
 				unionFindVisitor = new UnionFindVisitor();
@@ -296,7 +267,22 @@ public class DBSelectVisitor implements SelectVisitor {
 				}
 				joinOperator = new LogicalJoinOperator(joinChildren, expression, null, parseConjunctExpVisitor);
 			}
-
+			
+			
+			if (joinOperator!= null) {
+				System.out.println(joinOperator.getJoinChildren());
+				for (LogicalOperator i : joinOperator.getJoinChildren()) {
+					if (i instanceof LogicalSelectOperator) {
+						LogicalSelectOperator sel = (LogicalSelectOperator) i;
+						System.out.println(sel.getEx());
+					} else {
+						LogicalScanOperator scan = (LogicalScanOperator) i;
+						System.out.println("scan");
+					}
+				}
+				System.out.println(joinOperator.getJoinCondition());
+				System.out.println(joinOperator.getUnionElements());
+			}
 			
 		}
 
