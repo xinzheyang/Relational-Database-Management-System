@@ -394,8 +394,6 @@ public class PhysicalPlanBuilder {
 
 		}
 		else {
-			String ex = op.getEx() == null ? "" : op.getEx().toString();
-			counter++;
 			child.accept(this);
 			SelectOperator selectOperator = new SelectOperator(operator, op.getEx());
 			operator = selectOperator;
