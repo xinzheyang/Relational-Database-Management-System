@@ -59,6 +59,8 @@ public class CheckAllEquityExpVisitor implements ExpressionVisitor{
 	}
 	
 	public boolean isAllEquity() {
+//		System.out.println(numAnds);
+//		System.out.println(numEquiExps);
 		return numAnds == numEquiExps;
 	}
 	
@@ -109,6 +111,7 @@ public class CheckAllEquityExpVisitor implements ExpressionVisitor{
 
 	@Override
 	public void visit(AndExpression andExpression) {
+		System.out.println(andExpression);
 		numAnds++;
 		andExpression.getLeftExpression().accept(this);
 		andExpression.getRightExpression().accept(this);
@@ -125,6 +128,8 @@ public class CheckAllEquityExpVisitor implements ExpressionVisitor{
 	 */
 	@Override
 	public void visit(EqualsTo equalsTo) {
+//		System.out.println(numEquiExps);
+//		System.out.println(equalsTo);
 		this.numEquiExps++;
 	}
 
