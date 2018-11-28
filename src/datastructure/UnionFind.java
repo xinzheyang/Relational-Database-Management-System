@@ -11,6 +11,7 @@ import java.util.List;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.Union;
 
 
 
@@ -77,21 +78,55 @@ public class UnionFind {
 		int oldsize = q.getAttributes().size();
 		
 		boolean success = q.getAttributes().addAll(p.getAttributes());
+		if (q.getEquality() == null)
+			q.setEquality(p.getEquality());
 		
+		if (q.getLower() == null) {
+			q.setLower(p.getLower());
+		} else if (p.getLower() != null){
+			q.setLower(Math.max(p.getLower(), q.getLower()));
+		}
+		
+		if (q.getUpper() == null) {
+			q.setUpper(p.getUpper());
+		} else if (p.getUpper() != null){
+			q.setUpper(Math.min(p.getUpper(), q.getUpper()));
+		}
 		assert success && (q.getAttributes().size() == oldsize + p.getAttributes().size());
 		
 	}
 	
-	public void setConstraint(UnionElement e, Integer lower, Integer upper, Integer eq) {
-		e.setLower(lower);
-		e.setUpper(upper);
-		e.setEquality(eq);
+	public void setUpper(UnionElement e, Integer upper) {
+		int rid = e.getRootId();
+		assert rootElementMap.containsKey(rid);
+		rootElementMap.get(rid).setUpper(upper);
 	}
 	
-	private void debug() {
+	public void setLower(UnionElement e, Integer lower) {
+		int rid = e.getRootId();
+		assert rootElementMap.containsKey(rid);
+		rootElementMap.get(rid).setLower(lower);
+	}
+	
+	public void setEquality(UnionElement e, Integer eq) {
+		int rid = e.getRootId();
+		assert rootElementMap.containsKey(rid);
+		rootElementMap.get(rid).setEquality(eq);
+	}
+	
+//	public void setConstraint(UnionElement e, Integer lower, Integer upper, Integer eq) {
+//		e.setLower(lower);
+//		e.setUpper(upper);
+//		e.setEquality(eq);
+//	}
+//	
+	public void debug() {
+		System.out.println("==========");
 		System.out.println(idArray);
 		System.out.println(idMap);
-		System.out.println(rootElementMap);
+		System.out.println(rootElementMap);;
+//		System.err.println(rootElementMap.get(1).getLower());
+//		System.err.println(rootElementMap.get(1).getEquality());
 		System.out.println("=========");
 	}
 	public static void main(String[] args) {
