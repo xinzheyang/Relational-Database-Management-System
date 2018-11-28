@@ -30,8 +30,8 @@ public class PhysicalPlanBuilder {
 	Operator operator;
 	BufferedWriter logicalWriter;
 	int counter=0;
-	int beforeSelect=0;
-
+//	int beforeSelect=0;
+	int tmp;
 	public PhysicalPlanBuilder(BufferedWriter logicalPlan) throws IOException {
 //		logicalWriter = new BufferedWriter(new FileWriter("output" + File.separator + "query2" + "_logicalplan"));
 //		logicalWriter.write("fuck");
@@ -183,7 +183,7 @@ public class PhysicalPlanBuilder {
 						elt.getEquality()+", min "+elt.getLower()+", max "+elt.getUpper()+"]\n");
 			}
 			counter++;
-			beforeSelect=counter;
+//			beforeSelect=counter;
 //			for (LogicalOperator child : op.getJoinChildren()) {
 //				child.accept(this);
 //			}
@@ -200,9 +200,12 @@ public class PhysicalPlanBuilder {
 		//use parse conjunct visitor to build left deep join tree
 		assert optOrder.size() > 1;
 		JoinOperator left;
+		tmp=counter;
 		optOrder.get(0).accept(this);
+		counter=tmp;
 		Operator firstLeft = operator;
 		optOrder.get(1).accept(this);
+		counter=tmp;
 		Operator secondLeft = operator;
 
 		List<String> leftTableRefs = new LinkedList<String>();
@@ -218,6 +221,7 @@ public class PhysicalPlanBuilder {
 			Expression condition = null;
 			LogicalOperator currRight = optOrder.get(i);
 			currRight.accept(this);
+			counter=tmp;
 			String currRef = getScanOrSelectRef(operator);
 			for (String leftRef: leftTableRefs) {
 				Expression tempCondition = visitor != null ? visitor.getJoinCondition(leftRef, currRef) : null;
@@ -272,7 +276,7 @@ public class PhysicalPlanBuilder {
 
 		//create logical plan
 		try {
-			counter=beforeSelect;
+//			counter=beforeSelect;
 //			beforeSelect=counter;
 			String ex = op.getEx() == null ? "" : op.getEx().toString();
 			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))

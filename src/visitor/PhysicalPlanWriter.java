@@ -17,6 +17,8 @@ import physicaloperator.*;
 public class PhysicalPlanWriter {
 	private final String DASH="-";
 	BufferedWriter physicalWriter;
+	int counter=1;
+	int tmp;
 	
 	public PhysicalPlanWriter(BufferedWriter write) {
 		physicalWriter = write;
@@ -85,6 +87,7 @@ public class PhysicalPlanWriter {
 		try {
 			physicalWriter.write(String.join("", Collections.nCopies(1, DASH))
 					+ "ExternalSort"+"["+String.join(", ", op.getColumnIndexMap().keySet())+"]\n");
+			counter++;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -97,11 +100,13 @@ public class PhysicalPlanWriter {
 	
 	public void visit(ProjectOperator op) {
 		try {
-			physicalWriter.write(String.join("", Collections.nCopies(1, DASH))+
+			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+
 					"Project"+"["+String.join(", ", op.getColumnIndexMap().keySet())+"]\n");
+			counter++;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 		op.getChildOp().accept(this);
 	}
 	
