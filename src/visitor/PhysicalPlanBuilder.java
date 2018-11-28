@@ -237,7 +237,7 @@ public class PhysicalPlanBuilder {
 		//use parse conjunct visitor to build left deep join tree
 		assert physOptOrder.size() > 1;
 		JoinOperator left;
-		tmp=counter; 
+//		tmp=counter; 
 //		optOrder.get(0).accept(this);
 //		counter=tmp;
 //		Operator firstLeft = operator;
