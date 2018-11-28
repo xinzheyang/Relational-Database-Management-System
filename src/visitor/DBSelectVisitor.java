@@ -269,20 +269,20 @@ public class DBSelectVisitor implements SelectVisitor {
 			}
 			
 			
-			if (joinOperator!= null) {
-				System.out.println(joinOperator.getJoinChildren());
-				for (LogicalOperator i : joinOperator.getJoinChildren()) {
-					if (i instanceof LogicalSelectOperator) {
-						LogicalSelectOperator sel = (LogicalSelectOperator) i;
-						System.out.println(sel.getEx());
-					} else {
-						LogicalScanOperator scan = (LogicalScanOperator) i;
-						System.out.println("scan");
-					}
-				}
-				System.out.println(joinOperator.getJoinCondition());
-				System.out.println(joinOperator.getUnionElements());
-			}
+//			if (joinOperator!= null) {
+////				System.out.println(joinOperator.getJoinChildren());
+//				for (LogicalOperator i : joinOperator.getJoinChildren()) {
+//					if (i instanceof LogicalSelectOperator) {
+//						LogicalSelectOperator sel = (LogicalSelectOperator) i;
+//						System.out.println(sel.getEx());
+//					} else {
+//						LogicalScanOperator scan = (LogicalScanOperator) i;
+//						System.out.println("scan");
+//					}
+//				}
+//				System.out.println(joinOperator.getJoinCondition());
+//				System.out.println(joinOperator.getUnionElements());
+//			}
 			
 		}
 

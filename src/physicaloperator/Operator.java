@@ -96,6 +96,10 @@ public abstract class Operator {
 		}
 
 	}
+	
+	public void accept() {
+		
+	}
 
 
 	/**

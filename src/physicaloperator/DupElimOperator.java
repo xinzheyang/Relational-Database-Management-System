@@ -46,6 +46,11 @@ public class DupElimOperator extends Operator {
 		childOp.reset();
 
 	}
+	
+	public Operator getChildOp() {
+		return childOp;
+	}
+	
 	@Override
 	public void reset(int index) {
 		throw new UnsupportedOperationException("not supported");
