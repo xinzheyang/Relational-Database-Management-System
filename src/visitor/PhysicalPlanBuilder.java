@@ -120,8 +120,11 @@ public class PhysicalPlanBuilder {
 	 * @return
 	 */
 	private SMJoinOperator createSMJ(Operator left, Operator right, Expression cond) {
-		EquiConjunctVisitor equiVisit = new EquiConjunctVisitor();
+		EquiConjunctVisitor equiVisit = new EquiConjunctVisitor(left, right);
 		cond.accept(equiVisit);
+		System.out.println(equiVisit.getRightCompareCols());
+		System.out.println(left.getColumnIndexMap());
+		System.out.println(right.getColumnIndexMap());
 		Object[] sortLeftObj = equiVisit.getLeftCompareCols().toArray();
 		Object[] sortRightObj = equiVisit.getRightCompareCols().toArray();
 		String[] sortOrderLeft = Arrays.copyOf(sortLeftObj, sortLeftObj.length, String[].class);
