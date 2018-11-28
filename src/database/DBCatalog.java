@@ -44,6 +44,10 @@ public class DBCatalog {
 		//key=table name, value=col names array
 		schemaMap = new HashMap<String, String[]>();
 		treeIndexMap = new HashMap<String, List<String[]>>();
+		baseTableTupleCountMap = new HashMap<String, Integer>();
+		attributeBoundsMap = new HashMap<String, HashMap<String, int []>>();
+		indexDepth = new HashMap<String, Integer>();
+		indexLeafNumber = new HashMap<String, Integer>();
 	}
 
 	/** Static get instance method, gets the singleton instance
@@ -255,9 +259,9 @@ public class DBCatalog {
 			String curIndexOut = indexDir + File.separator + tableName + "." + attrName;
 			if (buildIndex) {
 				BPlusTree curTree = new BPlusTree(tableName, curIndexOut, "1".equals(indexInfo[2]), Integer.parseInt(indexInfo[3]), attrName);
+				curTree.scanAndConstructAll();
 				indexLeafNumber.put(tableName+"."+attrName, curTree.getNumOfLeafs());
 				indexDepth.put(tableName+"."+attrName, curTree.getDepth());
-				curTree.scanAndConstructAll();
 			}
 		}
 		if (buildIndex)
