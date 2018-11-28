@@ -379,6 +379,12 @@ public class PhysicalPlanBuilder {
 			//			op.getEx().accept(visitor);
 			ScanOperator indexScanOp;
 			try {
+				try {
+					logicalWriter.write(String.join("", Collections.nCopies(counter, DASH)) +
+							"Leaf["+op.getBaseTableName()+"]\n");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 				indexScanOp = new IndexScanOperator(tableName, scanChild.getAlias(),
 						DBCatalog.getIndexFileLoc(tableName, minIndex), minIndex, isMinClustered,
 						range[0], range[1]);
