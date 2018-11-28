@@ -165,7 +165,8 @@ public class PhysicalPlanBuilder {
 	public void visit(LogicalJoinOperator op) {
 		//create logical plan
 		try {
-			logicalWriter.write("Join"+"["+String.join(", ", op.getJoinCondition().toString())+"]\n");
+			String joinCond = op.getJoinCondition() == null ? "" : op.getJoinCondition().toString();
+			logicalWriter.write("Join"+"["+joinCond+"]\n");
 			for(UnionElement elt: op.getUnionElements()) {
 				logicalWriter.write("["+String.join(", ", elt.getAttributeStrings())+"], equals "+
 						elt.getEquality()+", min "+elt.getLower()+", max "+elt.getUpper()+"\n");
@@ -258,7 +259,8 @@ public class PhysicalPlanBuilder {
 		
 		//create logical plan
 		try {
-			logicalWriter.write("Select["+op.getEx().toString()+"]\n");
+			String ex = op.getEx() == null ? "" : op.getEx().toString();
+			logicalWriter.write("Select["+ex+"]\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
