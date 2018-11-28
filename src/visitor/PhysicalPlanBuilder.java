@@ -4,7 +4,9 @@
 package visitor;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -26,7 +28,9 @@ public class PhysicalPlanBuilder {
 	Operator operator;
 	BufferedWriter logicalWriter;
 
-	public PhysicalPlanBuilder(BufferedWriter logicalPlan) {
+	public PhysicalPlanBuilder(BufferedWriter logicalPlan) throws IOException {
+//		logicalWriter = new BufferedWriter(new FileWriter("output" + File.separator + "query2" + "_logicalplan"));
+//		logicalWriter.write("fuck");
 		logicalWriter=logicalPlan;
 	}
 
@@ -249,6 +253,13 @@ public class PhysicalPlanBuilder {
 	 *            upper bounds, if any.
 	 */
 	public void visit(LogicalSelectOperator op) {
+		
+		//create logical plan
+		try {
+			logicalWriter.write("Select["+op.getEx().toString()+"]\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		LogicalOperator child = op.getChildOp();
 		LogicalScanOperator scanChild = (LogicalScanOperator) child;
 		String tableName = scanChild.getTableName();
@@ -314,14 +325,6 @@ public class PhysicalPlanBuilder {
 			operator = selectOperator;
 		}
 		
-		
-		//create logical plan
-		try {
-			logicalWriter.write("Select["+op.getEx().toString()+"]");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
 //		if (DBCatalog.useIndex()) {
 //			visitor = new DivideSelectVisitor(DBCatalog.getIndexKey(tableName));
 //			op.getEx().accept(visitor);
@@ -353,6 +356,14 @@ public class PhysicalPlanBuilder {
 	}
 
 	public void visit(LogicalScanOperator op) {
+		
+		//create logical plan
+		try {
+			logicalWriter.write("Leaf["+op.getTableName()+"]\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		ScanOperator scanOperator;
 		try {
 			scanOperator = new ScanOperator(op.getTableName(), op.getAlias());
@@ -362,12 +373,7 @@ public class PhysicalPlanBuilder {
 			e.printStackTrace();
 		}
 		
-		//create logical plan
-		try {
-			logicalWriter.write("Leaf["+op.getTableName()+"]");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
 	}
 
 	/**
