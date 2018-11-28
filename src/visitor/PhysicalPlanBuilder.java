@@ -125,8 +125,7 @@ public class PhysicalPlanBuilder {
 	 * @return
 	 */
 	private BNLJoinOperator createBNLJ(Operator left, Operator right, Expression cond) {
-		int bufferSize = DBCatalog.getJoinBufferSize();
-		return new BNLJoinOperator(left, right, cond, bufferSize);
+		return new BNLJoinOperator(left, right, cond, 10); //use 10 as join size
 	}
 	
 	/** Creates a join operator by choosing the better join by following the principle of always using SMJ for

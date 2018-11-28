@@ -302,9 +302,10 @@ public class DBCatalog {
 				curAttribBounds.put(schema[i], colValBounds[i].clone());
 				buildStr.append(schema[i] + "," + colValBounds[i][1] + "," + colValBounds[i][0] + " ");
 			}
+			buildStr.append("\n");
 			DBCatalog.attributeBoundsMap.put(tb, curAttribBounds);
 			
-			stats.write(buildStr.toString().trim());
+			stats.write(buildStr.toString());
 		}
 		stats.close();
 	}
