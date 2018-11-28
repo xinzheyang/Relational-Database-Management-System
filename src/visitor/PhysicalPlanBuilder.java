@@ -48,7 +48,7 @@ public class PhysicalPlanBuilder {
 	 * @return the right sort operator constructed
 	 */
 	private SortOperator getSortOperator(Operator child, String[] cols) {
-		SortOperator sortOperator=new ExternalSortOperator(child, cols, DBCatalog.getSortBufferSize());
+		SortOperator sortOperator=new ExternalSortOperator(child, cols, 10); //hard code buffer size to 10
 //		if (DBCatalog.getSortMethod().equals("0")) {
 //			sortOperator = new InMemorySortOperator(child, cols);
 //		} else {
