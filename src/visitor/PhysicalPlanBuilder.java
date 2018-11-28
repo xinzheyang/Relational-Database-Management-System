@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,8 +26,11 @@ import physicaloperator.*;
  *         transform a logical operator into a physical operator
  */
 public class PhysicalPlanBuilder {
+	private final String DASH="-";
 	Operator operator;
 	BufferedWriter logicalWriter;
+	int counter=0;
+	int beforeSelect=0;
 
 	public PhysicalPlanBuilder(BufferedWriter logicalPlan) throws IOException {
 //		logicalWriter = new BufferedWriter(new FileWriter("output" + File.separator + "query2" + "_logicalplan"));
@@ -71,7 +75,10 @@ public class PhysicalPlanBuilder {
 	public void visit(LogicalSortOperator op) {
 		//create logical plan
 		try {
-			logicalWriter.write("Sort"+"["+String.join(", ", op.getCols())+"]\n");
+			System.out.println(String.join("", Collections.nCopies(counter, DASH)));
+			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH)) 
+					+ "Sort"+"["+String.join(", ", op.getCols())+"]\n");
+			counter++;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -84,7 +91,9 @@ public class PhysicalPlanBuilder {
 	public void visit(LogicalProjectOperator op) {
 		//create logical plan
 		try {
-			logicalWriter.write("Project"+"["+String.join(", ", op.getCols())+"]\n");
+			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+
+					"Project"+"["+String.join(", ", op.getCols())+"]\n");
+			counter++;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -165,14 +174,17 @@ public class PhysicalPlanBuilder {
 	public void visit(LogicalJoinOperator op) {
 		//create logical plan
 		try {
-			logicalWriter.write("Join"+"["+String.join(", ", op.getJoinCondition().toString())+"]\n");
+			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+"Join"
+		+"["+String.join(", ", op.getJoinCondition().toString())+"]\n");
 			for(UnionElement elt: op.getUnionElements()) {
 				logicalWriter.write("["+String.join(", ", elt.getAttributeStrings())+"], equals "+
 						elt.getEquality()+", min "+elt.getLower()+", max "+elt.getUpper()+"\n");
 			}
-			for (LogicalOperator child : op.getJoinChildren()) {
-				child.accept(this);
-			}
+			counter++;
+			beforeSelect=counter;
+//			for (LogicalOperator child : op.getJoinChildren()) {
+//				child.accept(this);
+//			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -258,7 +270,9 @@ public class PhysicalPlanBuilder {
 		
 		//create logical plan
 		try {
-			logicalWriter.write("Select["+op.getEx().toString()+"]\n");
+			logicalWriter.write(String.join("", Collections.nCopies(beforeSelect, DASH)) 
+					+ "Select["+op.getEx().toString()+"]\n");
+			beforeSelect++;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -361,7 +375,9 @@ public class PhysicalPlanBuilder {
 		
 		//create logical plan
 		try {
-			logicalWriter.write("Leaf["+op.getTableName()+"]\n");
+			logicalWriter.write(String.join("", Collections.nCopies(beforeSelect, DASH)) + 
+					"Leaf["+op.getTableName()+"]\n");
+			beforeSelect++;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
