@@ -18,6 +18,9 @@ import logicaloperator.LogicalSelectOperator;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.schema.Column;
+import physicaloperator.Operator;
+import physicaloperator.ScanOperator;
+import physicaloperator.SelectOperator;
 import visitor.ParseConjunctExpVisitor;
 import visitor.UnionFindVisitor;
 
@@ -195,24 +198,16 @@ public class JoinOrderOptimizer {
 			this.rightOp = rightOp;
 			costMetric = new CostMetric();
 			joinCondition = null;
+			
+			rightRef = getLogicalScanOrSelectRef(rightOp);
 
-			if (rightOp instanceof LogicalScanOperator) {
-				rightRef = ((LogicalScanOperator) rightOp).getReference();
-			} else if (rightOp instanceof LogicalSelectOperator) {
-				rightRef = ((LogicalSelectOperator) rightOp).getReference();
-			}
 			//extracts the join condition for this join
 			if (visitor != null) {
 				for (LogicalOperator leftChild : leftChildren) {
-					String leftRef = null;
-					if (leftChild instanceof LogicalScanOperator) {
-						leftRef = ((LogicalScanOperator) leftChild).getReference();
-					} else if (leftChild instanceof LogicalSelectOperator) {
-						leftRef = ((LogicalSelectOperator) leftChild).getReference();
-					}
-					System.out.println(visitor.getJoinMap());
-					System.out.println(leftRef);
-					System.out.println(rightRef);
+					String leftRef = getLogicalScanOrSelectRef(leftChild);
+//					System.out.println(visitor.getJoinMap());
+//					System.out.println(leftRef);
+//					System.out.println(rightRef);
 					Expression tempCondition = visitor.getJoinCondition(leftRef, rightRef); 
 					//gets the join exp of every left child with the right child
 					joinCondition = joinCondition == null ? tempCondition : new AndExpression(joinCondition, tempCondition);
@@ -220,6 +215,16 @@ public class JoinOrderOptimizer {
 				}
 			}
 
+		}
+		
+		private String getLogicalScanOrSelectRef(LogicalOperator op) {
+			String ref;
+			if (op instanceof LogicalScanOperator) {
+				ref = ((LogicalScanOperator) op).getReference();
+			} else {
+				ref = ((LogicalSelectOperator) op).getReference();
+			}
+			return ref;
 		}
 
 		/** 3.4.2 Computes the plan cost of this join from the left child's best plan cost and its

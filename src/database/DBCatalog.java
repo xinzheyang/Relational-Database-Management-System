@@ -280,16 +280,16 @@ public class DBCatalog {
 			String[] schema = DBCatalog.schemaMap.get(tb);
 			TupleReader read = new TupleReader(DBCatalog.getTableLoc(tb));
 			Tuple tup;
-			int[][] colValBounds = new int[schema.length][2]; //for each column, correspond to [upper, lower]
+			int[][] colValBounds = new int[schema.length][2]; //for each column, correspond to [lower, upper]
 			for (int i = 0; i < colValBounds.length; i++) {
-				colValBounds[i] = new int[] {Integer.MIN_VALUE, Integer.MAX_VALUE};
+				colValBounds[i] = new int[] {Integer.MAX_VALUE, Integer.MIN_VALUE};
 			}
 			int tupCount = 0;
 			while ((tup = read.getNextTuple()) != null) {
 				for (int j = 0; j < tup.getColValues().length; j++) {
 					int colVal = tup.getColumnValue(j);
-					if (colVal > colValBounds[j][0]) colValBounds[j][0] = colVal; //update upper bound
-					if (colVal < colValBounds[j][1]) colValBounds[j][1] = colVal; //update lower bound
+					if (colVal < colValBounds[j][0]) colValBounds[j][0] = colVal; //update lower bound
+					if (colVal > colValBounds[j][1]) colValBounds[j][1] = colVal; //update upper bound
 				}
 				tupCount++;
 			}
@@ -300,7 +300,7 @@ public class DBCatalog {
 			HashMap<String, int[]> curAttribBounds = new HashMap<String, int[]>(); //storing all attribute bounds for this table
 			for (int i = 0; i < schema.length; i++) {
 				curAttribBounds.put(schema[i], colValBounds[i].clone());
-				buildStr.append(schema[i] + "," + colValBounds[i][1] + "," + colValBounds[i][0] + " ");
+				buildStr.append(schema[i] + "," + colValBounds[i][0] + "," + colValBounds[i][1] + " ");
 			}
 			buildStr.append("\n");
 			DBCatalog.attributeBoundsMap.put(tb, curAttribBounds);

@@ -142,9 +142,7 @@ public class PhysicalPlanBuilder {
 		}
 		EquiConjunctVisitor equiVisit = new EquiConjunctVisitor(left, right);
 		cond.accept(equiVisit);
-		System.out.println(equiVisit.getRightCompareCols());
-		System.out.println(left.getColumnIndexMap());
-		System.out.println(right.getColumnIndexMap());
+		
 		Object[] sortLeftObj = equiVisit.getLeftCompareCols().toArray();
 		Object[] sortRightObj = equiVisit.getRightCompareCols().toArray();
 		String[] sortOrderLeft = Arrays.copyOf(sortLeftObj, sortLeftObj.length, String[].class);
@@ -332,15 +330,15 @@ public class PhysicalPlanBuilder {
 			int indexLow = Math.max(visitor.getLowKey(), bounds[0]);
 			int indexHigh = Math.min(visitor.getHighKey(), bounds[1]);
 //			int r = (indexHigh-indexLow+1)/(bounds[1]-bounds[0]+1); //the reduction factor
-			int r = op.getReductionFactor(index); //the reduction factor of this index
+			double r = op.getReductionFactor(index); //the reduction factor of this index
 			int l = DBCatalog.getNumOfLeaves(tableName+"."+index); //the number of leaves in the index
 			int costTraversal = DBCatalog.getTraversalCost(tableName+"."+index);
 			int cost;
 			if(info[1] == "0") { //unclustered
-				cost = costTraversal + l*r + t*r;
+				cost = (int)Math.ceil(costTraversal + l*r + t*r);
 			}
 			else {
-				cost = costTraversal + p*r;
+				cost = (int)Math.ceil(costTraversal + p*r);
 			}
 			if(cost < minIndexCost) {
 				minIndexCost = cost;

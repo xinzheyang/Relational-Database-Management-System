@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package visitor;
 import net.sf.jsqlparser.expression.Expression;
@@ -56,7 +56,7 @@ public class DBSelectVisitor implements SelectVisitor {
 		this.operator = operator;
 	}
 
-	
+
 	private Expression concatExp(Collection<Expression> expressions) {
 		if (expressions == null || expressions.isEmpty()) {
 			return null;
@@ -100,7 +100,7 @@ public class DBSelectVisitor implements SelectVisitor {
 		}
 		return selectOp;
 	}
-	
+
 
 	/**
 	 * @param fromItem
@@ -115,13 +115,13 @@ public class DBSelectVisitor implements SelectVisitor {
 			return selectOperator;
 		}
 	}
-	
+
 	private LogicalSelectOperator ufBuildSelectFromScan(LogicalScanOperator scanOperator) {
 		UnionFind uFind = unionFindVisitor.getUnionFind();
 		LogicalSelectOperator selectOp = null;
 		String tableReference = scanOperator.getAlias() != null ? scanOperator.getAlias() : scanOperator.getTableName();
-		
-		
+
+
 		HashSet<Expression> set = new HashSet<>();
 		// process unused normal select
 		if (selectMap != null && selectMap.size() > 0) {
@@ -129,7 +129,7 @@ public class DBSelectVisitor implements SelectVisitor {
 				set.addAll(selectMap.get(tableReference));
 			}
 		}
-		
+
 		// process union-find
 		List<Column> cols = unionFindVisitor.getEqJoinAttrByReference(tableReference); // the attributes of this table
 		HashSet<Column> allEqColSet = new HashSet<>();
@@ -153,7 +153,7 @@ public class DBSelectVisitor implements SelectVisitor {
 					List<Column> attrsSameTable = uElement.getAttrByTable(tableReference);
 					eqColSet = new HashSet<>(attrsSameTable);
 					allEqColSet.addAll(attrsSameTable);
-					
+
 					if (eqColSet.size() > 1) {
 						ArrayList<Column> lst = new ArrayList<>(eqColSet);
 						for (int i=0; i<lst.size()-1; i++) { // not including the last one, generating n-1 equals
@@ -164,8 +164,8 @@ public class DBSelectVisitor implements SelectVisitor {
 				}
 			}
 		}
-		
-		
+
+
 		Expression selectCondition = concatExp(set);
 		if (selectCondition != null) {
 			selectOp = new LogicalSelectOperator(scanOperator, selectCondition);
@@ -173,7 +173,7 @@ public class DBSelectVisitor implements SelectVisitor {
 		return selectOp;
 	}
 
-	
+
 	/**
 	 * @param fromItem
 	 * @return builds a selectOperator from FromItem if possible, otherwise a scanOperator
@@ -223,8 +223,8 @@ public class DBSelectVisitor implements SelectVisitor {
 		List<Join> joins = plainSelect.getJoins();
 		List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
 		Expression expression = plainSelect.getWhere();
-		
-		
+
+
 		if (expression != null) {
 			parseConjunctExpVisitor = new ParseConjunctExpVisitor();
 			expression.accept(parseConjunctExpVisitor);
@@ -267,8 +267,8 @@ public class DBSelectVisitor implements SelectVisitor {
 				}
 				joinOperator = new LogicalJoinOperator(joinChildren, expression, null, parseConjunctExpVisitor);
 			}
-			
-			
+
+
 //			if (joinOperator!= null) {
 //				System.out.println(joinOperator.getJoinChildren());
 //				for (LogicalOperator i : joinOperator.getJoinChildren()) {
@@ -276,6 +276,7 @@ public class DBSelectVisitor implements SelectVisitor {
 //						LogicalSelectOperator sel = (LogicalSelectOperator) i;
 //						System.out.println(sel.getEx());
 //					} else {
+//						LogicalScanOperator scan = (LogicalScanOperator) i;
 //						System.out.println("scan");
 //					}
 //				}
@@ -285,10 +286,10 @@ public class DBSelectVisitor implements SelectVisitor {
 //					System.err.println("upper:"+unionElement.getUpper());
 //				}
 //			}
-			
+
 		}
 
-		
+
 		// Projection
 		if (selectItems != null && selectItems.size() > 0) {
 			String[] cols = new String[selectItems.size()];

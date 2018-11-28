@@ -33,6 +33,7 @@ public class ProjectOperator extends Operator {
 		columnIndexMap = map;
 	}
 	
+	
 	/* (non-Javadoc)
 	 * @see database.Operator#getNextTuple()
 	 * Iterate over columns to be projected
@@ -57,6 +58,10 @@ public class ProjectOperator extends Operator {
 	@Override
 	public void reset() {
 		childOp.reset();
+	}
+	
+	public Operator getChildOp() {
+		return childOp;
 	}
 
 	@Override

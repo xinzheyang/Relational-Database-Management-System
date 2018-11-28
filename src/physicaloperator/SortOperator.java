@@ -43,5 +43,9 @@ public abstract class SortOperator extends Operator {
 		}
 		com = Tuple.getComparator(colIndexes);
 	}
+	
+	public Operator getChildOp() {
+		return childOp;
+	}
 
 }

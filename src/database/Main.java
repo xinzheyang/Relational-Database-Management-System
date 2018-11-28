@@ -40,7 +40,6 @@ public class Main {
 		QueryParser queryParser = new QueryParser(qFile, dirOut);
 		DBCatalog.setTempDir(dirTemp);
 		queryParser.parse();
-		System.out.println("hi");
 		//			}
 		interpConfigIn.close();
 

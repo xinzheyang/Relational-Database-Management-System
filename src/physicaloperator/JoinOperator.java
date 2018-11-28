@@ -33,6 +33,14 @@ public abstract class JoinOperator extends Operator {
 		
 		visitor = new EvaluateExpVisitor();
 	}
+	
+	public Operator getLeftChild() {
+		return leftChild;
+	}
+	
+	public Operator getRightChild() {
+		return rightChild;
+	}
 
 	/* (non-Javadoc)
 	 * @see physicaloperator.Operator#reset()
