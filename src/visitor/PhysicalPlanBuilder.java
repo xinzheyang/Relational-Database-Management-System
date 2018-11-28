@@ -56,41 +56,42 @@ public class PhysicalPlanBuilder {
 	}
 
 	public void visit(LogicalDupElimOperator op) {
+		//create logical plan
+		try {
+			logicalWriter.write("DupElim\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		op.getChildOp().accept(this);
 		DupElimOperator dupElimOperator = new DupElimOperator(operator);
 		operator = dupElimOperator;
-		//create logical plan
-		try {
-			logicalWriter.write("DupElim");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public void visit(LogicalSortOperator op) {
+		//create logical plan
+		try {
+			logicalWriter.write("Sort"+"["+String.join(", ", op.getCols())+"]\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		op.getChildOp().accept(this);
 		SortOperator sortOperator = getSortOperator(operator, op.getCols());
 		operator = sortOperator;
-		
-		//create logical plan
-		try {
-			logicalWriter.write("Sort"+"["+String.join(", ", op.getCols())+"]");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public void visit(LogicalProjectOperator op) {
-		op.getChildOp().accept(this);
-		ProjectOperator projectOperator = new ProjectOperator(operator, op.getCols());
-		operator = projectOperator;
-		
 		//create logical plan
 		try {
-			logicalWriter.write("Project"+"["+String.join(", ", op.getCols())+"]");
+			logicalWriter.write("Project"+"["+String.join(", ", op.getCols())+"]\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		op.getChildOp().accept(this);
+		ProjectOperator projectOperator = new ProjectOperator(operator, op.getCols());
+		operator = projectOperator;
 	}
 	
 	private String getScanOrSelectRef(Operator op) {
@@ -162,6 +163,21 @@ public class PhysicalPlanBuilder {
 	 *            which physical Join operators to construct
 	 */
 	public void visit(LogicalJoinOperator op) {
+		//create logical plan
+		try {
+			logicalWriter.write("Join"+"["+String.join(", ", op.getJoinCondition().toString())+"]\n");
+			for(UnionElement elt: op.getUnionElements()) {
+				logicalWriter.write("["+String.join(", ", elt.getAttributeStrings())+"], equals "+
+						elt.getEquality()+", min "+elt.getLower()+", max "+elt.getUpper()+"\n");
+			}
+			for (LogicalOperator child : op.getJoinChildren()) {
+				child.accept(this);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
 		// refactor PPB to left deep join tree
 		JoinOrderOptimizer opt = new JoinOrderOptimizer(op, op.getVisitor());
 		ParseConjunctExpVisitor visitor = op.getVisitor();
@@ -230,20 +246,6 @@ public class PhysicalPlanBuilder {
 //			}
 //		}
 		operator = left;
-		
-		//create logical plan
-		try {
-			logicalWriter.write("Join"+"["+String.join(", ", op.getJoinCondition().toString())+"]");
-			for(UnionElement elt: op.getUnionElements()) {
-				logicalWriter.write("["+String.join(", ", elt.getAttributeStrings())+"], equals "+
-						elt.getEquality()+", min "+elt.getLower()+", max "+elt.getUpper());
-			}
-			for (LogicalOperator child : op.getJoinChildren()) {
-				child.accept(this);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	/**
