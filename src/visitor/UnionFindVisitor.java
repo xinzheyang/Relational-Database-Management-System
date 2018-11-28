@@ -69,12 +69,14 @@ public class UnionFindVisitor implements ExpressionVisitor {
 	 */
 	private HashMap<String, List<Column>> eqJoinAttrMap;
 
+	private HashMap<String, List<Column>> attrMap;
 	/**
 	 * 
 	 */
 	public UnionFindVisitor() {
 		unionFind = new UnionFind();
 		eqJoinAttrMap = new HashMap<>();
+		attrMap = new HashMap<>();
 	}
 	
 
@@ -86,6 +88,15 @@ public class UnionFindVisitor implements ExpressionVisitor {
 	public List<Column> getEqJoinAttrByReference(String table) {
 		if (eqJoinAttrMap != null) {
 			return eqJoinAttrMap.get(table);
+		} else {
+			return null;
+		}
+	}
+	
+	
+	public List<Column> getAttrByReference(String table) {
+		if (attrMap != null) {
+			return attrMap.get(table);
 		} else {
 			return null;
 		}
@@ -228,6 +239,15 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		}
 	}
 	
+	private void updateAttrMap(String key, Column val) {
+		if (attrMap.containsKey(key)) {
+			attrMap.get(key).add(val);
+		} else {
+			List<Column> newAttrs = new LinkedList<>();
+			newAttrs.add(val);
+			attrMap.put(key, newAttrs);
+		}
+	}
 	private void updateUnused(Boolean isNormal, Expression toBeAcc) {
 		if (!isNormal) {
 			if (normalSelect == null)
@@ -258,13 +278,16 @@ public class UnionFindVisitor implements ExpressionVisitor {
 			
 			updateEqJoinAttrMap(leftCol.getTable().getName(), leftCol);
 			updateEqJoinAttrMap(rightCol.getTable().getName(), rightCol);
-			
+			updateAttrMap(leftCol.getTable().getName(), leftCol);
+			updateAttrMap(rightCol.getTable().getName(), rightCol);
 		} else if (!leftIsInt && rightIsInt) { // S.A = 2
 			UnionElement left = unionFind.find(leftCol);
 			left.setEquality(rightValue);
+			updateAttrMap(leftCol.getTable().getName(), leftCol);
 		} else if (leftIsInt && !rightIsInt) { // 2 = S.A
 			UnionElement right = unionFind.find(rightCol);
 			right.setEquality(leftValue);
+			updateAttrMap(rightCol.getTable().getName(), rightCol);
 		} else {
 			updateUnused(false, equalsTo);
 		}
@@ -297,9 +320,11 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		} else if (!leftIsInt && rightIsInt) {
 			UnionElement left = unionFind.find(leftCol);
 			left.setLower(rightValue + 1);
+			updateAttrMap(leftCol.getTable().getName(), leftCol);
 		} else if (leftIsInt && !rightIsInt) {
 			UnionElement right = unionFind.find(rightCol);
 			right.setUpper(leftValue - 1);
+			updateAttrMap(rightCol.getTable().getName(), rightCol);
 		} else {
 			updateUnused(false, greaterThan);
 		}
@@ -332,9 +357,11 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		} else if (!leftIsInt && rightIsInt) {
 			UnionElement left = unionFind.find(leftCol);
 			left.setLower(rightValue);
+			updateAttrMap(leftCol.getTable().getName(), leftCol);
 		} else if (leftIsInt && !rightIsInt) {
 			UnionElement right = unionFind.find(rightCol);
 			right.setUpper(leftValue);
+			updateAttrMap(rightCol.getTable().getName(), rightCol);
 		} else {
 			updateUnused(false, greaterThanEquals);
 		}
@@ -381,9 +408,11 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		} else if (!leftIsInt && rightIsInt) {
 			UnionElement left = unionFind.find(leftCol);
 			left.setUpper(rightValue - 1);
+			updateAttrMap(leftCol.getTable().getName(), leftCol);
 		} else if (leftIsInt && !rightIsInt) {
 			UnionElement right = unionFind.find(rightCol);
 			right.setLower(leftValue + 1);
+			updateAttrMap(rightCol.getTable().getName(), rightCol);
 		} else {
 			updateUnused(false, minorThan);
 		}
@@ -416,9 +445,11 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		} else if (!leftIsInt && rightIsInt) {
 			UnionElement left = unionFind.find(leftCol);
 			left.setUpper(rightValue);
+			updateAttrMap(leftCol.getTable().getName(), leftCol);
 		} else if (leftIsInt && !rightIsInt) {
 			UnionElement right = unionFind.find(rightCol);
 			right.setLower(leftValue);
+			updateAttrMap(rightCol.getTable().getName(), rightCol);
 		} else {
 			updateUnused(false, minorThanEquals);
 		}

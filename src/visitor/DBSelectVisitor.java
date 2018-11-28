@@ -124,7 +124,6 @@ public class DBSelectVisitor implements SelectVisitor {
 		String tableReference = scanOperator.getAlias() != null ? scanOperator.getAlias() : scanOperator.getTableName();
 
 
-		HashSet<Expression> set = new HashSet<>();
 		HashMap<String, Expression> map = new HashMap<>();
 		// process unused normal select
 		if (ufSelectMap != null && ufSelectMap.size() > 0) {
@@ -137,7 +136,7 @@ public class DBSelectVisitor implements SelectVisitor {
 		}
 
 		// process union-find
-		List<Column> cols = unionFindVisitor.getEqJoinAttrByReference(tableReference); // the attributes of this table
+		List<Column> cols = unionFindVisitor.getAttrByReference(tableReference); // the attributes of this table
 		HashSet<Column> allEqColSet = new HashSet<>();
 		HashSet<Column> eqColSet = new HashSet<>();
 		if (cols != null) {
