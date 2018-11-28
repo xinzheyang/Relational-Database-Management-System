@@ -279,10 +279,12 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		boolean rightIsInt = isInt;
 		
 		if (!leftIsInt && !rightIsInt) { // normal Join
-			if (normalJoin == null)
-				normalJoin = greaterThan;
-			else
-				normalJoin = new AndExpression(greaterThan, normalJoin);
+			if (!leftCol.getTable().getWholeTableName().equals(rightCol.getTable().getWholeTableName())) {
+				if (normalJoin == null)
+					normalJoin = greaterThan;
+				else
+					normalJoin = new AndExpression(greaterThan, normalJoin);
+			}
 		} else if (!leftIsInt && rightIsInt) {
 			UnionElement left = unionFind.find(leftCol);
 			left.setLower(rightValue + 1);
@@ -316,10 +318,12 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		boolean rightIsInt = isInt;
 
 		if (!leftIsInt && !rightIsInt) { // normal Join
-			if (normalJoin == null)
-				normalJoin = greaterThanEquals;
-			else
-				normalJoin = new AndExpression(greaterThanEquals, normalJoin);
+			if (!leftCol.getTable().getWholeTableName().equals(rightCol.getTable().getWholeTableName())) {
+				if (normalJoin == null)
+					normalJoin = greaterThanEquals;
+				else
+					normalJoin = new AndExpression(greaterThanEquals, normalJoin);
+			}
 		} else if (!leftIsInt && rightIsInt) {
 			UnionElement left = unionFind.find(leftCol);
 			left.setLower(rightValue);
@@ -367,10 +371,12 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		boolean rightIsInt = isInt;
 
 		if (!leftIsInt && !rightIsInt) { // normal Join
-			if (normalJoin == null)
-				normalJoin = minorThan;
-			else
-				normalJoin = new AndExpression(minorThan, normalJoin);
+			if (!leftCol.getTable().getWholeTableName().equals(rightCol.getTable().getWholeTableName())) {
+				if (normalJoin == null)
+					normalJoin = minorThan;
+				else
+					normalJoin = new AndExpression(minorThan, normalJoin);
+			}
 		} else if (!leftIsInt && rightIsInt) {
 			UnionElement left = unionFind.find(leftCol);
 			left.setUpper(rightValue - 1);
@@ -404,10 +410,12 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		boolean rightIsInt = isInt;
 
 		if (!leftIsInt && !rightIsInt) { // normal Join
-			if (normalJoin == null)
-				normalJoin = minorThanEquals;
-			else
-				normalJoin = new AndExpression(minorThanEquals, normalJoin);
+			if (!leftCol.getTable().getWholeTableName().equals(rightCol.getTable().getWholeTableName())) {
+				if (normalJoin == null)
+					normalJoin = minorThanEquals;
+				else
+					normalJoin = new AndExpression(minorThanEquals, normalJoin);
+			}
 		} else if (!leftIsInt && rightIsInt) {
 			UnionElement left = unionFind.find(leftCol);
 			left.setUpper(rightValue);
@@ -433,14 +441,18 @@ public class UnionFindVisitor implements ExpressionVisitor {
 	public void visit(NotEqualsTo notEqualsTo) {
 		notEqualsTo.getLeftExpression().accept(this);
 		boolean leftIsInt = isInt;
+		Column leftCol = col;
 		notEqualsTo.getRightExpression().accept(this);
 		boolean rightIsInt = isInt;
+		Column rightCol = col;
 		
 		if (!leftIsInt && !rightIsInt) { // normal Join
-			if (normalJoin == null)
-				normalJoin = notEqualsTo;
-			else
-				normalJoin = new AndExpression(notEqualsTo, normalJoin);
+			if (!leftCol.getTable().getWholeTableName().equals(rightCol.getTable().getWholeTableName())) {
+				if (normalJoin == null)
+					normalJoin = notEqualsTo;
+				else
+					normalJoin = new AndExpression(notEqualsTo, normalJoin);
+			}
 		} else {
 			if (normalSelect == null)
 				normalSelect = notEqualsTo;
