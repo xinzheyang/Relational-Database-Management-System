@@ -29,7 +29,7 @@ public class PhysicalPlanBuilder {
 	private final String DASH="-";
 	Operator operator;
 	BufferedWriter logicalWriter; //the BufferWriter to write the logical plan
-	int counter=1; //the counter to record the number of dashes
+	int counter=0; //the counter to record the number of dashes
 	int tmp; //temporary plcaeholder to keep track of counter
 	
 	public PhysicalPlanBuilder(BufferedWriter logicalPlan) throws IOException {
@@ -66,6 +66,7 @@ public class PhysicalPlanBuilder {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		counter++;
 
 		op.getChildOp().accept(this);
 		DupElimOperator dupElimOperator = new DupElimOperator(operator);
