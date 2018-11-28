@@ -18,7 +18,7 @@ import physicaloperator.*;
 public class PhysicalPlanWriter {
 	private final String DASH="-";
 	BufferedWriter physicalWriter; //the BufferWriter 
-	int counter=1;
+	int counter=0;
 //	int tmp;
 	
 	public PhysicalPlanWriter(BufferedWriter write) {
@@ -31,6 +31,7 @@ public class PhysicalPlanWriter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		counter++;
 		op.getChildOp().accept(this);
 	}
 	
