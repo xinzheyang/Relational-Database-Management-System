@@ -88,7 +88,7 @@ public class PhysicalPlanBuilder {
 					+ "Sort"+"["+String.join(", ", op.getCols())+"]\n");
 			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
 					+ "ExternalSort"+"["+String.join(", ", op.getCols())+"]\n");
-			
+
 			counter++;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -140,8 +140,11 @@ public class PhysicalPlanBuilder {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		EquiConjunctVisitor equiVisit = new EquiConjunctVisitor();
+		EquiConjunctVisitor equiVisit = new EquiConjunctVisitor(left, right);
 		cond.accept(equiVisit);
+		System.out.println(equiVisit.getRightCompareCols());
+		System.out.println(left.getColumnIndexMap());
+		System.out.println(right.getColumnIndexMap());
 		Object[] sortLeftObj = equiVisit.getLeftCompareCols().toArray();
 		Object[] sortRightObj = equiVisit.getRightCompareCols().toArray();
 		String[] sortOrderLeft = Arrays.copyOf(sortLeftObj, sortLeftObj.length, String[].class);
@@ -352,7 +355,7 @@ public class PhysicalPlanBuilder {
 //			visitor = new DivideSelectVisitor(minIndex);
 //			op.getEx().accept(visitor);
 			try {
-				
+
 				physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
 						+ "IndexScan["+tableName+","+minIndex+","+range[0]+","+range[1]+"]\n");
 			} catch (IOException e) {

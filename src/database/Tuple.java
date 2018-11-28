@@ -117,19 +117,22 @@ public class Tuple {
 	 * The comparator that sorts the Tuples according to a list of column 
 	 * indices as the order
 	 */
-	private static class TupleComparator implements Comparator<Tuple> { 	
+	private static class TupleComparator implements Comparator<Tuple> {
 		private List<Integer> indexes;
-	    public TupleComparator(List<Integer> lst) {
-	    	indexes=lst;
-	    }
-	    public int compare(Tuple a, Tuple b) 
-	    { 
-	        for(int i:indexes) {
-	        	if(a.getColumnValue(i) < b.getColumnValue(i)) return -1;
-	        	else if(a.getColumnValue(i) > b.getColumnValue(i)) return 1;
-	        }
-	        return 0;
-	    } 
+
+		public TupleComparator(List<Integer> lst) {
+			indexes = lst;
+		}
+
+		public int compare(Tuple a, Tuple b) {
+			for (int i : indexes) {
+				if (a.getColumnValue(i) < b.getColumnValue(i))
+					return -1;
+				else if (a.getColumnValue(i) > b.getColumnValue(i))
+					return 1;
+			}
+			return 0;
+		}
 	}
 	
 	

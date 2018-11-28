@@ -437,7 +437,10 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		boolean rightIsInt = isInt;
 		
 		if (!leftIsInt && !rightIsInt) { // normal Join
-			normalJoin = new AndExpression(notEqualsTo, normalJoin);
+			if (normalJoin == null)
+				normalJoin = notEqualsTo;
+			else
+				normalJoin = new AndExpression(notEqualsTo, normalJoin);
 		} else {
 			if (normalSelect == null)
 				normalSelect = notEqualsTo;
