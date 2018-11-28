@@ -207,9 +207,12 @@ public class JoinOrderOptimizer {
 					String leftRef = null;
 					if (leftChild instanceof LogicalScanOperator) {
 						leftRef = ((LogicalScanOperator) leftChild).getReference();
-					} else if (rightOp instanceof LogicalSelectOperator) {
-						leftRef = ((LogicalSelectOperator) rightOp).getReference();
+					} else if (leftChild instanceof LogicalSelectOperator) {
+						leftRef = ((LogicalSelectOperator) leftChild).getReference();
 					}
+					System.out.println(visitor.getJoinMap());
+					System.out.println(leftRef);
+					System.out.println(rightRef);
 					Expression tempCondition = visitor.getJoinCondition(leftRef, rightRef); 
 					//gets the join exp of every left child with the right child
 					joinCondition = joinCondition == null ? tempCondition : new AndExpression(joinCondition, tempCondition);
