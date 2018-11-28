@@ -113,6 +113,16 @@ public class PhysicalPlanBuilder {
 		}
 		return ref;
 	}
+	
+	private String getLogicalScanOrSelectRef(LogicalOperator op) {
+		String ref;
+		if (op instanceof LogicalScanOperator) {
+			ref = ((LogicalScanOperator) op).getReference();
+		} else {
+			ref = ((LogicalSelectOperator) op).getReference();
+		}
+		return ref;
+	}
 
 	/** Creates a SMJ operator from the left and right operator along with the join condition.
 	 * @param left
@@ -171,6 +181,15 @@ public class PhysicalPlanBuilder {
 		}
 		return op;
 	}
+	
+	public Operator findPhysOperator(LogicalOperator op, List<Operator> lst) {
+		String opRef = getLogicalScanOrSelectRef(op);
+		for (Operator phys : lst) {
+			if (this.getScanOrSelectRef(phys).equals(opRef))
+				return phys;
+		}
+		return null; //not found
+	}
 
 	/**
 	 * @param op
@@ -202,16 +221,31 @@ public class PhysicalPlanBuilder {
 		ParseConjunctExpVisitor visitor = op.getVisitor();
 		opt.dpChooseBestPlan();
 		List<LogicalOperator> optOrder = opt.getBestOrder(); //best join order
+		List<Operator> physChildren = new LinkedList<Operator>(); //physical children
+		for (LogicalOperator child : op.getJoinChildren()) { //serialize logical children in order by accepting
+			tmp=counter; 
+			child.accept(this);
+			counter=tmp;
+			Operator childPhys = operator;
+			physChildren.add(childPhys);
+		}
+		List<Operator> physOptOrder = new LinkedList<Operator>();
+		for (LogicalOperator logChild : optOrder) { //build physical operator order from logical operator order
+			physOptOrder.add(findPhysOperator(logChild, physChildren));
+		}
+		
 		//use parse conjunct visitor to build left deep join tree
-		assert optOrder.size() > 1;
+		assert physOptOrder.size() > 1;
 		JoinOperator left;
-		tmp=counter;
-		optOrder.get(0).accept(this);
-		counter=tmp;
-		Operator firstLeft = operator;
-		optOrder.get(1).accept(this);
-		counter=tmp;
-		Operator secondLeft = operator;
+		tmp=counter; 
+//		optOrder.get(0).accept(this);
+//		counter=tmp;
+//		Operator firstLeft = operator;
+//		optOrder.get(1).accept(this);
+//		counter=tmp;
+//		Operator secondLeft = operator;
+		Operator firstLeft = physOptOrder.get(0);
+		Operator secondLeft = physOptOrder.get(1);
 
 		List<String> leftTableRefs = new LinkedList<String>();
 		leftTableRefs.add(getScanOrSelectRef(firstLeft));
@@ -222,20 +256,21 @@ public class PhysicalPlanBuilder {
 
 		left = createBestJoin(firstLeft, secondLeft, firstCond, checkEquity);
 
-		for (int i = 2; i < optOrder.size(); i++) {
+		for (int i = 2; i < physOptOrder.size(); i++) {
 			CheckAllEquityExpVisitor checkEquityIn = new CheckAllEquityExpVisitor();
 			Expression condition = null;
-			LogicalOperator currRight = optOrder.get(i);
-			currRight.accept(this);
-			counter=tmp;
-			String currRef = getScanOrSelectRef(operator);
+			Operator currRight = physOptOrder.get(i);
+//			LogicalOperator currRight = optOrder.get(i);
+//			currRight.accept(this);
+//			counter=tmp;
+			String currRef = getScanOrSelectRef(currRight);
 			for (String leftRef: leftTableRefs) {
 				Expression tempCondition = visitor != null ? visitor.getJoinCondition(leftRef, currRef) : null;
 				if (tempCondition != null)
 					condition = condition == null ? tempCondition: new AndExpression(condition, tempCondition);
 			}
 			leftTableRefs.add(currRef);
-			left = createBestJoin(left, operator, condition, checkEquityIn);
+			left = createBestJoin(left, currRight, condition, checkEquityIn);
 		}
 		//		op.getLeftChild().accept(this);
 		//		Operator left = operator;
