@@ -18,96 +18,10 @@ public class PhysicalPlanWriter {
 	private final String DASH="-";
 	BufferedWriter physicalWriter;
 	int counter=1;
-	int tmp;
+//	int tmp;
 	
 	public PhysicalPlanWriter(BufferedWriter write) {
 		physicalWriter = write;
-	}
-
-	public void visit(ScanOperator op) {
-		//create logical plan
-		try {
-			physicalWriter.write(String.join("", Collections.nCopies(1, DASH)) +
-					"TableScan["+op.getTableName()+"]\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
-	
-	public void visit(IndexScanOperator op) {
-		try {
-			physicalWriter.write(String.join("", Collections.nCopies(1, DASH))
-					+ "IndexScan["+op.getTableName()+","+op.getIndexName()+","+op.getLowKey()+","+op.getHighKey()+"]\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void visit(SelectOperator op) {
-		try {
-			String ex = op.getEx() == null ? "" : op.getEx().toString();
-			physicalWriter.write(String.join("", Collections.nCopies(1, DASH))
-					+ "Select["+ex+"]\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		op.getChildOp().accept(this);
-	}
-
-	public void visit(TNLJoinOperator op) {
-
-	}
-	
-	public void visit(SMJoinOperator op) {
-		String ex = op.getCondition() == null ? "" : op.getCondition().toString();
-		try {
-			physicalWriter.write(String.join("", Collections.nCopies(1, DASH))+
-					"SMJ"+"["+ex+"]\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		op.getLeftChild().accept(this);
-		op.getRightChild().accept(this);
-	}
-	
-	public void visit(BNLJoinOperator op) {
-		String ex = op.getCondition() == null ? "" : op.getCondition().toString();
-		try {
-			physicalWriter.write(String.join("", Collections.nCopies(1, DASH))+
-					"BNLJ"+"["+ex+"]\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		op.getLeftChild().accept(this);
-		op.getRightChild().accept(this);
-	}
-
-	public void visit(ExternalSortOperator op) {
-		try {
-			physicalWriter.write(String.join("", Collections.nCopies(1, DASH))
-					+ "ExternalSort"+"["+String.join(", ", op.getColumnIndexMap().keySet())+"]\n");
-			counter++;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		op.getChildOp().accept(this);
-	}
-	
-	public void visit(InMemorySortOperator op) {
-
-	}
-	
-	public void visit(ProjectOperator op) {
-		try {
-			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+
-					"Project"+"["+String.join(", ", op.getColumnIndexMap().keySet())+"]\n");
-			counter++;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		op.getChildOp().accept(this);
 	}
 	
 	public void visit(DupElimOperator op) {
@@ -117,6 +31,107 @@ public class PhysicalPlanWriter {
 			e.printStackTrace();
 		}
 		op.getChildOp().accept(this);
+	}
+	
+
+	public void visit(ExternalSortOperator op) {
+		try {
+			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
+					+ "ExternalSort"+"["+String.join(", ", op.getSortedByCols())+"]\n");
+			counter++;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		op.getChildOp().accept(this);
+	}
+	
+	public void visit(ProjectOperator op) {
+		try {
+			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+
+					"Project"+"["+String.join(", ", op.getColsInOrder())+"]\n");
+			counter++;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		op.getChildOp().accept(this);
+	}
+	
+	public void visit(ScanOperator op) {
+		//create logical plan
+		try {
+			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH)) +
+					"TableScan["+op.getTableName()+"]\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	public void visit(IndexScanOperator op) {
+		try {
+			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
+					+ "IndexScan["+op.getTableName()+","+op.getIndexName()+","+op.getLowKey()+","+op.getHighKey()+"]\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void visit(SelectOperator op) {
+		try {
+			String ex = op.getEx() == null ? "" : op.getEx().toString();
+			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
+					+ "Select["+ex+"]\n");
+			counter++;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		int tmp=counter;
+		op.getChildOp().accept(this);
+		counter=tmp;
+	}
+
+	public void visit(TNLJoinOperator op) {
+
+	}
+	
+	public void visit(SMJoinOperator op) {
+		String ex = op.getCondition() == null ? "" : op.getCondition().toString();
+		try {
+			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+
+					"SMJ"+"["+ex+"]\n");
+			counter++;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		int tmp=counter;
+		System.out.println("SMJ before left" + counter);
+		op.getLeftChild().accept(this);
+		counter=tmp;
+		op.getRightChild().accept(this);
+		counter=tmp;
+	}
+	
+	public void visit(BNLJoinOperator op) {
+		String ex = op.getCondition() == null ? "" : op.getCondition().toString();
+		try {
+			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+
+					"BNLJ"+"["+ex+"]\n");
+			counter++;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		int tmp=counter;
+		System.out.println(op.getLeftChild().toString());
+		op.getLeftChild().accept(this);
+		counter=tmp;
+		op.getRightChild().accept(this);
+		counter=tmp;
+	}
+
+	
+	public void visit(InMemorySortOperator op) {
+
 	}
 
 }
