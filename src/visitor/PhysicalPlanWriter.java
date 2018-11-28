@@ -11,12 +11,13 @@ import logicaloperator.LogicalOperator;
 import physicaloperator.*;
 
 /**
- * @author sitianchen
- *
+ * @author xinqilyu
+ * A physical writer builder that uses visitor pattern to write the formatted physical plan
+ * of the query into a file
  */
 public class PhysicalPlanWriter {
 	private final String DASH="-";
-	BufferedWriter physicalWriter;
+	BufferedWriter physicalWriter; //the BufferWriter 
 	int counter=1;
 //	int tmp;
 	
@@ -33,7 +34,6 @@ public class PhysicalPlanWriter {
 		op.getChildOp().accept(this);
 	}
 	
-
 	public void visit(ExternalSortOperator op) {
 		try {
 			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))

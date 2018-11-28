@@ -28,10 +28,10 @@ import physicaloperator.*;
 public class PhysicalPlanBuilder {
 	private final String DASH="-";
 	Operator operator;
-	BufferedWriter logicalWriter;
-	int counter=0;
-	//	int beforeSelect=0;
-	int tmp;
+	BufferedWriter logicalWriter; //the BufferWriter to write the logical plan
+	int counter=1; //the counter to record the number of dashes
+	int tmp; //temporary plcaeholder to keep track of counter
+	
 	public PhysicalPlanBuilder(BufferedWriter logicalPlan) throws IOException {
 		//		logicalWriter = new BufferedWriter(new FileWriter("output" + File.separator + "query2" + "_logicalplan"));
 		//		logicalWriter.write("fuck");
@@ -282,8 +282,6 @@ public class PhysicalPlanBuilder {
 
 		//create logical plan
 		try {
-			//			counter=beforeSelect;
-			//			beforeSelect=counter;
 			String ex = op.getEx() == null ? "" : op.getEx().toString();
 			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
 					+ "Select["+ex+"]\n");
@@ -291,11 +289,16 @@ public class PhysicalPlanBuilder {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		
 		LogicalOperator child = op.getChildOp();
 		LogicalScanOperator scanChild = (LogicalScanOperator) child;
 		String tableName = scanChild.getTableName();
 		DivideSelectVisitor visitor = null;
 
+		//calculate the cost of using scan and different indices, 
+		//and choose the best choice for selection
+		
 		//the number of pages in the relation
 		int p = DBCatalog.getRelationSize(tableName)*(DBCatalog.getTableColumns(tableName).length * 4)/4096;
 		int t = DBCatalog.getRelationSize(tableName); //the number of tuples
