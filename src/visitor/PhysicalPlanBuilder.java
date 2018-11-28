@@ -1,5 +1,5 @@
 /**
- *
+ * 
  */
 package visitor;
 
@@ -40,7 +40,7 @@ public class PhysicalPlanBuilder {
 
 	/**
 	 * Constructs the sort operator according to the PPB configuration.
-	 *
+	 * 
 	 * @param child:
 	 *            child operator to be sorted
 	 * @param cols:
@@ -66,7 +66,7 @@ public class PhysicalPlanBuilder {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		
 		op.getChildOp().accept(this);
 		DupElimOperator dupElimOperator = new DupElimOperator(operator);
 		operator = dupElimOperator;
@@ -76,13 +76,13 @@ public class PhysicalPlanBuilder {
 		//create logical plan
 		try {
 			System.out.println(String.join("", Collections.nCopies(counter, DASH)));
-			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
+			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH)) 
 					+ "Sort"+"["+String.join(", ", op.getCols())+"]\n");
 			counter++;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		
 		op.getChildOp().accept(this);
 		SortOperator sortOperator = getSortOperator(operator, op.getCols());
 		operator = sortOperator;
@@ -97,12 +97,12 @@ public class PhysicalPlanBuilder {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		
 		op.getChildOp().accept(this);
 		ProjectOperator projectOperator = new ProjectOperator(operator, op.getCols());
 		operator = projectOperator;
 	}
-
+	
 	private String getScanOrSelectRef(Operator op) {
 		String ref;
 		if (op instanceof ScanOperator) {
@@ -112,7 +112,7 @@ public class PhysicalPlanBuilder {
 		}
 		return ref;
 	}
-
+	
 	/** Creates a SMJ operator from the left and right operator along with the join condition.
 	 * @param left
 	 * @param right
@@ -131,7 +131,7 @@ public class PhysicalPlanBuilder {
 		SortOperator rightSort = getSortOperator(right, sortOrderRight);
 		return new SMJoinOperator(leftSort, rightSort, cond);
 	}
-
+	
 	/** Creates a BNLJ operator from the left and right operator along with the join condition.
 	 * @param left
 	 * @param right
@@ -141,7 +141,7 @@ public class PhysicalPlanBuilder {
 	private BNLJoinOperator createBNLJ(Operator left, Operator right, Expression cond) {
 		return new BNLJoinOperator(left, right, cond, 10); //use 10 as join size
 	}
-
+	
 	/** Creates a join operator by choosing the better join by following the principle of always using SMJ for
 	 * joins with all equality conditions and BNLJ otherwise.
 	 * @param left
@@ -174,9 +174,8 @@ public class PhysicalPlanBuilder {
 	public void visit(LogicalJoinOperator op) {
 		//create logical plan
 		try {
-			String joinCond = op.getJoinCondition() == null ? "" : op.getJoinCondition().toString();
 			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+"Join"
-		+"["+joinCond+"]\n");
+		+"["+String.join(", ", op.getJoinCondition().toString())+"]\n");
 			for(UnionElement elt: op.getUnionElements()) {
 				logicalWriter.write("["+String.join(", ", elt.getAttributeStrings())+"], equals "+
 						elt.getEquality()+", min "+elt.getLower()+", max "+elt.getUpper()+"\n");
@@ -189,8 +188,8 @@ public class PhysicalPlanBuilder {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-
+		
+		
 		// refactor PPB to left deep join tree
 		JoinOrderOptimizer opt = new JoinOrderOptimizer(op, op.getVisitor());
 		ParseConjunctExpVisitor visitor = op.getVisitor();
@@ -203,16 +202,16 @@ public class PhysicalPlanBuilder {
 		Operator firstLeft = operator;
 		optOrder.get(1).accept(this);
 		Operator secondLeft = operator;
-
+		
 		List<String> leftTableRefs = new LinkedList<String>();
 		leftTableRefs.add(getScanOrSelectRef(firstLeft));
 		leftTableRefs.add(getScanOrSelectRef(secondLeft));
-
+		
 		Expression firstCond = visitor == null ? null : visitor.getJoinCondition(leftTableRefs.get(0), leftTableRefs.get(1));
 		CheckAllEquityExpVisitor checkEquity = new CheckAllEquityExpVisitor();
 
 		left = createBestJoin(firstLeft, secondLeft, firstCond, checkEquity);
-
+		
 		for (int i = 2; i < optOrder.size(); i++) {
 			Expression condition = null;
 			LogicalOperator currRight = optOrder.get(i);
@@ -268,12 +267,11 @@ public class PhysicalPlanBuilder {
 	 *            upper bounds, if any.
 	 */
 	public void visit(LogicalSelectOperator op) {
-
+		
 		//create logical plan
 		try {
-			String ex = op.getEx() == null ? "" : op.getEx().toString();
-			logicalWriter.write(String.join("", Collections.nCopies(beforeSelect, DASH))
-					+ "Select["+ex+"]\n");
+			logicalWriter.write(String.join("", Collections.nCopies(beforeSelect, DASH)) 
+					+ "Select["+op.getEx().toString()+"]\n");
 			beforeSelect++;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -282,7 +280,7 @@ public class PhysicalPlanBuilder {
 		LogicalScanOperator scanChild = (LogicalScanOperator) child;
 		String tableName = scanChild.getTableName();
 		DivideSelectVisitor visitor = null;
-
+		
 		//the number of pages in the relation
 		int p = DBCatalog.getRelationSize(tableName)*(DBCatalog.getTableColumns(tableName).length * 4)/4096;
 		int t = DBCatalog.getRelationSize(tableName); //the number of tuples
@@ -323,7 +321,7 @@ public class PhysicalPlanBuilder {
 			ScanOperator indexScanOp;
 			try {
 				indexScanOp = new IndexScanOperator(tableName, scanChild.getAlias(),
-				DBCatalog.getIndexFileLoc(tableName, minIndex), minIndex, isMinClustered,
+				DBCatalog.getIndexFileLoc(tableName, minIndex), minIndex, isMinClustered, 
 				minVisitor.getLowKey(), minVisitor.getHighKey());
 				if (minVisitor.getNormalSelect() == null) {
 					operator = indexScanOp;
@@ -342,7 +340,7 @@ public class PhysicalPlanBuilder {
 			SelectOperator selectOperator = new SelectOperator(operator, op.getEx());
 			operator = selectOperator;
 		}
-
+		
 //		if (DBCatalog.useIndex()) {
 //			visitor = new DivideSelectVisitor(DBCatalog.getIndexKey(tableName));
 //			op.getEx().accept(visitor);
@@ -374,16 +372,16 @@ public class PhysicalPlanBuilder {
 	}
 
 	public void visit(LogicalScanOperator op) {
-
+		
 		//create logical plan
 		try {
-			logicalWriter.write(String.join("", Collections.nCopies(beforeSelect, DASH)) +
+			logicalWriter.write(String.join("", Collections.nCopies(beforeSelect, DASH)) + 
 					"Leaf["+op.getTableName()+"]\n");
 			beforeSelect++;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		
 		ScanOperator scanOperator;
 		try {
 			scanOperator = new ScanOperator(op.getTableName(), op.getAlias());
@@ -392,7 +390,7 @@ public class PhysicalPlanBuilder {
 			System.err.println("error occurred during building scan operator, file not found");
 			e.printStackTrace();
 		}
-
+		
 
 	}
 
