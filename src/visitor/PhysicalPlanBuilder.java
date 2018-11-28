@@ -325,7 +325,7 @@ public class PhysicalPlanBuilder {
 			//compute the index scan cost for each possible index
 			String index= info[0];//A
 			visitor = new DivideSelectVisitor(index);
-//			op.getEx().accept(visitor);
+			op.getEx().accept(visitor);
 			int[] bounds = DBCatalog.getAttribBounds(tableName).get(index);
 			int indexLow = Math.max(visitor.getLowKey(), bounds[0]);
 			int indexHigh = Math.min(visitor.getHighKey(), bounds[1]);
