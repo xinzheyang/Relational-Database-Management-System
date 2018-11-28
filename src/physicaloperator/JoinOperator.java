@@ -8,6 +8,7 @@ import java.util.HashMap;
 import database.Tuple;
 import net.sf.jsqlparser.expression.Expression;
 import visitor.EvaluateExpVisitor;
+import visitor.PhysicalPlanWriter;
 
 /** An abstract class that all physical join operators inherits.
  * @author sitianchen
@@ -59,6 +60,10 @@ public abstract class JoinOperator extends Operator {
 	public void reset(int index) {
 		throw new UnsupportedOperationException("not supported");
 
+	}
+	
+	public Expression getCondition() {
+		return joinCondition;
 	}
 
 }

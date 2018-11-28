@@ -11,6 +11,7 @@ import java.util.*;
 
 import database.Tuple;
 import database.TupleWriter;
+import visitor.PhysicalPlanWriter;
 
 /**
  * The abstract class for all kinds of operators
@@ -97,9 +98,7 @@ public abstract class Operator {
 
 	}
 	
-	public void accept() {
-		
-	}
+	public abstract void accept(PhysicalPlanWriter write);
 
 
 	/**

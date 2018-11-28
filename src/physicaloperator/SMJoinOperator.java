@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import database.Tuple;
 import net.sf.jsqlparser.expression.Expression;
 import visitor.EquiConjunctVisitor;
+import visitor.PhysicalPlanWriter;
 
 /** Partition-based approach to avoid cross-producting. Merging phase follows the 
  * algorithm in textbook page 460. All join conditions assumed to be conjunctions of
@@ -149,6 +150,9 @@ public class SMJoinOperator extends JoinOperator {
 		tRight = rightChild.getNextTuple();
 		startOfCurrPartition = tRight;
 	}
-
+	
+	public void accept(PhysicalPlanWriter write) {
+		write.visit(this);
+	}
 
 }

@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import database.Tuple;
+import visitor.PhysicalPlanWriter;
 
 /**
  * @author xinzheyang
@@ -242,5 +243,20 @@ public class IndexScanOperator extends ScanOperator {
 			unclusterExceedHigh = false;
 		}
 	}
-
+	
+	public void accept(PhysicalPlanWriter write) {
+		write.visit(this);
+	}
+	
+	public int getLowKey() {
+		return lowKey;
+	}
+	
+	public int getHighKey() {
+		return highKey;
+	}
+	
+	public String getIndexName() {
+		return indexCol;
+	}
 }

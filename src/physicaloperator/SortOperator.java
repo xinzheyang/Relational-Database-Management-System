@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import database.Tuple;
+import visitor.PhysicalPlanWriter;
 
 /**
  * @author xinqi
@@ -47,5 +48,5 @@ public abstract class SortOperator extends Operator {
 	public Operator getChildOp() {
 		return childOp;
 	}
-
+	
 }

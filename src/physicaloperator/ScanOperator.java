@@ -14,6 +14,7 @@ import java.util.*;
 import database.DBCatalog;
 import database.Tuple;
 import database.TupleReader;
+import visitor.PhysicalPlanWriter;
 
 /**
  * @author sitianchen
@@ -114,5 +115,9 @@ public class ScanOperator extends Operator {
 	public void reset(int index) {
 		throw new UnsupportedOperationException("not supported");
 		
+	}
+	
+	public void accept(PhysicalPlanWriter write) {
+		write.visit(this);
 	}
 }

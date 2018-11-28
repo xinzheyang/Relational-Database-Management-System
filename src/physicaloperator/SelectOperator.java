@@ -10,6 +10,7 @@ import database.DBCatalog;
 import java.util.HashMap;
 import database.Tuple;
 import visitor.EvaluateExpVisitor;
+import visitor.PhysicalPlanWriter;
 import net.sf.jsqlparser.expression.Expression;
 
 /**
@@ -126,5 +127,8 @@ public class SelectOperator extends Operator {
 		throw new UnsupportedOperationException("not supported");
 		
 	}
-
+	
+	public void accept(PhysicalPlanWriter write) {
+		write.visit(this);
+	}
 }

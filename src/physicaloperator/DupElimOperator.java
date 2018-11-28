@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import database.Tuple;
+import visitor.PhysicalPlanWriter;
 
 /** 
  * @author sitianchen
@@ -55,6 +56,10 @@ public class DupElimOperator extends Operator {
 	public void reset(int index) {
 		throw new UnsupportedOperationException("not supported");
 		
+	}
+	
+	public void accept(PhysicalPlanWriter write) {
+		write.visit(this);
 	}
 
 }

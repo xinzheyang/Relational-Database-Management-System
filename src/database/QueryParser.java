@@ -14,6 +14,7 @@ import net.sf.jsqlparser.statement.Statement;
 import physicaloperator.Operator;
 import visitor.DBStatementVisitor;
 import visitor.PhysicalPlanBuilder;
+import visitor.PhysicalPlanWriter;
 
 
 /**
@@ -49,12 +50,16 @@ public class QueryParser {
 					statement.accept(dbStatementVisitor);
 					LogicalOperator logicalOperator = dbStatementVisitor.getOperator();
 					BufferedWriter logicalPlanWriter = new BufferedWriter(new FileWriter(output + File.separator + "query" + localCount + "_logicalplan"));
-					BufferedWriter physicalPlanWriter = new BufferedWriter(new FileWriter(output + File.separator + "query" + localCount + "_physicalplan"));
-					PhysicalPlanBuilder physicalPlanBuilder = new PhysicalPlanBuilder(logicalPlanWriter,physicalPlanWriter);
+					BufferedWriter physicalPla = new BufferedWriter(new FileWriter(output + File.separator + "haha" + localCount + "_physicalplan"));
+					PhysicalPlanBuilder physicalPlanBuilder = new PhysicalPlanBuilder(logicalPlanWriter,physicalPla);
 					logicalOperator.accept(physicalPlanBuilder);
 					logicalPlanWriter.close();
-					physicalPlanWriter.close();
+					physicalPla.close();
 					operator = physicalPlanBuilder.getOperator();
+					BufferedWriter physicalPlan = new BufferedWriter(new FileWriter(output + File.separator + "query" + localCount + "_physicalplan"));
+					PhysicalPlanWriter physicalPlanWriter = new PhysicalPlanWriter(physicalPlan);
+					operator.accept(physicalPlanWriter);
+					physicalPlan.close();
 				} catch (Exception e) {
 					System.err.println("Exception occurred during query plan building");
 					e.printStackTrace();

@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import database.Tuple;
+import visitor.PhysicalPlanWriter;
 
 /**
  * @author xinqi
@@ -59,6 +60,12 @@ public class InMemorySortOperator extends SortOperator {
 	@Override
 	public void reset(int index) {
 		this.index = index;
+	}
+
+	@Override
+	public void accept(PhysicalPlanWriter write) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

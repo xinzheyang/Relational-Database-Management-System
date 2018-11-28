@@ -34,7 +34,7 @@ public class PhysicalPlanBuilder {
 	int beforeSelect=0;
 
 	public PhysicalPlanBuilder(BufferedWriter logicalPlan, BufferedWriter physicalPlan) throws IOException {
-//		logicalWriter = new BufferedWriter(new FileWriter("output" + File.separator + "query2" + "_logicalplan"));
+		logicalWriter = new BufferedWriter(new FileWriter("output" + File.separator + "query2" + "_logicalplan"));
 //		logicalWriter.write("fuck");
 		logicalWriter=logicalPlan;
 		physicalWriter=physicalPlan;
@@ -363,7 +363,7 @@ public class PhysicalPlanBuilder {
 			try {
 				indexScanOp = new IndexScanOperator(tableName, scanChild.getAlias(),
 				DBCatalog.getIndexFileLoc(tableName, minIndex), minIndex, isMinClustered,
-				minVisitor.getLowKey(), minVisitor.getHighKey());
+				range[0], range[1]);
 				if (minVisitor.getNormalSelect() == null) {
 					operator = indexScanOp;
 				} else {

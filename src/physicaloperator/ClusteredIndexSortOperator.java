@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import database.Tuple;
+import visitor.PhysicalPlanWriter;
 
 /**
  * @author sitianchen
@@ -79,6 +80,11 @@ public class ClusteredIndexSortOperator extends Operator {
 	@Override
 	public void reset(int index) {
 
+	}
+
+	@Override
+	public void accept(PhysicalPlanWriter write) {
+		// TODO Auto-generated method stub
 	}
 
 }

@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import database.Tuple;
 import visitor.EvaluateExpVisitor;
+import visitor.PhysicalPlanWriter;
 import net.sf.jsqlparser.expression.Expression;
 
 /**
@@ -85,6 +86,12 @@ public class TNLJoinOperator extends JoinOperator {
 	public void reset() {
 		super.reset();
 		leftTuple = leftChild.getNextTuple();
+	}
+
+	@Override
+	public void accept(PhysicalPlanWriter write) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

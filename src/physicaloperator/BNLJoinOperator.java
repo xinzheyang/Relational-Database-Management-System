@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 import database.Tuple;
 import visitor.EvaluateExpVisitor;
+import visitor.PhysicalPlanWriter;
 import net.sf.jsqlparser.expression.Expression;
 
 /**
@@ -117,6 +118,11 @@ public class BNLJoinOperator extends JoinOperator {
 		buffer.clear();
 		rightTuple = rightChild.getNextTuple();
 	}
+	
+	public void accept(PhysicalPlanWriter write) {
+		write.visit(this);
+	}
+
 
 //	@Override
 //	public void reset(int index) {

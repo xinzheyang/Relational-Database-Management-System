@@ -17,6 +17,7 @@ import database.DBCatalog;
 import database.Tuple;
 import database.TupleReader;
 import database.TupleWriter;
+import visitor.PhysicalPlanWriter;
 
 /**
  * @author xinzheyang
@@ -239,5 +240,9 @@ public class ExternalSortOperator extends SortOperator {
 	public void reset(int index) {
 		sortedRun.reset(index);
 		
+	}
+	
+	public void accept(PhysicalPlanWriter write) {
+		write.visit(this);
 	}
 }

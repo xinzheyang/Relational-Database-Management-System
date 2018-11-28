@@ -6,6 +6,7 @@ package physicaloperator;
 import java.util.HashMap;
 
 import database.Tuple;
+import visitor.PhysicalPlanWriter;
 
 /**
  * The Project Operator selects the columns to be projected from its child Operator
@@ -68,6 +69,10 @@ public class ProjectOperator extends Operator {
 	public void reset(int index) {
 		throw new UnsupportedOperationException("not supported");
 		
+	}
+	
+	public void accept(PhysicalPlanWriter write) {
+		write.visit(this);
 	}
 
 }
