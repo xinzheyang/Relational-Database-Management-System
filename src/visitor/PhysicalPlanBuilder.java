@@ -29,15 +29,13 @@ public class PhysicalPlanBuilder {
 	private final String DASH="-";
 	Operator operator;
 	BufferedWriter logicalWriter;
-	BufferedWriter physicalWriter;
 	int counter=0;
-	int beforeSelect=0;
-
-	public PhysicalPlanBuilder(BufferedWriter logicalPlan, BufferedWriter physicalPlan) throws IOException {
-		logicalWriter = new BufferedWriter(new FileWriter("output" + File.separator + "query2" + "_logicalplan"));
+	//	int beforeSelect=0;
+	int tmp;
+	public PhysicalPlanBuilder(BufferedWriter logicalPlan) throws IOException {
+		//		logicalWriter = new BufferedWriter(new FileWriter("output" + File.separator + "query2" + "_logicalplan"));
 		//		logicalWriter.write("fuck");
 		logicalWriter=logicalPlan;
-		physicalWriter=physicalPlan;
 	}
 
 	/**
@@ -50,11 +48,6 @@ public class PhysicalPlanBuilder {
 	 * @return the right sort operator constructed
 	 */
 	private SortOperator getSortOperator(Operator child, String[] cols) {
-		try {
-			physicalWriter.write("ExternalSort["+ String.join(", ", cols)+"]\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		SortOperator sortOperator=new ExternalSortOperator(child, cols, 10); //hard code buffer size to 10
 		//		if (DBCatalog.getSortMethod().equals("0")) {
 		//			sortOperator = new InMemorySortOperator(child, cols);
@@ -70,7 +63,6 @@ public class PhysicalPlanBuilder {
 		//create logical plan
 		try {
 			logicalWriter.write("DupElim\n");
-			physicalWriter.write("DupElim\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -86,8 +78,6 @@ public class PhysicalPlanBuilder {
 			//			System.out.println(String.join("", Collections.nCopies(counter, DASH)));
 			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
 					+ "Sort"+"["+String.join(", ", op.getCols())+"]\n");
-			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
-					+ "ExternalSort"+"["+String.join(", ", op.getCols())+"]\n");
 
 			counter++;
 		} catch (IOException e) {
@@ -103,8 +93,6 @@ public class PhysicalPlanBuilder {
 		//create logical plan
 		try {
 			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+
-					"Project"+"["+String.join(", ", op.getCols())+"]\n");
-			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+
 					"Project"+"["+String.join(", ", op.getCols())+"]\n");
 			counter++;
 		} catch (IOException e) {
@@ -133,13 +121,6 @@ public class PhysicalPlanBuilder {
 	 * @return
 	 */
 	private SMJoinOperator createSMJ(Operator left, Operator right, Expression cond) {
-		try {
-			String ex = cond == null ? "" : cond.toString();
-			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+
-					"SMJ"+"["+ex+"]\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		EquiConjunctVisitor equiVisit = new EquiConjunctVisitor(left, right);
 		cond.accept(equiVisit);
 		System.out.println(cond);
@@ -164,12 +145,6 @@ public class PhysicalPlanBuilder {
 	 */
 	private BNLJoinOperator createBNLJ(Operator left, Operator right, Expression cond) {
 		String ex = cond == null ? "" : cond.toString();
-		try {
-			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+
-					"BNLJ"+"["+ex+"]\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		return new BNLJoinOperator(left, right, cond, 10); //use 10 as join size
 	}
 
@@ -213,7 +188,7 @@ public class PhysicalPlanBuilder {
 						elt.getEquality()+", min "+elt.getLower()+", max "+elt.getUpper()+"]\n");
 			}
 			counter++;
-			beforeSelect=counter;
+			//			beforeSelect=counter;
 			//			for (LogicalOperator child : op.getJoinChildren()) {
 			//				child.accept(this);
 			//			}
@@ -230,9 +205,12 @@ public class PhysicalPlanBuilder {
 		//use parse conjunct visitor to build left deep join tree
 		assert optOrder.size() > 1;
 		JoinOperator left;
+		tmp=counter;
 		optOrder.get(0).accept(this);
+		counter=tmp;
 		Operator firstLeft = operator;
 		optOrder.get(1).accept(this);
+		counter=tmp;
 		Operator secondLeft = operator;
 
 		List<String> leftTableRefs = new LinkedList<String>();
@@ -249,6 +227,7 @@ public class PhysicalPlanBuilder {
 			Expression condition = null;
 			LogicalOperator currRight = optOrder.get(i);
 			currRight.accept(this);
+			counter=tmp;
 			String currRef = getScanOrSelectRef(operator);
 			for (String leftRef: leftTableRefs) {
 				Expression tempCondition = visitor != null ? visitor.getJoinCondition(leftRef, currRef) : null;
@@ -303,7 +282,8 @@ public class PhysicalPlanBuilder {
 
 		//create logical plan
 		try {
-			counter=beforeSelect;
+			//			counter=beforeSelect;
+			//			beforeSelect=counter;
 			String ex = op.getEx() == null ? "" : op.getEx().toString();
 			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
 					+ "Select["+ex+"]\n");
@@ -358,13 +338,6 @@ public class PhysicalPlanBuilder {
 		if(minIndex != null && minIndexCost<p) {
 			//			visitor = new DivideSelectVisitor(minIndex);
 			//			op.getEx().accept(visitor);
-			try {
-
-				physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
-						+ "IndexScan["+tableName+","+minIndex+","+range[0]+","+range[1]+"]\n");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 			ScanOperator indexScanOp;
 			try {
 				indexScanOp = new IndexScanOperator(tableName, scanChild.getAlias(),
@@ -383,14 +356,8 @@ public class PhysicalPlanBuilder {
 
 		}
 		else {
-			try {
-				String ex = op.getEx() == null ? "" : op.getEx().toString();
-				physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
-						+ "Select["+ex+"]\n");
-				counter++;
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			String ex = op.getEx() == null ? "" : op.getEx().toString();
+			counter++;
 			child.accept(this);
 			SelectOperator selectOperator = new SelectOperator(operator, op.getEx());
 			operator = selectOperator;
@@ -432,8 +399,6 @@ public class PhysicalPlanBuilder {
 		try {
 			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH)) +
 					"Leaf["+op.getTableName()+"]\n");
-			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH)) +
-					"TableScan["+op.getTableName()+"]\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
