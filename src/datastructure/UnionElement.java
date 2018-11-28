@@ -76,8 +76,7 @@ public class UnionElement {
 	 * @param lower the lower to set
 	 */
 	public void setLower(Integer lower) {
-		if (lower != null && lower < this.lower)
-			this.lower = lower;
+		this.lower = lower;
 	}
 
 	/**
@@ -91,8 +90,7 @@ public class UnionElement {
 	 * @param upper the upper to set
 	 */
 	public void setUpper(Integer upper) {
-		if (upper != null && upper > this.upper)
-			this.upper = upper;
+		this.upper = upper;
 	}
 
 	/**
