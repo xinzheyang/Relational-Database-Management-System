@@ -50,11 +50,10 @@ public class QueryParser {
 					statement.accept(dbStatementVisitor);
 					LogicalOperator logicalOperator = dbStatementVisitor.getOperator();
 					BufferedWriter logicalPlanWriter = new BufferedWriter(new FileWriter(output + File.separator + "query" + localCount + "_logicalplan"));
-					BufferedWriter physicalPla = new BufferedWriter(new FileWriter(output + File.separator + "haha" + localCount + "_physicalplan"));
-					PhysicalPlanBuilder physicalPlanBuilder = new PhysicalPlanBuilder(logicalPlanWriter,physicalPla);
+//					BufferedWriter physicalPla = new BufferedWriter(new FileWriter(output + File.separator + "haha" + localCount + "_physicalplan"));
+					PhysicalPlanBuilder physicalPlanBuilder = new PhysicalPlanBuilder(logicalPlanWriter);
 					logicalOperator.accept(physicalPlanBuilder);
 					logicalPlanWriter.close();
-					physicalPla.close();
 					operator = physicalPlanBuilder.getOperator();
 					BufferedWriter physicalPlan = new BufferedWriter(new FileWriter(output + File.separator + "query" + localCount + "_physicalplan"));
 					PhysicalPlanWriter physicalPlanWriter = new PhysicalPlanWriter(physicalPlan);
