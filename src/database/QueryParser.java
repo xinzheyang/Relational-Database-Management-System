@@ -49,10 +49,11 @@ public class QueryParser {
 					statement.accept(dbStatementVisitor);
 					LogicalOperator logicalOperator = dbStatementVisitor.getOperator();
 					BufferedWriter logicalPlanWriter = new BufferedWriter(new FileWriter(output + File.separator + "query" + localCount + "_logicalplan"));
-					System.out.println("created logicalwriter");
-					PhysicalPlanBuilder physicalPlanBuilder = new PhysicalPlanBuilder(logicalPlanWriter);
+					BufferedWriter physicalPlanWriter = new BufferedWriter(new FileWriter(output + File.separator + "query" + localCount + "_physicalplan"));
+					PhysicalPlanBuilder physicalPlanBuilder = new PhysicalPlanBuilder(logicalPlanWriter,physicalPlanWriter);
 					logicalOperator.accept(physicalPlanBuilder);
 					logicalPlanWriter.close();
+					physicalPlanWriter.close();
 					operator = physicalPlanBuilder.getOperator();
 				} catch (Exception e) {
 					System.err.println("Exception occurred during query plan building");

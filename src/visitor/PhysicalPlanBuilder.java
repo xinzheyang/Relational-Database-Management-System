@@ -29,13 +29,15 @@ public class PhysicalPlanBuilder {
 	private final String DASH="-";
 	Operator operator;
 	BufferedWriter logicalWriter;
+	BufferedWriter physicalWriter;
 	int counter=0;
 	int beforeSelect=0;
 
-	public PhysicalPlanBuilder(BufferedWriter logicalPlan) throws IOException {
+	public PhysicalPlanBuilder(BufferedWriter logicalPlan, BufferedWriter physicalPlan) throws IOException {
 //		logicalWriter = new BufferedWriter(new FileWriter("output" + File.separator + "query2" + "_logicalplan"));
 //		logicalWriter.write("fuck");
 		logicalWriter=logicalPlan;
+		physicalWriter=physicalPlan;
 	}
 
 	/**
@@ -48,6 +50,11 @@ public class PhysicalPlanBuilder {
 	 * @return the right sort operator constructed
 	 */
 	private SortOperator getSortOperator(Operator child, String[] cols) {
+		try {
+			physicalWriter.write("ExternalSort["+ String.join(", ", cols)+"]\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		SortOperator sortOperator=new ExternalSortOperator(child, cols, 10); //hard code buffer size to 10
 //		if (DBCatalog.getSortMethod().equals("0")) {
 //			sortOperator = new InMemorySortOperator(child, cols);
@@ -63,6 +70,7 @@ public class PhysicalPlanBuilder {
 		//create logical plan
 		try {
 			logicalWriter.write("DupElim\n");
+			physicalWriter.write("DupElim\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -75,9 +83,12 @@ public class PhysicalPlanBuilder {
 	public void visit(LogicalSortOperator op) {
 		//create logical plan
 		try {
-			System.out.println(String.join("", Collections.nCopies(counter, DASH)));
+//			System.out.println(String.join("", Collections.nCopies(counter, DASH)));
 			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
 					+ "Sort"+"["+String.join(", ", op.getCols())+"]\n");
+			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
+					+ "ExternalSort"+"["+String.join(", ", op.getCols())+"]\n");
+			
 			counter++;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -92,6 +103,8 @@ public class PhysicalPlanBuilder {
 		//create logical plan
 		try {
 			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+
+					"Project"+"["+String.join(", ", op.getCols())+"]\n");
+			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+
 					"Project"+"["+String.join(", ", op.getCols())+"]\n");
 			counter++;
 		} catch (IOException e) {
@@ -120,6 +133,13 @@ public class PhysicalPlanBuilder {
 	 * @return
 	 */
 	private SMJoinOperator createSMJ(Operator left, Operator right, Expression cond) {
+		try {
+			String ex = cond == null ? "" : cond.toString();
+			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+
+					"SMJ"+"["+ex+"]\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		EquiConjunctVisitor equiVisit = new EquiConjunctVisitor();
 		cond.accept(equiVisit);
 		Object[] sortLeftObj = equiVisit.getLeftCompareCols().toArray();
@@ -139,6 +159,13 @@ public class PhysicalPlanBuilder {
 	 * @return
 	 */
 	private BNLJoinOperator createBNLJ(Operator left, Operator right, Expression cond) {
+		String ex = cond == null ? "" : cond.toString();
+		try {
+			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+
+					"BNLJ"+"["+ex+"]\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return new BNLJoinOperator(left, right, cond, 10); //use 10 as join size
 	}
 
@@ -290,16 +317,17 @@ public class PhysicalPlanBuilder {
 		int minIndexCost=Integer.MAX_VALUE;
 		String minIndex=null;
 		int isMinClustered=0;
+		int[] range = new int[2];
 		DivideSelectVisitor minVisitor=null;
 		List<String[]> infos = DBCatalog.getIndexInfo(tableName);
 		for(String[] info: infos) {
 			//compute the index scan cost for each possible index
 			String index= info[0];//A
-//			visitor = new DivideSelectVisitor(index);
+			visitor = new DivideSelectVisitor(index);
 //			op.getEx().accept(visitor);
-//			int[] bounds = DBCatalog.getAttribBounds(tableName).get(index);
-//			int indexLow = Math.max(visitor.getLowKey(), bounds[0]);
-//			int indexHigh = Math.min(visitor.getHighKey(), bounds[1]);
+			int[] bounds = DBCatalog.getAttribBounds(tableName).get(index);
+			int indexLow = Math.max(visitor.getLowKey(), bounds[0]);
+			int indexHigh = Math.min(visitor.getHighKey(), bounds[1]);
 //			int r = (indexHigh-indexLow+1)/(bounds[1]-bounds[0]+1); //the reduction factor
 			int r = op.getReductionFactor(index); //the reduction factor of this index
 			int l = DBCatalog.getNumOfLeaves(tableName+"."+index); //the number of leaves in the index
@@ -316,11 +344,20 @@ public class PhysicalPlanBuilder {
 				minIndex = index;
 				isMinClustered = Integer.parseInt(info[1]);
 				minVisitor = visitor;
+				range[0]=indexLow;
+				range[1]=indexHigh;
 			}
 		}
 		if(minIndex != null && minIndexCost<p) {
 //			visitor = new DivideSelectVisitor(minIndex);
 //			op.getEx().accept(visitor);
+			try {
+				
+				physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
+						+ "IndexScan["+tableName+","+minIndex+","+range[0]+","+range[1]+"]\n");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			ScanOperator indexScanOp;
 			try {
 				indexScanOp = new IndexScanOperator(tableName, scanChild.getAlias(),
@@ -339,6 +376,14 @@ public class PhysicalPlanBuilder {
 
 		}
 		else {
+			try {
+				String ex = op.getEx() == null ? "" : op.getEx().toString();
+				physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
+						+ "Select["+ex+"]\n");
+				counter++;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			child.accept(this);
 			SelectOperator selectOperator = new SelectOperator(operator, op.getEx());
 			operator = selectOperator;
@@ -380,6 +425,8 @@ public class PhysicalPlanBuilder {
 		try {
 			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH)) +
 					"Leaf["+op.getTableName()+"]\n");
+			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH)) +
+					"TableScan["+op.getTableName()+"]\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
