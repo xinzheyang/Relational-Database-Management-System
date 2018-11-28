@@ -228,19 +228,6 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		}
 	}
 	
-	private void updateUnused(Boolean isNormal, Expression toBeAcc) {
-		if (!isNormal) {
-			if (normalSelect == null)
-				normalSelect = toBeAcc;
-			else
-				normalSelect = new AndExpression(toBeAcc, normalSelect);
-		} else {
-			if (normalJoin == null)
-				normalJoin = toBeAcc;
-			else
-				normalJoin = new AndExpression(toBeAcc, normalJoin);
-		}
-	}
 	
 	@Override
 	public void visit(EqualsTo equalsTo) {
@@ -266,7 +253,10 @@ public class UnionFindVisitor implements ExpressionVisitor {
 			UnionElement right = unionFind.find(rightCol);
 			right.setEquality(leftValue);
 		} else {
-			updateUnused(false, equalsTo);
+			if (normalSelect == null)
+				normalSelect = equalsTo;
+			else
+				normalSelect = new AndExpression(equalsTo, normalSelect);
 		}
 
 	}
@@ -290,9 +280,10 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		
 		if (!leftIsInt && !rightIsInt) { // normal Join
 			if (!leftCol.getTable().getWholeTableName().equals(rightCol.getTable().getWholeTableName())) {
-				updateUnused(true, greaterThan);
-			} else {
-				updateUnused(false, greaterThan);
+				if (normalJoin == null)
+					normalJoin = greaterThan;
+				else
+					normalJoin = new AndExpression(greaterThan, normalJoin);
 			}
 		} else if (!leftIsInt && rightIsInt) {
 			UnionElement left = unionFind.find(leftCol);
@@ -301,7 +292,10 @@ public class UnionFindVisitor implements ExpressionVisitor {
 			UnionElement right = unionFind.find(rightCol);
 			right.setUpper(leftValue - 1);
 		} else {
-			updateUnused(false, greaterThan);
+			if (normalSelect == null)
+				normalSelect = greaterThan;
+			else
+				normalSelect = new AndExpression(greaterThan, normalSelect);
 		}
 
 	}
@@ -325,9 +319,10 @@ public class UnionFindVisitor implements ExpressionVisitor {
 
 		if (!leftIsInt && !rightIsInt) { // normal Join
 			if (!leftCol.getTable().getWholeTableName().equals(rightCol.getTable().getWholeTableName())) {
-				updateUnused(true, greaterThanEquals);
-			} else {
-				updateUnused(false, greaterThanEquals);
+				if (normalJoin == null)
+					normalJoin = greaterThanEquals;
+				else
+					normalJoin = new AndExpression(greaterThanEquals, normalJoin);
 			}
 		} else if (!leftIsInt && rightIsInt) {
 			UnionElement left = unionFind.find(leftCol);
@@ -336,7 +331,10 @@ public class UnionFindVisitor implements ExpressionVisitor {
 			UnionElement right = unionFind.find(rightCol);
 			right.setUpper(leftValue);
 		} else {
-			updateUnused(false, greaterThanEquals);
+			if (normalSelect == null)
+				normalSelect = greaterThanEquals;
+			else
+				normalSelect = new AndExpression(greaterThanEquals, normalSelect);
 		}
 	}
 
@@ -374,9 +372,10 @@ public class UnionFindVisitor implements ExpressionVisitor {
 
 		if (!leftIsInt && !rightIsInt) { // normal Join
 			if (!leftCol.getTable().getWholeTableName().equals(rightCol.getTable().getWholeTableName())) {
-				updateUnused(true, minorThan);
-			} else {
-				updateUnused(false, minorThan);
+				if (normalJoin == null)
+					normalJoin = minorThan;
+				else
+					normalJoin = new AndExpression(minorThan, normalJoin);
 			}
 		} else if (!leftIsInt && rightIsInt) {
 			UnionElement left = unionFind.find(leftCol);
@@ -385,7 +384,10 @@ public class UnionFindVisitor implements ExpressionVisitor {
 			UnionElement right = unionFind.find(rightCol);
 			right.setLower(leftValue + 1);
 		} else {
-			updateUnused(false, minorThan);
+			if (normalSelect == null)
+				normalSelect = minorThan;
+			else
+				normalSelect = new AndExpression(minorThan, normalSelect);
 		}
 
 	}
@@ -409,9 +411,10 @@ public class UnionFindVisitor implements ExpressionVisitor {
 
 		if (!leftIsInt && !rightIsInt) { // normal Join
 			if (!leftCol.getTable().getWholeTableName().equals(rightCol.getTable().getWholeTableName())) {
-				updateUnused(true, minorThanEquals);
-			} else {
-				updateUnused(false, minorThanEquals);
+				if (normalJoin == null)
+					normalJoin = minorThanEquals;
+				else
+					normalJoin = new AndExpression(minorThanEquals, normalJoin);
 			}
 		} else if (!leftIsInt && rightIsInt) {
 			UnionElement left = unionFind.find(leftCol);
@@ -420,7 +423,10 @@ public class UnionFindVisitor implements ExpressionVisitor {
 			UnionElement right = unionFind.find(rightCol);
 			right.setLower(leftValue);
 		} else {
-			updateUnused(false, minorThanEquals);
+			if (normalSelect == null)
+				normalSelect = minorThanEquals;
+			else
+				normalSelect = new AndExpression(minorThanEquals, normalSelect);
 		}
 
 	}
@@ -442,12 +448,16 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		
 		if (!leftIsInt && !rightIsInt) { // normal Join
 			if (!leftCol.getTable().getWholeTableName().equals(rightCol.getTable().getWholeTableName())) {
-				updateUnused(true, notEqualsTo);
-			} else {
-				updateUnused(false, notEqualsTo);
+				if (normalJoin == null)
+					normalJoin = notEqualsTo;
+				else
+					normalJoin = new AndExpression(notEqualsTo, normalJoin);
 			}
 		} else {
-			updateUnused(false, notEqualsTo);
+			if (normalSelect == null)
+				normalSelect = notEqualsTo;
+			else
+				normalSelect = new AndExpression(notEqualsTo, normalSelect);
 		}
 	}
 
