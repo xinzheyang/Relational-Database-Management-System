@@ -17,6 +17,7 @@ import logicaloperator.LogicalScanOperator;
 import logicaloperator.LogicalSelectOperator;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import physicaloperator.Operator;
 import physicaloperator.ScanOperator;
@@ -198,26 +199,45 @@ public class JoinOrderOptimizer {
 			this.rightOp = rightOp;
 			costMetric = new CostMetric();
 			joinCondition = null;
-			
+
 			rightRef = getLogicalScanOrSelectRef(rightOp);
 
-			//extracts the join condition for this join
-			if (visitor != null) {
+			//first extracts the join condition from union find
+			for (UnionElement union : joinOp.getUnionElements()) {
+				List<Column> rightAttribs = union.getAttrByTable(rightRef);
 				for (LogicalOperator leftChild : leftChildren) {
-					String leftRef = getLogicalScanOrSelectRef(leftChild);
-//					System.out.println(visitor.getJoinMap());
-//					System.out.println(leftRef);
-//					System.out.println(rightRef);
-					Expression tempCondition = visitor.getJoinCondition(leftRef, rightRef); 
-					//gets the join exp of every left child with the right child
-					if (tempCondition != null) 
-						joinCondition = joinCondition == null ? tempCondition : new AndExpression(joinCondition, tempCondition);
-					//AND them all together to get the final join condition
+					List<Column> leftAttribs = union.getAttrByTable(getLogicalScanOrSelectRef(leftChild));
+					for(Column rightAttrib : rightAttribs) {
+						for(Column leftAttrib : leftAttribs) {
+							Expression newEqual = new EqualsTo(leftAttrib, rightAttrib);
+							joinCondition = joinCondition == null ? newEqual : new AndExpression(joinCondition, newEqual);
+						}
+					}
 				}
 			}
 
+			//then extracts the join condition for this join
+			if (visitor != null) {
+				for (LogicalOperator leftChild : leftChildren) {
+					String leftRef = getLogicalScanOrSelectRef(leftChild);
+					//					System.out.println(visitor.getJoinMap());
+					//					System.out.println(leftRef);
+					//					System.out.println(rightRef);
+					HashSet<Expression> tempConditions = visitor.getJoinConditionSet(leftRef, rightRef); 
+					if (tempConditions != null) {
+						for(Expression tempCondition : tempConditions) {
+							//gets the join exp of every left child with the right child
+							if (tempCondition != null && !(tempCondition instanceof EqualsTo)) 
+								joinCondition = joinCondition == null ? tempCondition : new AndExpression(joinCondition, tempCondition);
+							//AND them all together to get the final join condition
+						}
+					}
+				}
+			}
+			System.out.println(joinCondition);
+			
 		}
-		
+
 		private String getLogicalScanOrSelectRef(LogicalOperator op) {
 			String ref;
 			if (op instanceof LogicalScanOperator) {
@@ -254,7 +274,7 @@ public class JoinOrderOptimizer {
 			}
 			int leftRelationSize = leftRelations.relationSize;
 			int relationSize = leftRelationSize * rightRelationSize; //cross product relation size
-			
+
 			if (joinCondition != null) {//if there is join condition
 				//use UF to get all unions of table attributes joined on equality in the join condition.
 				//compute denominators on these unions (max of all v-values of union attributes).

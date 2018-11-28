@@ -76,7 +76,6 @@ public class PhysicalPlanBuilder {
 	public void visit(LogicalSortOperator op) {
 		//create logical plan
 		try {
-			//			System.out.println(String.join("", Collections.nCopies(counter, DASH)));
 			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
 					+ "Sort"+"["+String.join(", ", op.getCols())+"]\n");
 
@@ -134,9 +133,6 @@ public class PhysicalPlanBuilder {
 	private SMJoinOperator createSMJ(Operator left, Operator right, Expression cond) {
 		EquiConjunctVisitor equiVisit = new EquiConjunctVisitor(left, right);
 		cond.accept(equiVisit);
-		System.out.println(cond);
-		System.out.println(equiVisit.getLeftCompareCols());
-		System.out.println(equiVisit.getRightCompareCols());
 
 		Object[] sortLeftObj = equiVisit.getLeftCompareCols().toArray();
 		Object[] sortRightObj = equiVisit.getRightCompareCols().toArray();
@@ -238,7 +234,7 @@ public class PhysicalPlanBuilder {
 		//use parse conjunct visitor to build left deep join tree
 		assert physOptOrder.size() > 1;
 		JoinOperator left;
-		tmp=counter; 
+//		tmp=counter; 
 //		optOrder.get(0).accept(this);
 //		counter=tmp;
 //		Operator firstLeft = operator;
@@ -379,6 +375,12 @@ public class PhysicalPlanBuilder {
 			//			op.getEx().accept(visitor);
 			ScanOperator indexScanOp;
 			try {
+				try {
+					logicalWriter.write(String.join("", Collections.nCopies(counter, DASH)) +
+							"Leaf["+op.getBaseTableName()+"]\n");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 				indexScanOp = new IndexScanOperator(tableName, scanChild.getAlias(),
 						DBCatalog.getIndexFileLoc(tableName, minIndex), minIndex, isMinClustered,
 						range[0], range[1]);
