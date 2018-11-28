@@ -48,7 +48,7 @@ public class DBSelectVisitor implements SelectVisitor {
 	private ParseConjunctExpVisitor parseConjunctExpVisitor;
 	private HashMap<String, HashSet<Expression>> selectMap;
 	private UnionFindVisitor unionFindVisitor;
-	
+
 	private HashMap<String, HashSet<Expression>> ufSelectMap;
 	public LogicalOperator getOperator() {
 		return operator;
@@ -125,10 +125,14 @@ public class DBSelectVisitor implements SelectVisitor {
 
 
 		HashSet<Expression> set = new HashSet<>();
+		HashMap<String, Expression> map = new HashMap<>();
 		// process unused normal select
 		if (ufSelectMap != null && ufSelectMap.size() > 0) {
 			if (ufSelectMap.containsKey(tableReference)) {
-				set.addAll(ufSelectMap.get(tableReference));
+				// set.addAll(ufSelectMap.get(tableReference));
+        for (Expression ex : ufSelectMap.get(tableReference)) {
+					map.put(ex.toString(), ex);
+				}
 			}
 		}
 
@@ -141,15 +145,18 @@ public class DBSelectVisitor implements SelectVisitor {
 				UnionElement uElement = uFind.find(col);
 				if (uElement.getEquality() != null) {
 					Expression eq = new EqualsTo(col, new LongValue(uElement.getEquality()));
-					set.add(eq);
+//					set.add(eq);
+					map.put(eq.toString(), eq);
 				}
 				if (uElement.getLower() != null) {
 					Expression geq = new GreaterThanEquals(col, new LongValue(uElement.getLower()));
-					set.add(geq);
+//					set.add(geq);
+					map.put(geq.toString(), geq);
 				}
 				if (uElement.getUpper() != null) {
 					Expression leq = new MinorThanEquals(col, new LongValue(uElement.getUpper()));
-					set.add(leq);
+//					set.add(leq);
+					map.put(leq.toString(), leq);
 				}
 				if (!allEqColSet.contains(col)) {
 					List<Column> attrsSameTable = uElement.getAttrByTable(tableReference);
@@ -160,15 +167,16 @@ public class DBSelectVisitor implements SelectVisitor {
 						ArrayList<Column> lst = new ArrayList<>(eqColSet);
 						for (int i=0; i<lst.size()-1; i++) { // not including the last one, generating n-1 equals
 							EqualsTo equalsTo = new EqualsTo(lst.get(i), lst.get(i+1));
-							set.add(equalsTo);
+//							set.add(equalsTo);
+							map.put(equalsTo.toString(), equalsTo);
 						}
 					}
 				}
 			}
 		}
 
-
-		Expression selectCondition = concatExp(set);
+		System.out.println(map.values());
+		Expression selectCondition = concatExp(map.values());
 		if (selectCondition != null) {
 			selectOp = new LogicalSelectOperator(scanOperator, selectCondition);
 		}

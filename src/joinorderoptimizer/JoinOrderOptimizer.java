@@ -210,7 +210,8 @@ public class JoinOrderOptimizer {
 //					System.out.println(rightRef);
 					Expression tempCondition = visitor.getJoinCondition(leftRef, rightRef); 
 					//gets the join exp of every left child with the right child
-					joinCondition = joinCondition == null ? tempCondition : new AndExpression(joinCondition, tempCondition);
+					if (tempCondition != null) 
+						joinCondition = joinCondition == null ? tempCondition : new AndExpression(joinCondition, tempCondition);
 					//AND them all together to get the final join condition
 				}
 			}
