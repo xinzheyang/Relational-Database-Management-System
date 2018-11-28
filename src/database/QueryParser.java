@@ -55,6 +55,8 @@ public class QueryParser {
 					logicalPlanWriter.close();
 					operator = physicalPlanBuilder.getOperator();
 				} catch (Exception e) {
+					System.err.println("Exception occurred during query plan building");
+					e.printStackTrace();
 					File file = new File(output + File.separator + "query" + localCount);
 					FileWriter fw = new FileWriter(file);
 					if (!file.exists()) {
