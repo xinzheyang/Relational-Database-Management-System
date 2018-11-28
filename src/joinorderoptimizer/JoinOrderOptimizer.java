@@ -233,7 +233,6 @@ public class JoinOrderOptimizer {
 		 */
 		public void computePlanCost() {
 			if (this.leftChildren.size() == 1) { //two-relation join plan, plan cost is 0
-				System.out.println("hi");
 				costMetric.planCost = 0;
 			}
 			else {

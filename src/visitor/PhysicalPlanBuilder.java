@@ -35,7 +35,7 @@ public class PhysicalPlanBuilder {
 
 	public PhysicalPlanBuilder(BufferedWriter logicalPlan, BufferedWriter physicalPlan) throws IOException {
 		logicalWriter = new BufferedWriter(new FileWriter("output" + File.separator + "query2" + "_logicalplan"));
-//		logicalWriter.write("fuck");
+		//		logicalWriter.write("fuck");
 		logicalWriter=logicalPlan;
 		physicalWriter=physicalPlan;
 	}
@@ -56,12 +56,12 @@ public class PhysicalPlanBuilder {
 			e.printStackTrace();
 		}
 		SortOperator sortOperator=new ExternalSortOperator(child, cols, 10); //hard code buffer size to 10
-//		if (DBCatalog.getSortMethod().equals("0")) {
-//			sortOperator = new InMemorySortOperator(child, cols);
-//		} else {
-//			assert DBCatalog.getSortMethod().equals("1");
-//			sortOperator = new ExternalSortOperator(child, cols, DBCatalog.getSortBufferSize());
-//		}
+		//		if (DBCatalog.getSortMethod().equals("0")) {
+		//			sortOperator = new InMemorySortOperator(child, cols);
+		//		} else {
+		//			assert DBCatalog.getSortMethod().equals("1");
+		//			sortOperator = new ExternalSortOperator(child, cols, DBCatalog.getSortBufferSize());
+		//		}
 
 		return sortOperator;
 	}
@@ -83,7 +83,7 @@ public class PhysicalPlanBuilder {
 	public void visit(LogicalSortOperator op) {
 		//create logical plan
 		try {
-//			System.out.println(String.join("", Collections.nCopies(counter, DASH)));
+			//			System.out.println(String.join("", Collections.nCopies(counter, DASH)));
 			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
 					+ "Sort"+"["+String.join(", ", op.getCols())+"]\n");
 			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
@@ -142,7 +142,10 @@ public class PhysicalPlanBuilder {
 		}
 		EquiConjunctVisitor equiVisit = new EquiConjunctVisitor(left, right);
 		cond.accept(equiVisit);
-		
+		System.out.println(cond);
+		System.out.println(equiVisit.getLeftCompareCols());
+		System.out.println(equiVisit.getRightCompareCols());
+
 		Object[] sortLeftObj = equiVisit.getLeftCompareCols().toArray();
 		Object[] sortRightObj = equiVisit.getRightCompareCols().toArray();
 		String[] sortOrderLeft = Arrays.copyOf(sortLeftObj, sortLeftObj.length, String[].class);
@@ -204,16 +207,16 @@ public class PhysicalPlanBuilder {
 		try {
 			String joinCond = op.getJoinCondition() == null ? "" : op.getJoinCondition().toString();
 			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+"Join"
-		+"["+joinCond+"]\n");
+					+"["+joinCond+"]\n");
 			for(UnionElement elt: op.getUnionElements()) {
 				logicalWriter.write("[["+String.join(", ", elt.getAttributeStrings())+"], equals "+
 						elt.getEquality()+", min "+elt.getLower()+", max "+elt.getUpper()+"]\n");
 			}
 			counter++;
 			beforeSelect=counter;
-//			for (LogicalOperator child : op.getJoinChildren()) {
-//				child.accept(this);
-//			}
+			//			for (LogicalOperator child : op.getJoinChildren()) {
+			//				child.accept(this);
+			//			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -242,6 +245,7 @@ public class PhysicalPlanBuilder {
 		left = createBestJoin(firstLeft, secondLeft, firstCond, checkEquity);
 
 		for (int i = 2; i < optOrder.size(); i++) {
+			CheckAllEquityExpVisitor checkEquityIn = new CheckAllEquityExpVisitor();
 			Expression condition = null;
 			LogicalOperator currRight = optOrder.get(i);
 			currRight.accept(this);
@@ -252,40 +256,40 @@ public class PhysicalPlanBuilder {
 					condition = condition == null ? tempCondition: new AndExpression(condition, tempCondition);
 			}
 			leftTableRefs.add(currRef);
-			left = createBestJoin(left, operator, condition, checkEquity);
+			left = createBestJoin(left, operator, condition, checkEquityIn);
 		}
-//		op.getLeftChild().accept(this);
-//		Operator left = operator;
-//		op.getRightChild().accept(this);
-//		Operator right = operator;
-//		JoinOperator joinOperator;
-//		if (DBCatalog.getJoinMethod().equals("0")) { // TNLJ
-//			joinOperator = new TNLJoinOperator(left, right, op.getJoinCondition());
-//		} else {
-//			if (DBCatalog.getJoinMethod().equals("1")) { // BNLJ
-//				int bufferSize = DBCatalog.getJoinBufferSize();
-//				joinOperator = new BNLJoinOperator(left, right, op.getJoinCondition(), bufferSize);
-//			} else if (DBCatalog.getJoinMethod().equals("2")) { // SMJ
-//				Expression smjCondition = op.getJoinCondition();
-//				EquiConjunctVisitor equiVisit = new EquiConjunctVisitor();
-//				/*
-//				 * by accepting, the visitor processes the join condition and extract left and
-//				 * right column names in the sorting order.
-//				 */
-//				smjCondition.accept(equiVisit);
-//				Object[] sortLeftObj = equiVisit.getLeftCompareCols().toArray();
-//				Object[] sortRightObj = equiVisit.getRightCompareCols().toArray();
-//
-//				String[] sortOrderLeft = Arrays.copyOf(sortLeftObj, sortLeftObj.length, String[].class);
-//				String[] sortOrderRight = Arrays.copyOf(sortRightObj, sortRightObj.length, String[].class);
-//				// push down left and right sort operator to sort relations before merging
-//				SortOperator leftSort = getSortOperator(left, sortOrderLeft);
-//				SortOperator rightSort = getSortOperator(right, sortOrderRight);
-//				joinOperator = new SMJoinOperator(leftSort, rightSort, smjCondition);
-//			} else { // invalid input, default to TNLJ
-//				joinOperator = new TNLJoinOperator(left, right, op.getJoinCondition());
-//			}
-//		}
+		//		op.getLeftChild().accept(this);
+		//		Operator left = operator;
+		//		op.getRightChild().accept(this);
+		//		Operator right = operator;
+		//		JoinOperator joinOperator;
+		//		if (DBCatalog.getJoinMethod().equals("0")) { // TNLJ
+		//			joinOperator = new TNLJoinOperator(left, right, op.getJoinCondition());
+		//		} else {
+		//			if (DBCatalog.getJoinMethod().equals("1")) { // BNLJ
+		//				int bufferSize = DBCatalog.getJoinBufferSize();
+		//				joinOperator = new BNLJoinOperator(left, right, op.getJoinCondition(), bufferSize);
+		//			} else if (DBCatalog.getJoinMethod().equals("2")) { // SMJ
+		//				Expression smjCondition = op.getJoinCondition();
+		//				EquiConjunctVisitor equiVisit = new EquiConjunctVisitor();
+		//				/*
+		//				 * by accepting, the visitor processes the join condition and extract left and
+		//				 * right column names in the sorting order.
+		//				 */
+		//				smjCondition.accept(equiVisit);
+		//				Object[] sortLeftObj = equiVisit.getLeftCompareCols().toArray();
+		//				Object[] sortRightObj = equiVisit.getRightCompareCols().toArray();
+		//
+		//				String[] sortOrderLeft = Arrays.copyOf(sortLeftObj, sortLeftObj.length, String[].class);
+		//				String[] sortOrderRight = Arrays.copyOf(sortRightObj, sortRightObj.length, String[].class);
+		//				// push down left and right sort operator to sort relations before merging
+		//				SortOperator leftSort = getSortOperator(left, sortOrderLeft);
+		//				SortOperator rightSort = getSortOperator(right, sortOrderRight);
+		//				joinOperator = new SMJoinOperator(leftSort, rightSort, smjCondition);
+		//			} else { // invalid input, default to TNLJ
+		//				joinOperator = new TNLJoinOperator(left, right, op.getJoinCondition());
+		//			}
+		//		}
 		operator = left;
 	}
 
@@ -321,37 +325,39 @@ public class PhysicalPlanBuilder {
 		int[] range = new int[2];
 		DivideSelectVisitor minVisitor=null;
 		List<String[]> infos = DBCatalog.getIndexInfo(tableName);
-		for(String[] info: infos) {
-			//compute the index scan cost for each possible index
-			String index= info[0];//A
-			visitor = new DivideSelectVisitor(index);
-			op.getEx().accept(visitor);
-			int[] bounds = DBCatalog.getAttribBounds(tableName).get(index);
-			int indexLow = Math.max(visitor.getLowKey(), bounds[0]);
-			int indexHigh = Math.min(visitor.getHighKey(), bounds[1]);
-//			int r = (indexHigh-indexLow+1)/(bounds[1]-bounds[0]+1); //the reduction factor
-			double r = op.getReductionFactor(index); //the reduction factor of this index
-			int l = DBCatalog.getNumOfLeaves(tableName+"."+index); //the number of leaves in the index
-			int costTraversal = DBCatalog.getTraversalCost(tableName+"."+index);
-			int cost;
-			if(info[1] == "0") { //unclustered
-				cost = (int)Math.ceil(costTraversal + l*r + t*r);
-			}
-			else {
-				cost = (int)Math.ceil(costTraversal + p*r);
-			}
-			if(cost < minIndexCost) {
-				minIndexCost = cost;
-				minIndex = index;
-				isMinClustered = Integer.parseInt(info[1]);
-				minVisitor = visitor;
-				range[0]=indexLow;
-				range[1]=indexHigh;
+		if (infos != null) {
+			for(String[] info: infos) {
+				//compute the index scan cost for each possible index
+				String index= info[0];//A
+				visitor = new DivideSelectVisitor(index);
+				op.getEx().accept(visitor);
+				int[] bounds = DBCatalog.getAttribBounds(tableName).get(index);
+				int indexLow = Math.max(visitor.getLowKey(), bounds[0]);
+				int indexHigh = Math.min(visitor.getHighKey(), bounds[1]);
+				//			int r = (indexHigh-indexLow+1)/(bounds[1]-bounds[0]+1); //the reduction factor
+				double r = op.getReductionFactor(index); //the reduction factor of this index
+				int l = DBCatalog.getNumOfLeaves(tableName+"."+index); //the number of leaves in the index
+				int costTraversal = DBCatalog.getTraversalCost(tableName+"."+index);
+				int cost;
+				if(info[1] == "0") { //unclustered
+					cost = (int)Math.ceil(costTraversal + l*r + t*r);
+				}
+				else {
+					cost = (int)Math.ceil(costTraversal + p*r);
+				}
+				if(cost < minIndexCost) {
+					minIndexCost = cost;
+					minIndex = index;
+					isMinClustered = Integer.parseInt(info[1]);
+					minVisitor = visitor;
+					range[0]=indexLow;
+					range[1]=indexHigh;
+				}
 			}
 		}
 		if(minIndex != null && minIndexCost<p) {
-//			visitor = new DivideSelectVisitor(minIndex);
-//			op.getEx().accept(visitor);
+			//			visitor = new DivideSelectVisitor(minIndex);
+			//			op.getEx().accept(visitor);
 			try {
 
 				physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
@@ -362,8 +368,8 @@ public class PhysicalPlanBuilder {
 			ScanOperator indexScanOp;
 			try {
 				indexScanOp = new IndexScanOperator(tableName, scanChild.getAlias(),
-				DBCatalog.getIndexFileLoc(tableName, minIndex), minIndex, isMinClustered,
-				range[0], range[1]);
+						DBCatalog.getIndexFileLoc(tableName, minIndex), minIndex, isMinClustered,
+						range[0], range[1]);
 				if (minVisitor.getNormalSelect() == null) {
 					operator = indexScanOp;
 				} else {
@@ -390,34 +396,34 @@ public class PhysicalPlanBuilder {
 			operator = selectOperator;
 		}
 
-//		if (DBCatalog.useIndex()) {
-//			visitor = new DivideSelectVisitor(DBCatalog.getIndexKey(tableName));
-//			op.getEx().accept(visitor);
-//		}
-//
-//		if (child instanceof LogicalScanOperator && DBCatalog.useIndex() && visitor != null
-//				&& visitor.needIndexScan()) {
-//			try {
-//				ScanOperator indexScanOp = new IndexScanOperator(tableName, scanChild.getAlias(),
-//						DBCatalog.getIndexFileLoc(tableName), DBCatalog.getIndexKey(tableName),
-//						DBCatalog.hasClusteredIndex(tableName), visitor.getLowKey(), visitor.getHighKey());
-//
-//				if (visitor.getNormalSelect() == null) {
-//					operator = indexScanOp;
-//				} else {
-//					SelectOperator selectOperator = new SelectOperator(indexScanOp, visitor.getNormalSelect());
-//					operator = selectOperator;
-//				}
-//			} catch (FileNotFoundException e) {
-//				System.err.println("error occurred during construcuting IndexScanOp");
-//				e.printStackTrace();
-//			}
-//
-//		} else {
-//			child.accept(this);
-//			SelectOperator selectOperator = new SelectOperator(operator, op.getEx());
-//			operator = selectOperator;
-//		}
+		//		if (DBCatalog.useIndex()) {
+		//			visitor = new DivideSelectVisitor(DBCatalog.getIndexKey(tableName));
+		//			op.getEx().accept(visitor);
+		//		}
+		//
+		//		if (child instanceof LogicalScanOperator && DBCatalog.useIndex() && visitor != null
+		//				&& visitor.needIndexScan()) {
+		//			try {
+		//				ScanOperator indexScanOp = new IndexScanOperator(tableName, scanChild.getAlias(),
+		//						DBCatalog.getIndexFileLoc(tableName), DBCatalog.getIndexKey(tableName),
+		//						DBCatalog.hasClusteredIndex(tableName), visitor.getLowKey(), visitor.getHighKey());
+		//
+		//				if (visitor.getNormalSelect() == null) {
+		//					operator = indexScanOp;
+		//				} else {
+		//					SelectOperator selectOperator = new SelectOperator(indexScanOp, visitor.getNormalSelect());
+		//					operator = selectOperator;
+		//				}
+		//			} catch (FileNotFoundException e) {
+		//				System.err.println("error occurred during construcuting IndexScanOp");
+		//				e.printStackTrace();
+		//			}
+		//
+		//		} else {
+		//			child.accept(this);
+		//			SelectOperator selectOperator = new SelectOperator(operator, op.getEx());
+		//			operator = selectOperator;
+		//		}
 	}
 
 	public void visit(LogicalScanOperator op) {

@@ -172,8 +172,6 @@ public class DBSelectVisitor implements SelectVisitor {
 				}
 			}
 		}
-
-		System.out.println(map.values());
 		Expression selectCondition = concatExp(map.values());
 		if (selectCondition != null) {
 			selectOp = new LogicalSelectOperator(scanOperator, selectCondition);

@@ -111,7 +111,6 @@ public class CheckAllEquityExpVisitor implements ExpressionVisitor{
 
 	@Override
 	public void visit(AndExpression andExpression) {
-		System.out.println(andExpression);
 		numAnds++;
 		andExpression.getLeftExpression().accept(this);
 		andExpression.getRightExpression().accept(this);

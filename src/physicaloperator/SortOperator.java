@@ -25,6 +25,7 @@ public abstract class SortOperator extends Operator {
 	protected List<Integer> colIndexes=new ArrayList<>();
 	protected int index;
 	Comparator<Tuple> com;
+	private String[] sortedByCols;
 	
 	/**
 	 * Initializes the sort operator
@@ -33,6 +34,7 @@ public abstract class SortOperator extends Operator {
 	 */
 	public SortOperator(Operator op, String[] cols) {
 		childOp=op;
+		sortedByCols = cols;
 		columnIndexMap = new HashMap<String, Integer>(childOp.getColumnIndexMap()); //same col index map as child operator
 		for(int i=0;i<cols.length;i++) {
 			colIndexes.add(columnIndexMap.get(cols[i]));
@@ -47,6 +49,13 @@ public abstract class SortOperator extends Operator {
 	
 	public Operator getChildOp() {
 		return childOp;
+	}
+	
+	/** Gets the column order that this sort operator is sorted by.
+	 * @return
+	 */
+	public String[] getSortedByCols() {
+		return sortedByCols;
 	}
 	
 }

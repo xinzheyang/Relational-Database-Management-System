@@ -88,7 +88,8 @@ public class RandomGenerator {
 	 */
 	public static void main(String[] args) {
 		RandomGenerator randomGenerator = new RandomGenerator("random");
-		randomGenerator.generate("Boats", 1000, 3, 0, 1000, 1);
+//		randomGenerator.generate("Boats", 1000, 3, 0, 1000, 1);
+		randomGenerator.generate("Reserves", 10000, 2, 1, 10000, 1);
 
 	}
 
