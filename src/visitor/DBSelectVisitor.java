@@ -134,32 +134,35 @@ public class DBSelectVisitor implements SelectVisitor {
 		// process union-find
 		List<Column> cols = unionFindVisitor.getEqJoinAttrByReference(tableReference); // the attributes of this table
 		HashSet<Column> sameTableColSet = new HashSet<>();
-		for (Column col : cols) {
-			UnionElement uElement = uFind.find(col);
-			if (uElement.getEquality() != null) {
-				Expression eq = new EqualsTo(col, new LongValue(uElement.getEquality()));
-				set.add(eq);
-			}
-			if (uElement.getLower() != null) {
-				Expression geq = new GreaterThanEquals(col, new LongValue(uElement.getLower()));
-				set.add(geq);
-			}
-			if (uElement.getUpper() != null) {
-				Expression leq = new MinorThanEquals(col, new LongValue(uElement.getUpper()));
-				set.add(leq);
-			}
-			if (!sameTableColSet.contains(col)) {
-				List<Column> attrsSameTable = uElement.getAttrByTable(tableReference);
-				sameTableColSet.addAll(attrsSameTable);
-				Expression sameTableEq = col;
-				for (Column column : attrsSameTable) {
-					if (!column.getWholeColumnName().equals(col.getWholeColumnName())) {
-						sameTableEq = new AndExpression(column, sameTableEq);
-					}
+		if (cols != null) {
+			for (Column col : cols) {
+				UnionElement uElement = uFind.find(col);
+				if (uElement.getEquality() != null) {
+					Expression eq = new EqualsTo(col, new LongValue(uElement.getEquality()));
+					set.add(eq);
 				}
-				set.add(sameTableEq);
+				if (uElement.getLower() != null) {
+					Expression geq = new GreaterThanEquals(col, new LongValue(uElement.getLower()));
+					set.add(geq);
+				}
+				if (uElement.getUpper() != null) {
+					Expression leq = new MinorThanEquals(col, new LongValue(uElement.getUpper()));
+					set.add(leq);
+				}
+				if (!sameTableColSet.contains(col)) {
+					List<Column> attrsSameTable = uElement.getAttrByTable(tableReference);
+					sameTableColSet.addAll(attrsSameTable);
+					Expression sameTableEq = col;
+					for (Column column : attrsSameTable) {
+						if (!column.getWholeColumnName().equals(col.getWholeColumnName())) {
+							sameTableEq = new AndExpression(column, sameTableEq);
+						}
+					}
+					set.add(sameTableEq);
+				}
 			}
 		}
+		
 		
 		Expression selectCondition = concatExp(set);
 		if (selectCondition != null) {
