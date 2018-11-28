@@ -83,7 +83,7 @@ public class JoinOrderOptimizer {
 				//relation sizes of children
 				int child1Size = (child1 instanceof LogicalScanOperator) ? ((LogicalScanOperator) child1).getRelationSize() 
 						: ((LogicalSelectOperator) child1).getRelationSize();
-				int child2Size = (child1 instanceof LogicalScanOperator) ? ((LogicalScanOperator) child2).getRelationSize() 
+				int child2Size = (child2 instanceof LogicalScanOperator) ? ((LogicalScanOperator) child2).getRelationSize() 
 						: ((LogicalSelectOperator) child2).getRelationSize();
 				//set the relation with smaller size to be the left / outer relation of the join
 
