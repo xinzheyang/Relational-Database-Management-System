@@ -22,6 +22,7 @@ public class SMJoinOperator extends JoinOperator {
 	private Tuple tLeft; //initialized to first tuple in left relation
 	private Tuple tRight; //initialized to first tuple in right relation
 	private Tuple startOfCurrPartition; //start of current partition, initialized to first tuple in right relation
+	private boolean isNull; //next tuple is null
 
 	public SMJoinOperator(Operator left, Operator right, Expression condition) {
 		super(left, right, condition);
@@ -32,6 +33,7 @@ public class SMJoinOperator extends JoinOperator {
 		tLeft = leftChild.getNextTuple();
 		tRight = rightChild.getNextTuple();
 		startOfCurrPartition = tRight;
+		isNull = false;
 	}
 
 //	public SMJoinOperator(Operator left, Operator right) {
@@ -70,6 +72,7 @@ public class SMJoinOperator extends JoinOperator {
 	 */
 	@Override
 	public Tuple getNextTuple() {
+		if (isNull) return null;
 
 		if (tLeft != null && tRight == null) {
 			rightChild.reset(jumpBackToPartition);
@@ -122,6 +125,9 @@ public class SMJoinOperator extends JoinOperator {
 				startOfCurrPartition = rightChild.getNextTuple();
 				jumpBackToPartition++;
 			}
+//			if (startOfCurrPartition == null) { //go back one step
+//				jumpBackToPartition--;
+//			}
 			tRight = startOfCurrPartition;
 			while(tLeft != null && startOfCurrPartition != null && compareByCondition(tLeft, startOfCurrPartition) == 0) {
 				rightChild.reset(jumpBackToPartition);
@@ -136,6 +142,7 @@ public class SMJoinOperator extends JoinOperator {
 				tLeft = leftChild.getNextTuple();
 			}
 		}
+		isNull = true;
 
 		return null;
 	}
@@ -149,6 +156,8 @@ public class SMJoinOperator extends JoinOperator {
 		tLeft = leftChild.getNextTuple();
 		tRight = rightChild.getNextTuple();
 		startOfCurrPartition = tRight;
+		jumpBackToPartition = 0;
+		currRightPosition = 0;
 	}
 	
 	public void accept(PhysicalPlanWriter write) {

@@ -76,7 +76,6 @@ public class PhysicalPlanBuilder {
 	public void visit(LogicalSortOperator op) {
 		//create logical plan
 		try {
-			//			System.out.println(String.join("", Collections.nCopies(counter, DASH)));
 			logicalWriter.write(String.join("", Collections.nCopies(counter, DASH))
 					+ "Sort"+"["+String.join(", ", op.getCols())+"]\n");
 
@@ -134,9 +133,6 @@ public class PhysicalPlanBuilder {
 	private SMJoinOperator createSMJ(Operator left, Operator right, Expression cond) {
 		EquiConjunctVisitor equiVisit = new EquiConjunctVisitor(left, right);
 		cond.accept(equiVisit);
-		System.out.println(cond);
-		System.out.println(equiVisit.getLeftCompareCols());
-		System.out.println(equiVisit.getRightCompareCols());
 
 		Object[] sortLeftObj = equiVisit.getLeftCompareCols().toArray();
 		Object[] sortRightObj = equiVisit.getRightCompareCols().toArray();

@@ -65,6 +65,7 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 
 	private Stack<String> tbStack; //stack keeping record of tables last involved
 	private HashMap<List<String>, Expression> joinMap; //mapping tables referenced --> Join Condition (concat tgt)
+	private HashMap<List<String>, HashSet<Expression>> joinSetMap; //mapping tables referenced --> Join Condition (concat tgt)
 	private HashMap<String, HashSet<Expression>> selectMap; //mapping tables referenced --> Select Condition (not concat tgt)
 	private boolean alwaysFalse; //checker for a false constant boolean conjunct in the where clause - if one of the
 	//conjunct is false, the where clause is always false
@@ -74,6 +75,7 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 		tbStack = new Stack<String>();
 		joinMap = new HashMap<List<String>, Expression>();
 		selectMap = new HashMap<String, HashSet<Expression>>();
+		joinSetMap = new HashMap<List<String>, HashSet<Expression>>();
 		allEqualityJoins = true;
 	}
 
@@ -104,6 +106,14 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 		key.add(tb2);
 		Collections.sort(key);
 		return joinMap.get(key);
+	}
+	
+	public HashSet<Expression> getJoinConditionSet(String tb1, String tb2) {
+		List<String> key = new ArrayList<String>();
+		key.add(tb1);
+		key.add(tb2);
+		Collections.sort(key);
+		return joinSetMap.get(key);
 	}
 
 	/**Hashes into the the selectMap with tableNames passed in as the key.
@@ -154,10 +164,14 @@ public class ParseConjunctExpVisitor implements ExpressionVisitor {
 			Collections.sort(key);
 			if (!joinMap.containsKey(key)) {
 				joinMap.put(key, op);
+				HashSet<Expression> exSet = new HashSet<Expression>();
+				exSet.add(op);
+				joinSetMap.put(key, exSet);
 			}
 			else {
 				Expression newExp = new AndExpression(joinMap.get(key), op);
 				joinMap.put(key, newExp);
+				joinSetMap.get(key).add(op);
 			}
 		}
 		else if (!tb1.isEmpty() || !tb2.isEmpty()) { //Select Condition, stack had one table

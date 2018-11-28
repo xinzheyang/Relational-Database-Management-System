@@ -106,7 +106,6 @@ public class PhysicalPlanWriter {
 			e.printStackTrace();
 		}
 		int tmp=counter;
-		System.out.println("SMJ before left" + counter);
 		op.getLeftChild().accept(this);
 		counter=tmp;
 		op.getRightChild().accept(this);
@@ -123,7 +122,6 @@ public class PhysicalPlanWriter {
 			e.printStackTrace();
 		}
 		int tmp=counter;
-		System.out.println(op.getLeftChild().toString());
 		op.getLeftChild().accept(this);
 		counter=tmp;
 		op.getRightChild().accept(this);
