@@ -70,7 +70,7 @@ public class QueryParser {
 					DBCatalog.resetTempDir();
 					continue;
 				}
-				DBCatalog.resetTempDir();
+//				DBCatalog.resetTempDir();
 				try {
 					if (operator == null) {
 						File file = new File(output + File.separator + "query" + localCount);
