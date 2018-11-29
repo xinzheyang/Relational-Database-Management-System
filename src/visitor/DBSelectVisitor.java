@@ -2,6 +2,7 @@
  *
  */
 package visitor;
+
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -31,10 +32,9 @@ import datastructure.UnionFind;
 import logicaloperator.*;
 
 /**
- * @author xinzheyang
- * An important visitor that builds the query plan for the database.
- * It uses JSqlParser to extract all the elements and then builds the
- * query plan in a bottom-up manner.
+ * @author xinzheyang An important visitor that builds the query plan for the
+ *         database. It uses JSqlParser to extract all the elements and then
+ *         builds the query plan in a bottom-up manner.
  */
 public class DBSelectVisitor implements SelectVisitor {
 	private LogicalOperator operator = null;
@@ -50,6 +50,7 @@ public class DBSelectVisitor implements SelectVisitor {
 	private UnionFindVisitor unionFindVisitor;
 
 	private HashMap<String, HashSet<Expression>> ufSelectMap;
+
 	public LogicalOperator getOperator() {
 		return operator;
 	}
@@ -57,7 +58,6 @@ public class DBSelectVisitor implements SelectVisitor {
 	public void setOperator(LogicalOperator operator) {
 		this.operator = operator;
 	}
-
 
 	private Expression concatExp(Collection<Expression> expressions) {
 		if (expressions == null || expressions.isEmpty()) {
@@ -73,6 +73,7 @@ public class DBSelectVisitor implements SelectVisitor {
 			return temp;
 		}
 	}
+
 	/**
 	 * @param fromItem
 	 * @return an scanOperator that builds from an FromItem
@@ -103,10 +104,10 @@ public class DBSelectVisitor implements SelectVisitor {
 		return selectOp;
 	}
 
-
 	/**
 	 * @param fromItem
-	 * @return builds a selectOperator from FromItem if possible, otherwise a scanOperator
+	 * @return builds a selectOperator from FromItem if possible, otherwise a
+	 *         scanOperator
 	 */
 	private LogicalOperator buildScanSelectFromItem(FromItem fromItem) {
 		LogicalScanOperator scanOperator = buildScanFromItem(fromItem);
@@ -118,18 +119,21 @@ public class DBSelectVisitor implements SelectVisitor {
 		}
 	}
 
+	/**
+	 * @param scanOperator
+	 * @return an selectOperator that builds from a scanOperator using Union-Find
+	 *         algorithm
+	 */
 	private LogicalSelectOperator ufBuildSelectFromScan(LogicalScanOperator scanOperator) {
 		UnionFind uFind = unionFindVisitor.getUnionFind();
 		LogicalSelectOperator selectOp = null;
 		String tableReference = scanOperator.getAlias() != null ? scanOperator.getAlias() : scanOperator.getTableName();
 
-
 		HashMap<String, Expression> map = new HashMap<>();
 		// process unused normal select
 		if (ufSelectMap != null && ufSelectMap.size() > 0) {
 			if (ufSelectMap.containsKey(tableReference)) {
-				// set.addAll(ufSelectMap.get(tableReference));
-        for (Expression ex : ufSelectMap.get(tableReference)) {
+				for (Expression ex : ufSelectMap.get(tableReference)) {
 					map.put(ex.toString(), ex);
 				}
 			}
@@ -144,17 +148,14 @@ public class DBSelectVisitor implements SelectVisitor {
 				UnionElement uElement = uFind.find(col);
 				if (uElement.getEquality() != null) {
 					Expression eq = new EqualsTo(col, new LongValue(uElement.getEquality()));
-//					set.add(eq);
 					map.put(eq.toString(), eq);
 				}
 				if (uElement.getLower() != null) {
 					Expression geq = new GreaterThanEquals(col, new LongValue(uElement.getLower()));
-//					set.add(geq);
 					map.put(geq.toString(), geq);
 				}
 				if (uElement.getUpper() != null) {
 					Expression leq = new MinorThanEquals(col, new LongValue(uElement.getUpper()));
-//					set.add(leq);
 					map.put(leq.toString(), leq);
 				}
 				if (!allEqColSet.contains(col)) {
@@ -164,9 +165,8 @@ public class DBSelectVisitor implements SelectVisitor {
 
 					if (eqColSet.size() > 1) {
 						ArrayList<Column> lst = new ArrayList<>(eqColSet);
-						for (int i=0; i<lst.size()-1; i++) { // not including the last one, generating n-1 equals
-							EqualsTo equalsTo = new EqualsTo(lst.get(i), lst.get(i+1));
-//							set.add(equalsTo);
+						for (int i = 0; i < lst.size() - 1; i++) { // not including the last one, generating n-1 equals
+							EqualsTo equalsTo = new EqualsTo(lst.get(i), lst.get(i + 1));
 							map.put(equalsTo.toString(), equalsTo);
 						}
 					}
@@ -180,10 +180,10 @@ public class DBSelectVisitor implements SelectVisitor {
 		return selectOp;
 	}
 
-
 	/**
 	 * @param fromItem
-	 * @return builds a selectOperator from FromItem if possible, otherwise a scanOperator
+	 * @return builds a selectOperator from FromItem if possible, otherwise a
+	 *         scanOperator using Union-Find algorithm
 	 */
 	private LogicalOperator ufBuildScanSelectFromItem(FromItem fromItem) {
 		LogicalScanOperator scanOperator = buildScanFromItem(fromItem);
@@ -194,14 +194,16 @@ public class DBSelectVisitor implements SelectVisitor {
 			return selectOperator;
 		}
 	}
+
 	/**
 	 * @param orderByElements
-	 * @return a sortOperator built from a list of OrderByElements, which follows the query plan structure
+	 * @return a sortOperator built from a list of OrderByElements, which follows
+	 *         the query plan structure
 	 */
 	private LogicalSortOperator buildSort(List<OrderByElement> orderByElements) {
 		LogicalSortOperator sortOperator = null;
 		String[] cols = new String[orderByElements.size()];
-		for (int i=0; i<orderByElements.size(); i++) {
+		for (int i = 0; i < orderByElements.size(); i++) {
 			cols[i] = orderByElements.get(i).toString();
 		}
 		if (projectOperator != null) {
@@ -216,10 +218,10 @@ public class DBSelectVisitor implements SelectVisitor {
 		return sortOperator;
 	}
 
-
-	/* (non-Javadoc)
-	 * This is the visit method that overrides SelectVisitor for PlainSelect type
-	 * It basically parses all the SQL elements and builds the query from bottom up
+	/*
+	 * (non-Javadoc) This is the visit method that overrides SelectVisitor for
+	 * PlainSelect type It basically parses all the SQL elements and builds the
+	 * query from bottom up
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -231,27 +233,26 @@ public class DBSelectVisitor implements SelectVisitor {
 		List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
 		Expression expression = plainSelect.getWhere();
 
-
 		if (expression != null) {
 			parseConjunctExpVisitor = new ParseConjunctExpVisitor();
 			expression.accept(parseConjunctExpVisitor);
-			if (parseConjunctExpVisitor.isAlwaysFalse()) { //there exists at least one constant conjunction
-				//that always evaluates to false, and we know select or join wouldn't output any tuples
-				return; //simply return -> null on this.operator
+			if (parseConjunctExpVisitor.isAlwaysFalse()) { // there exists at least one constant conjunction
+				// that always evaluates to false, and we know select or join wouldn't output
+				// any tuples
+				return; // simply return -> null on this.operator
 			}
-			// SELECT * FROM A WHERE A.sid  A:A.sid = 1
+			// SELECT * FROM A WHERE A.sid A:A.sid = 1
 			selectMap = parseConjunctExpVisitor.getSelectMap();
 		}
-
 
 		scanOperator = buildScanFromItem(fromItem);
 
 		selectOperator = buildSelectFromScan(scanOperator);
 
-
 		if (joins != null && joins.size() > 0) {
 			ArrayList<LogicalOperator> joinChildren = new ArrayList<>();
 			if (expression != null) {
+				// using UF
 				unionFindVisitor = new UnionFindVisitor();
 				expression.accept(unionFindVisitor);
 				ParseConjunctExpVisitor ufParseConjunctExpVisitor = new ParseConjunctExpVisitor();
@@ -262,17 +263,19 @@ public class DBSelectVisitor implements SelectVisitor {
 				LogicalOperator initOp = ufBuildScanSelectFromItem(fromItem);
 				joinChildren.add(initOp);
 
-				for (int i=0; i<joins.size(); i++) {
+				for (int i = 0; i < joins.size(); i++) {
 					FromItem rightItem = joins.get(i).getRightItem();
 					LogicalOperator newScanSelect = ufBuildScanSelectFromItem(rightItem);
 					joinChildren.add(newScanSelect);
 				}
 				UnionFind uFind = unionFindVisitor.getUnionFind();
-				joinOperator = new LogicalJoinOperator(joinChildren, unionFindVisitor.getNormalJoin(), uFind.getRootElementMap(), parseConjunctExpVisitor);
+				joinOperator = new LogicalJoinOperator(joinChildren, unionFindVisitor.getNormalJoin(),
+						uFind.getRootElementMap(), parseConjunctExpVisitor);
 			} else {
+				// normal join not using UF
 				LogicalOperator initOp = selectOperator == null ? scanOperator : selectOperator;
 				joinChildren.add(initOp);
-				for (int i=0; i<joins.size(); i++) {
+				for (int i = 0; i < joins.size(); i++) {
 					FromItem rightItem = joins.get(i).getRightItem();
 					LogicalOperator newScanSelect = buildScanSelectFromItem(rightItem);
 					joinChildren.add(newScanSelect);
@@ -280,33 +283,13 @@ public class DBSelectVisitor implements SelectVisitor {
 				joinOperator = new LogicalJoinOperator(joinChildren, expression, null, parseConjunctExpVisitor);
 			}
 
-
-//			if (joinOperator!= null) {
-//				System.out.println(joinOperator.getJoinChildren());
-//				for (LogicalOperator i : joinOperator.getJoinChildren()) {
-//					if (i instanceof LogicalSelectOperator) {
-//						LogicalSelectOperator sel = (LogicalSelectOperator) i;
-//						System.out.println(sel.getEx());
-//					} else {
-//						LogicalScanOperator scan = (LogicalScanOperator) i;
-//						System.out.println("scan");
-//					}
-//				}
-//				System.out.println(joinOperator.getJoinCondition());
-//				System.out.println(joinOperator.getUnionElements());
-//				for (UnionElement unionElement :joinOperator.getUnionElements() ) {
-//					System.err.println("upper:"+unionElement.getUpper());
-//				}
-//			}
-
 		}
-
 
 		// Projection
 		if (selectItems != null && selectItems.size() > 0) {
 			String[] cols = new String[selectItems.size()];
 			if (!(selectItems.size() == 1 && selectItems.get(0) instanceof AllColumns)) {
-				for (int i=0; i<selectItems.size(); i++) {
+				for (int i = 0; i < selectItems.size(); i++) {
 					SelectExpressionItem selectItem = (SelectExpressionItem) selectItems.get(i);
 					cols[i] = selectItem.getExpression().toString();
 				}
@@ -320,7 +303,6 @@ public class DBSelectVisitor implements SelectVisitor {
 			}
 
 		}
-
 
 		if (orderByElements != null && orderByElements.size() > 0) {
 			sortOperator = buildSort(orderByElements);

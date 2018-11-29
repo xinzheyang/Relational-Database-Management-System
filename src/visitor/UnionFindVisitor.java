@@ -52,8 +52,8 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 /**
- * @author xinzheyang
- *
+ * @author xinzheyang this visitor applies the Union-Find algorithm to the
+ *         expression by inheriting the ExpressionVisitor
  */
 public class UnionFindVisitor implements ExpressionVisitor {
 
@@ -69,16 +69,20 @@ public class UnionFindVisitor implements ExpressionVisitor {
 	 */
 	private HashMap<String, List<Column>> eqJoinAttrMap;
 
-	private HashMap<String, List<Column>> attrMap;
 	/**
-	 * 
+	 * table reference -> list of attributes of the table that exist in the union
+	 * find object
+	 */
+	private HashMap<String, List<Column>> attrMap;
+
+	/**
+	 * default constructor of the visitor
 	 */
 	public UnionFindVisitor() {
 		unionFind = new UnionFind();
 		eqJoinAttrMap = new HashMap<>();
 		attrMap = new HashMap<>();
 	}
-	
 
 	/**
 	 * @param table
@@ -92,8 +96,12 @@ public class UnionFindVisitor implements ExpressionVisitor {
 			return null;
 		}
 	}
-	
-	
+
+	/**
+	 * @param table
+	 *            the table reference
+	 * @return list of attributes of the table that exist in the union find object
+	 */
 	public List<Column> getAttrByReference(String table) {
 		if (attrMap != null) {
 			return attrMap.get(table);
@@ -109,22 +117,19 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		return unionFind;
 	}
 
-
 	/**
 	 * @return the normal select expression
 	 */
 	public Expression getNormalSelect() {
 		return normalSelect;
 	}
-	
-	
+
 	/**
-	 * @return the normalJoin
+	 * @return the normalJoin expression
 	 */
 	public Expression getNormalJoin() {
 		return normalJoin;
 	}
-
 
 	@Override
 	public void visit(NullValue nullValue) {
@@ -224,10 +229,11 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		throw new UnsupportedOperationException("not supported");
 	}
 
-	
 	/**
-	 * @param key the attribute that acts as an key in eqJoinAttrMap
-	 * @param val the attribute to be added in the value in eqJoinAttrMap
+	 * @param key
+	 *            the attribute that acts as an key in eqJoinAttrMap
+	 * @param val
+	 *            the attribute to be added in the value in eqJoinAttrMap
 	 */
 	private void updateEqJoinAttrMap(String key, Column val) {
 		if (eqJoinAttrMap.containsKey(key)) {
@@ -238,7 +244,7 @@ public class UnionFindVisitor implements ExpressionVisitor {
 			eqJoinAttrMap.put(key, newAttrs);
 		}
 	}
-	
+
 	private void updateAttrMap(String key, Column val) {
 		if (attrMap.containsKey(key)) {
 			attrMap.get(key).add(val);
@@ -248,6 +254,7 @@ public class UnionFindVisitor implements ExpressionVisitor {
 			attrMap.put(key, newAttrs);
 		}
 	}
+
 	private void updateUnused(Boolean isNormal, Expression toBeAcc) {
 		if (!isNormal) {
 			if (normalSelect == null)
@@ -261,7 +268,7 @@ public class UnionFindVisitor implements ExpressionVisitor {
 				normalJoin = new AndExpression(toBeAcc, normalJoin);
 		}
 	}
-	
+
 	@Override
 	public void visit(EqualsTo equalsTo) {
 		equalsTo.getLeftExpression().accept(this);
@@ -273,9 +280,9 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		Column rightCol = col;
 		boolean rightIsInt = isInt;
 
-		if (!leftIsInt && !rightIsInt) { //S.A = S.B
+		if (!leftIsInt && !rightIsInt) { // S.A = S.B
 			unionFind.unite(unionFind.find(leftCol), unionFind.find(rightCol));
-			
+
 			updateEqJoinAttrMap(leftCol.getTable().getName(), leftCol);
 			updateEqJoinAttrMap(rightCol.getTable().getName(), rightCol);
 			updateAttrMap(leftCol.getTable().getName(), leftCol);
@@ -310,7 +317,7 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		int rightValue = intValue;
 		Column rightCol = col;
 		boolean rightIsInt = isInt;
-		
+
 		if (!leftIsInt && !rightIsInt) { // normal Join
 			if (!leftCol.getTable().getWholeTableName().equals(rightCol.getTable().getWholeTableName())) {
 				updateUnused(true, greaterThan);
@@ -388,6 +395,12 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		throw new UnsupportedOperationException("not supported");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.
+	 * expression.operators.relational.MinorThan)
+	 */
 	@Override
 	public void visit(MinorThan minorThan) {
 		minorThan.getLeftExpression().accept(this);
@@ -470,7 +483,7 @@ public class UnionFindVisitor implements ExpressionVisitor {
 		notEqualsTo.getRightExpression().accept(this);
 		boolean rightIsInt = isInt;
 		Column rightCol = col;
-		
+
 		if (!leftIsInt && !rightIsInt) { // normal Join
 			if (!leftCol.getTable().getWholeTableName().equals(rightCol.getTable().getWholeTableName())) {
 				updateUnused(true, notEqualsTo);
