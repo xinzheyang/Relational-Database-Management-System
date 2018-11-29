@@ -17,6 +17,11 @@ Choosing Best Join Order
 Choosing implementation
 - We use a visitor visitor/CheckAllEquityExpVisitor.java to check if a join condition contains only equality joins. And we use SMJ for all joins with only equality joins, and BNLJ for all others where we can't apply SMJ.
 
+Other Notes:
+
+Our runnable jar file produces different results on different machines, we tried on two OS X machines and they produce very different query and logical/physical plan outputs. We couldn't figure out why but we suspect this to be a Java/Eclipse problem.
+
+
 ==================== Project 3 ====================
 
 The top-level class is Main.java in the database package

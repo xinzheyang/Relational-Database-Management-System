@@ -116,7 +116,9 @@ public class IndexScanOperator extends ScanOperator {
 		buffer.clear();
 		channel.read(buffer);
 		buffer.position(0);
-		assert buffer.getInt() == 0;
+		int nodeType = buffer.getInt();
+		assert nodeType == 0;
+//		assert buffer.getInt() == 0;
 		int numEntry = buffer.getInt();
 		int offset = 8;
 
