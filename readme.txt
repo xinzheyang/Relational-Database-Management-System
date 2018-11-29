@@ -6,7 +6,9 @@ Selection Pushing
 - The implementation can be found in the UnionFind.java and UnionElement.java in the datastructure package, and also the UnionFindVisitor.java in the visitor package.
 The logic of UnionFind is to use an array of indexes where each element represents the parent of the index. We maintain a HashMap that maps each attribute to an index, and a HashMap that maps a root index to a UnionElement object, which houses information of a union element, including all attributes, constraints and rootId.
 We then use a UnionFindVisitor that constructs the UnionFind object according the spec.
-In DBSelectVisitor, where we 
+In DBSelectVisitor, where we build logical query plans, we implemented a method that builds selectionOperator using union find, by utilizing the information passed by the UnionFindVisitor, such as UnionElements, unused Joins and unused Selects.
+
+
 ==================== Project 3 ====================
 
 The top-level class is Main.java in the database package
