@@ -91,7 +91,6 @@ public class SMJoinOperator extends JoinOperator {
 				Tuple merged = tLeft.merge(tRight);
 				tRight = rightChild.getNextTuple();
 				currRightPosition++;
-				System.out.println(merged);
 				return merged;
 			}
 		}
@@ -108,7 +107,6 @@ public class SMJoinOperator extends JoinOperator {
 					Tuple merged = tLeft.merge(tRight);
 					tRight = rightChild.getNextTuple();
 					currRightPosition++;
-					System.out.println(merged);
 					return merged;
 				}
 				tLeft = leftChild.getNextTuple();
@@ -139,7 +137,6 @@ public class SMJoinOperator extends JoinOperator {
 					Tuple merged = tLeft.merge(tRight);
 					tRight = rightChild.getNextTuple();
 					currRightPosition++;
-					System.out.println("merged");
 					return merged;
 				}
 				tLeft = leftChild.getNextTuple();
