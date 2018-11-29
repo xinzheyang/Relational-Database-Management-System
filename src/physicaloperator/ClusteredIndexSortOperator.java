@@ -84,7 +84,6 @@ public class ClusteredIndexSortOperator extends Operator {
 
 	@Override
 	public void accept(PhysicalPlanWriter write) {
-		// TODO Auto-generated method stub
 	}
 
 }
