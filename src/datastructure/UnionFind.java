@@ -113,20 +113,12 @@ public class UnionFind {
 		assert rootElementMap.containsKey(rid);
 		rootElementMap.get(rid).setEquality(eq);
 	}
-	
-//	public void setConstraint(UnionElement e, Integer lower, Integer upper, Integer eq) {
-//		e.setLower(lower);
-//		e.setUpper(upper);
-//		e.setEquality(eq);
-//	}
-//	
-	public void debug() {
+
+	private void debug() {
 		System.out.println("==========");
 		System.out.println(idArray);
 		System.out.println(idMap);
-		System.out.println(rootElementMap);;
-//		System.err.println(rootElementMap.get(1).getLower());
-//		System.err.println(rootElementMap.get(1).getEquality());
+		System.out.println(rootElementMap);
 		System.out.println("=========");
 	}
 	public static void main(String[] args) {
