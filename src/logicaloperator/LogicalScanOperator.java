@@ -68,6 +68,11 @@ public class LogicalScanOperator extends LogicalOperator {
 		return alias == null ? tb : alias;
 	}
 	
+	@Override
+	public String toString() {
+		return getReference();
+	}
+	
 	/** Gets the relation size, in tuples, of this base table by reading from db/stats.txt.
 	 * @return
 	 * @throws Exception 

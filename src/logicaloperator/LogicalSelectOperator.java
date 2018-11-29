@@ -119,5 +119,10 @@ public class LogicalSelectOperator extends LogicalOperator {
 	public void accept(PhysicalPlanBuilder pb) {
 		pb.visit(this);
 	}
+	
+	@Override
+	public String toString() {
+		return getReference();
+	}
 
 }

@@ -55,7 +55,7 @@ import physicaloperator.Operator;
  *
  */
 public class EquiConjunctVisitor implements ExpressionVisitor {
-	
+
 	private ArrayList<String> leftCompareCols; //column names of left relation to be compared in order
 	private ArrayList<Integer> leftCompareVals; //column values of left relation to be compared in order
 	private ArrayList<String> rightCompareCols;  //column names of right relation to be compared in order
@@ -66,7 +66,7 @@ public class EquiConjunctVisitor implements ExpressionVisitor {
 	private Operator leftOp; //left operator of the join
 	private Operator rightOp; //right operator of the join
 	private boolean isEval;
-	
+
 	public EquiConjunctVisitor(Tuple tupleLeft, Tuple tupleRight, Operator leftOp, Operator rightOp) {
 		leftCompareVals = new ArrayList<Integer>();
 		rightCompareVals = new ArrayList<Integer>();
@@ -76,7 +76,7 @@ public class EquiConjunctVisitor implements ExpressionVisitor {
 		this.rightOp = rightOp;
 		isEval = true;
 	}
-	
+
 	/** Constructs an equity conjunct visitor with no evaluation properties.
 	 * All the information we want are the left and right column names.
 	 */
@@ -91,23 +91,23 @@ public class EquiConjunctVisitor implements ExpressionVisitor {
 	public void setTupleLeft(Tuple tupleLeft) {
 		this.tupleLeft = tupleLeft;
 	}
-	
+
 	public void setTupleRight(Tuple tupleRight) {
 		this.tupleRight = tupleRight;
 	}
-	
+
 	public ArrayList<String> getLeftCompareCols() {
 		return leftCompareCols;
 	}
-	
+
 	public ArrayList<String> getRightCompareCols() {
 		return rightCompareCols;
 	}
-	
+
 	public ArrayList<Integer> getLeftCompareVals() {
 		return leftCompareVals;
 	}
-	
+
 	public ArrayList<Integer> getRightCompareVals() {
 		return rightCompareVals;
 	}
@@ -175,9 +175,9 @@ public class EquiConjunctVisitor implements ExpressionVisitor {
 	 */
 	@Override
 	public void visit(EqualsTo equalsTo) {
-//		isLeft = true;
+		//		isLeft = true;
 		equalsTo.getLeftExpression().accept(this);
-//		isLeft = false;
+		//		isLeft = false;
 		equalsTo.getRightExpression().accept(this);
 	}
 
@@ -214,7 +214,7 @@ public class EquiConjunctVisitor implements ExpressionVisitor {
 	public void visit(Column tableColumn) {
 		if (isEval) { //we need tuple value information, evaluate the column expression
 			EvaluateExpVisitor eval = new EvaluateExpVisitor();
-//			if (isLeft) {
+			//			if (isLeft) {
 			if (leftOp.getColumnIndexMap().containsKey(tableColumn.getWholeColumnName())) {
 				eval.setCurrTuple(tupleLeft);
 				eval.setOperator(leftOp);
@@ -229,15 +229,20 @@ public class EquiConjunctVisitor implements ExpressionVisitor {
 			}
 		}
 		else { //we just need the names of columns
-//			if (isLeft) {
+			//			if (isLeft) {
+			String attrib = tableColumn.getWholeColumnName();
 			if (leftOp.getColumnIndexMap().containsKey(tableColumn.getWholeColumnName())) {
-				leftCompareCols.add(tableColumn.getWholeColumnName());
+				if (!leftCompareCols.contains(attrib)) {//prevent duplicates
+					leftCompareCols.add(tableColumn.getWholeColumnName());
+				}
 			}
 			else {
-				rightCompareCols.add(tableColumn.getWholeColumnName());
+				if (!rightCompareCols.contains(attrib)) {
+					rightCompareCols.add(tableColumn.getWholeColumnName());
+				}
 			}
 		}
-		
+
 	}
 
 	@Override

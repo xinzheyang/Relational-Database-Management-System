@@ -234,7 +234,6 @@ public class JoinOrderOptimizer {
 					}
 				}
 			}
-			System.out.println(joinCondition);
 			
 		}
 
