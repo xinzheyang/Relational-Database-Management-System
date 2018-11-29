@@ -19,8 +19,9 @@ import net.sf.jsqlparser.schema.Column;
 public class CostMetric {
 	public int planCost;
 	public int relationSize;
-	public List<LogicalOperator> bestJoinOrder;
-	public HashMap<HashSet<Column>, Integer> vValueMap;
+	public List<LogicalOperator> bestJoinOrder; //best order of the cost metric
+	public HashMap<HashSet<Column>, Integer> vValueMap; //mapping v-values of a set of united columns to their shared v-value
+	//to be used for memoizing v-values of intermediate joins
 	
 	public CostMetric(int bestPlanCost, int relationSize, List<LogicalOperator> bestJoinOrder) {
 		this.planCost = bestPlanCost;

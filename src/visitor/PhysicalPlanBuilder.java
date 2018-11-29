@@ -33,15 +33,13 @@ import physicaloperator.*;
  *
  */
 public class PhysicalPlanBuilder {
-	private final String DASH="-";
+	private final String DASH="-"; //backtracking to add dashes in writing the logical plan
 	Operator operator;
 	BufferedWriter logicalWriter; //the BufferWriter to write the logical plan
 	int counter=0; //the counter to record the number of dashes
-	int tmp; //temporary plcaeholder to keep track of counter
+	int tmp; //temporary placeholder to keep track of counter
 	
 	public PhysicalPlanBuilder(BufferedWriter logicalPlan) throws IOException {
-		//		logicalWriter = new BufferedWriter(new FileWriter("output" + File.separator + "query2" + "_logicalplan"));
-		//		logicalWriter.write("fuck");
 		logicalWriter=logicalPlan;
 	}
 
@@ -56,13 +54,6 @@ public class PhysicalPlanBuilder {
 	 */
 	private SortOperator getSortOperator(Operator child, String[] cols) {
 		SortOperator sortOperator=new ExternalSortOperator(child, cols, 10); //hard code buffer size to 10
-		//		if (DBCatalog.getSortMethod().equals("0")) {
-		//			sortOperator = new InMemorySortOperator(child, cols);
-		//		} else {
-		//			assert DBCatalog.getSortMethod().equals("1");
-		//			sortOperator = new ExternalSortOperator(child, cols, DBCatalog.getSortBufferSize());
-		//		}
-
 		return sortOperator;
 	}
 
@@ -166,7 +157,6 @@ public class PhysicalPlanBuilder {
 	 * @return
 	 */
 	private BNLJoinOperator createBNLJ(Operator left, Operator right, Expression cond) {
-		String ex = cond == null ? "" : cond.toString();
 		return new BNLJoinOperator(left, right, cond, 10); //use 10 as join size
 	}
 
@@ -194,6 +184,12 @@ public class PhysicalPlanBuilder {
 		return op;
 	}
 	
+	/** Find the corresponding physical operator of a logical operator by matching their
+	 * operator references.
+	 * @param op
+	 * @param lst
+	 * @return
+	 */
 	private Operator findPhysOperator(LogicalOperator op, List<Operator> lst) {
 		String opRef = getLogicalScanOrSelectRef(op);
 		for (Operator phys : lst) {
@@ -203,6 +199,14 @@ public class PhysicalPlanBuilder {
 		return null; //not found
 	}
 	
+	/** Extracts the intermediate condition of a left and a right scan or select operator
+	 * by extracting all the conditions involving just the pair's references and concat all
+	 * conditions together.
+	 * @param leftRef
+	 * @param rightRef
+	 * @param op
+	 * @return
+	 */
 	private Expression getIntermediateCondition(String leftRef, String rightRef, LogicalJoinOperator op) {
 		Expression cond = null;
 		ParseConjunctExpVisitor visitor = op.getVisitor();
@@ -217,7 +221,7 @@ public class PhysicalPlanBuilder {
 				}
 			}
 		}
-		//then extracts the join condition for this join
+		//then extracts from the visitor any unusable conditions
 		if (visitor != null) {
 			HashSet<Expression> tempConditions = visitor.getJoinConditionSet(leftRef, rightRef); 
 			if (tempConditions != null) {
@@ -251,10 +255,7 @@ public class PhysicalPlanBuilder {
 						elt.getEquality()+", min "+elt.getLower()+", max "+elt.getUpper()+"]\n");
 			}
 			counter++;
-			//			beforeSelect=counter;
-			//			for (LogicalOperator child : op.getJoinChildren()) {
-			//				child.accept(this);
-			//			}
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -262,7 +263,6 @@ public class PhysicalPlanBuilder {
 
 		// refactor PPB to left deep join tree
 		JoinOrderOptimizer opt = new JoinOrderOptimizer(op, op.getVisitor());
-//		ParseConjunctExpVisitor visitor = op.getVisitor();
 		opt.dpChooseBestPlan();
 		List<LogicalOperator> optOrder = opt.getBestOrder(); //best join order
 		List<Operator> physChildren = new LinkedList<Operator>(); //physical children
@@ -278,16 +278,9 @@ public class PhysicalPlanBuilder {
 			physOptOrder.add(findPhysOperator(logChild, physChildren));
 		}
 		
-		//use parse conjunct visitor to build left deep join tree
+		//initialize the join by joining the first two tables together 
 		assert physOptOrder.size() > 1;
 		JoinOperator left;
-//		tmp=counter; 
-//		optOrder.get(0).accept(this);
-//		counter=tmp;
-//		Operator firstLeft = operator;
-//		optOrder.get(1).accept(this);
-//		counter=tmp;
-//		Operator secondLeft = operator;
 		Operator firstLeft = physOptOrder.get(0);
 		Operator secondLeft = physOptOrder.get(1);
 
@@ -297,59 +290,24 @@ public class PhysicalPlanBuilder {
 		
 		Expression firstCond = getIntermediateCondition(leftTableRefs.get(0), leftTableRefs.get(1), op);
 
-//		Expression firstCond = visitor == null ? null : visitor.getJoinCondition(leftTableRefs.get(0), leftTableRefs.get(1));
 		CheckAllEquityExpVisitor checkEquity = new CheckAllEquityExpVisitor();
 
 		left = createBestJoin(firstLeft, secondLeft, firstCond, checkEquity);
 
-		for (int i = 2; i < physOptOrder.size(); i++) {
+		for (int i = 2; i < physOptOrder.size(); i++) { //builds the left deep join tree in order
 			CheckAllEquityExpVisitor checkEquityIn = new CheckAllEquityExpVisitor();
 			Expression condition = null;
 			Operator currRight = physOptOrder.get(i);
-//			LogicalOperator currRight = optOrder.get(i);
-//			currRight.accept(this);
-//			counter=tmp;
 			String currRef = getScanOrSelectRef(currRight);
-			for (String leftRef: leftTableRefs) {
+			for (String leftRef: leftTableRefs) { //extracts the join condition for this intermediate join
 				Expression tempCondition = getIntermediateCondition(leftRef, currRef, op);
 				if (tempCondition != null)
 					condition = condition == null ? tempCondition: new AndExpression(condition, tempCondition);
 			}
 			leftTableRefs.add(currRef);
-			left = createBestJoin(left, currRight, condition, checkEquityIn);
+			left = createBestJoin(left, currRight, condition, checkEquityIn); //always create the optimal join
 		}
-		//		op.getLeftChild().accept(this);
-		//		Operator left = operator;
-		//		op.getRightChild().accept(this);
-		//		Operator right = operator;
-		//		JoinOperator joinOperator;
-		//		if (DBCatalog.getJoinMethod().equals("0")) { // TNLJ
-		//			joinOperator = new TNLJoinOperator(left, right, op.getJoinCondition());
-		//		} else {
-		//			if (DBCatalog.getJoinMethod().equals("1")) { // BNLJ
-		//				int bufferSize = DBCatalog.getJoinBufferSize();
-		//				joinOperator = new BNLJoinOperator(left, right, op.getJoinCondition(), bufferSize);
-		//			} else if (DBCatalog.getJoinMethod().equals("2")) { // SMJ
-		//				Expression smjCondition = op.getJoinCondition();
-		//				EquiConjunctVisitor equiVisit = new EquiConjunctVisitor();
-		//				/*
-		//				 * by accepting, the visitor processes the join condition and extract left and
-		//				 * right column names in the sorting order.
-		//				 */
-		//				smjCondition.accept(equiVisit);
-		//				Object[] sortLeftObj = equiVisit.getLeftCompareCols().toArray();
-		//				Object[] sortRightObj = equiVisit.getRightCompareCols().toArray();
-		//
-		//				String[] sortOrderLeft = Arrays.copyOf(sortLeftObj, sortLeftObj.length, String[].class);
-		//				String[] sortOrderRight = Arrays.copyOf(sortRightObj, sortRightObj.length, String[].class);
-		//				// push down left and right sort operator to sort relations before merging
-		//				SortOperator leftSort = getSortOperator(left, sortOrderLeft);
-		//				SortOperator rightSort = getSortOperator(right, sortOrderRight);
-		//				joinOperator = new SMJoinOperator(leftSort, rightSort, smjCondition);
-		//			} else { // invalid input, default to TNLJ
-		//				joinOperator = new TNLJoinOperator(left, right, op.getJoinCondition());
-		//			}
-		//		}
+		
 		operator = left;
 	}
 
@@ -398,7 +356,7 @@ public class PhysicalPlanBuilder {
 				int[] bounds = DBCatalog.getAttribBounds(tableName).get(index);
 				int indexLow = Math.max(visitor.getLowKey(), bounds[0]);
 				int indexHigh = Math.min(visitor.getHighKey(), bounds[1]);
-				//			int r = (indexHigh-indexLow+1)/(bounds[1]-bounds[0]+1); //the reduction factor
+
 				double r = op.getReductionFactor(index); //the reduction factor of this index
 				int l = DBCatalog.getNumOfLeaves(tableName+"."+index); //the number of leaves in the index
 				int costTraversal = DBCatalog.getTraversalCost(tableName+"."+index);
@@ -451,34 +409,6 @@ public class PhysicalPlanBuilder {
 			operator = selectOperator;
 		}
 
-		//		if (DBCatalog.useIndex()) {
-		//			visitor = new DivideSelectVisitor(DBCatalog.getIndexKey(tableName));
-		//			op.getEx().accept(visitor);
-		//		}
-		//
-		//		if (child instanceof LogicalScanOperator && DBCatalog.useIndex() && visitor != null
-		//				&& visitor.needIndexScan()) {
-		//			try {
-		//				ScanOperator indexScanOp = new IndexScanOperator(tableName, scanChild.getAlias(),
-		//						DBCatalog.getIndexFileLoc(tableName), DBCatalog.getIndexKey(tableName),
-		//						DBCatalog.hasClusteredIndex(tableName), visitor.getLowKey(), visitor.getHighKey());
-		//
-		//				if (visitor.getNormalSelect() == null) {
-		//					operator = indexScanOp;
-		//				} else {
-		//					SelectOperator selectOperator = new SelectOperator(indexScanOp, visitor.getNormalSelect());
-		//					operator = selectOperator;
-		//				}
-		//			} catch (FileNotFoundException e) {
-		//				System.err.println("error occurred during construcuting IndexScanOp");
-		//				e.printStackTrace();
-		//			}
-		//
-		//		} else {
-		//			child.accept(this);
-		//			SelectOperator selectOperator = new SelectOperator(operator, op.getEx());
-		//			operator = selectOperator;
-		//		}
 	}
 
 	public void visit(LogicalScanOperator op) {

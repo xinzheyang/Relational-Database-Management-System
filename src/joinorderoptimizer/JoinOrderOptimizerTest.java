@@ -14,7 +14,7 @@ import logicaloperator.LogicalJoinOperator;
 import logicaloperator.LogicalOperator;
 import logicaloperator.LogicalScanOperator;
 
-/**
+/** Test for join order optimizer.
  * @author sitianchen
  *
  */

@@ -44,7 +44,9 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.expression.ExpressionVisitor;
 
-/**
+/** A simple expression visitor to check if a join condition consists of only 
+ * equality join conditions AND-ed together. An equality join condition is of
+ * the form col1 OP col2.
  * @author sitianchen
  *
  */
@@ -54,13 +56,11 @@ public class CheckAllEquityExpVisitor implements ExpressionVisitor{
 	private int numEquiExps; //number of equality expressions
 	
 	public CheckAllEquityExpVisitor() {
-		numAnds = 1;
+		numAnds = 1; //total number of expressions initialized to one
 		numEquiExps = 0;
 	}
 	
 	public boolean isAllEquity() {
-//		System.out.println(numAnds);
-//		System.out.println(numEquiExps);
 		return numAnds == numEquiExps;
 	}
 	
@@ -111,7 +111,7 @@ public class CheckAllEquityExpVisitor implements ExpressionVisitor{
 
 	@Override
 	public void visit(AndExpression andExpression) {
-		numAnds++;
+		numAnds++; //increment 
 		andExpression.getLeftExpression().accept(this);
 		andExpression.getRightExpression().accept(this);
 	}
@@ -127,9 +127,7 @@ public class CheckAllEquityExpVisitor implements ExpressionVisitor{
 	 */
 	@Override
 	public void visit(EqualsTo equalsTo) {
-//		System.out.println(numEquiExps);
-//		System.out.println(equalsTo);
-		this.numEquiExps++;
+		this.numEquiExps++; //increment for visiting any equality condition
 	}
 
 	@Override

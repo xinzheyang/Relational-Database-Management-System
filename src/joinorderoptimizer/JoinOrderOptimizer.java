@@ -33,7 +33,7 @@ public class JoinOrderOptimizer {
 
 	private LogicalJoinOperator joinOp;
 	private List<HashMap<HashSet<LogicalOperator>, CostMetric>> subsetCostMetrics; //cost and relation size of best plan for all subsets 
-	private List<LogicalOperator> finalOrder;
+	private List<LogicalOperator> finalOrder; //final best order to be returned
 	private ParseConjunctExpVisitor visitor;
 
 	/** Given the logical join operator and join map (or construct one if null)
@@ -69,13 +69,13 @@ public class JoinOrderOptimizer {
 		initTwoRelationJoins();
 	}
 
-	/**The cost of a two-relation plan is zero; however, 
+	/**Special case for two relation joins. The cost of a two-relation plan is zero; however, 
 	 * you should choose the smaller relation to be the outer in the best plan;
 	 */
 	private void initTwoRelationJoins() {
 		HashMap<HashSet<LogicalOperator>, CostMetric> sizeTwoMap = new HashMap<HashSet<LogicalOperator>, CostMetric>();
 		List<LogicalOperator> allChildren = joinOp.getJoinChildren();
-		for (int i = 0; i < allChildren.size(); i++) {
+		for (int i = 0; i < allChildren.size(); i++) { //for all possible pair combinations
 			for (int j = i+1; j < allChildren.size(); j++) {
 				LogicalOperator child1 = allChildren.get(i);
 				LogicalOperator child2 = allChildren.get(j);
@@ -99,7 +99,7 @@ public class JoinOrderOptimizer {
 				CostMetric currMetric = comp.getResultCostMetric();
 				currMetric.bestJoinOrder = new ArrayList<LogicalOperator>();
 
-				if (child1Size < child2Size) {
+				if (child1Size < child2Size) { //always choose the relation with smaller size to be the outer relation
 					currMetric.bestJoinOrder.add(child1);
 					currMetric.bestJoinOrder.add(child2);
 				} else {
@@ -113,6 +113,9 @@ public class JoinOrderOptimizer {
 		subsetCostMetrics.add(sizeTwoMap);
 	}
 
+	/** Getter for the final best order of this join.
+	 * @return
+	 */
 	public List<LogicalOperator> getBestOrder() {
 		return finalOrder;
 	}
@@ -126,26 +129,18 @@ public class JoinOrderOptimizer {
 		List<List<HashSet<LogicalOperator>>> subsetsBySize = enumerateSubsets(allChildren);
 		for (int i = 3; i <= allChildren.size(); i++) { //starts from size = 3, since 0,1,2 already initialized
 
-//			int bestPlanCost = Integer.MAX_VALUE;
-//			CostMetric curBest = null;
-//			LogicalOperator optimalRightOp = null;
-//			List<LogicalOperator> leftBestOrder = null;
-
-			for(HashSet<LogicalOperator> ops : subsetsBySize.get(i)) {
-				
+			for(HashSet<LogicalOperator> ops : subsetsBySize.get(i)) { //for all subsets of this size
+				//compute optimal for this subset
 				int bestPlanCost = Integer.MAX_VALUE;
 				CostMetric curBest = null;
 				LogicalOperator optimalRightOp = null;
 				List<LogicalOperator> leftBestOrder = null;
 				
 				HashSet<LogicalOperator> leftRelations = new HashSet<LogicalOperator>(ops);
-				for(LogicalOperator op : ops) {
-//					HashSet<LogicalOperator> leftRelations = new HashSet<LogicalOperator>(subsetsBySize.get(i));
+				for(LogicalOperator op : ops) {//choose the rightmost operator
 					leftRelations.remove(op);
 					CostMetric lastBest = subsetCostMetrics.get(i - 1).get(leftRelations);
-					//				System.err.println(subsetsBySize);
-					//				System.out.println(subsetCostMetrics);
-					//				System.out.println(leftRelations);
+					
 					PlanCostCompute comp = new PlanCostCompute(lastBest, leftRelations, op);
 					comp.computePlanCost();
 					comp.computeJoinSize();
@@ -162,30 +157,35 @@ public class JoinOrderOptimizer {
 				curBest.bestJoinOrder = leftBestOrder;
 				if (subsetCostMetrics.size() == i) 
 					subsetCostMetrics.add(new HashMap<HashSet<LogicalOperator>, CostMetric>()); //curr level not yet initialized
-				subsetCostMetrics.get(i).put(ops, curBest);
+				subsetCostMetrics.get(i).put(ops, curBest); //memoize the opt
 				
 			}
 
-//			leftBestOrder.add(optimalRightOp);
-//			curBest.bestJoinOrder = leftBestOrder;
-//			if (subsetCostMetrics.size() == i) 
-//				subsetCostMetrics.add(new HashMap<HashSet<LogicalOperator>, CostMetric>()); //curr level not yet initialized
-//			subsetCostMetrics.get(i).put(subsetsBySize.get(i), curBest);
 		}
 
 		finalOrder = subsetCostMetrics.get(allChildren.size()).get(new HashSet<LogicalOperator>(allChildren)).bestJoinOrder;
 	}
 
+	/** Enumerates the subsets of the logical operator list and group subsets by their size. e.g. for
+	 * set {A, B, C}, result is [{}, [{A}, {B}, {C}], [{AB}, {AC}, {BC}], [{ABC}]]
+	 * @param lst
+	 * @return subsets group by size
+	 */
 	private List<List<HashSet<LogicalOperator>>> enumerateSubsets(List<LogicalOperator> lst) {
 		List<List<HashSet<LogicalOperator>>> subsetsBySize = new ArrayList<List<HashSet<LogicalOperator>>>();
 		for (int i = 0; i < lst.size() + 1; i++) {
 			subsetsBySize.add(null);
 		}
 		enumerateSubsets(lst, new HashSet<LogicalOperator>(), subsetsBySize, 0);
-		//		System.out.println(subsets[1]);
 		return subsetsBySize;
 	}
 
+	/** Recursive helper for enumerate subsets by size.
+	 * @param lst
+	 * @param tmp
+	 * @param res
+	 * @param currElemIndex
+	 */
 	private void enumerateSubsets(List<LogicalOperator> lst, HashSet<LogicalOperator> tmp, List<List<HashSet<LogicalOperator>>> res, int currElemIndex) {
 		if (currElemIndex >= lst.size()) {
 			if (res.get(tmp.size()) == null) {
@@ -224,7 +224,8 @@ public class JoinOrderOptimizer {
 			joinCondition = null;
 
 			rightRef = getLogicalScanOrSelectRef(rightOp);
-
+			
+			//extracting the join condition for this intermediate join
 			//first extracts the join condition from union find
 			for (UnionElement union : joinOp.getUnionElements()) {
 				List<Column> rightAttribs = union.getAttrByTable(rightRef);
@@ -243,9 +244,6 @@ public class JoinOrderOptimizer {
 			if (visitor != null) {
 				for (LogicalOperator leftChild : leftChildren) {
 					String leftRef = getLogicalScanOrSelectRef(leftChild);
-					//					System.out.println(visitor.getJoinMap());
-					//					System.out.println(leftRef);
-					//					System.out.println(rightRef);
 					HashSet<Expression> tempConditions = visitor.getJoinConditionSet(leftRef, rightRef); 
 					if (tempConditions != null) {
 						for(Expression tempCondition : tempConditions) {
@@ -260,6 +258,10 @@ public class JoinOrderOptimizer {
 
 		}
 
+		/** Helper for getting the operator reference of a logical scan or select operator
+		 * @param op
+		 * @return
+		 */
 		private String getLogicalScanOrSelectRef(LogicalOperator op) {
 			String ref;
 			if (op instanceof LogicalScanOperator) {
