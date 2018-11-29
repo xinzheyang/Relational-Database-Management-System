@@ -110,7 +110,6 @@ public class JoinOrderOptimizer {
 				sizeTwoMap.put(twoList, currMetric);		
 			}
 		}
-
 		subsetCostMetrics.add(sizeTwoMap);
 	}
 
@@ -124,41 +123,61 @@ public class JoinOrderOptimizer {
 	public void dpChooseBestPlan() {
 		//implement dp bottom-up.
 		List<LogicalOperator> allChildren = joinOp.getJoinChildren();
-		List<HashSet<LogicalOperator>> subsetsBySize = enumerateSubsets(allChildren);
+		List<List<HashSet<LogicalOperator>>> subsetsBySize = enumerateSubsets(allChildren);
 		for (int i = 3; i <= allChildren.size(); i++) { //starts from size = 3, since 0,1,2 already initialized
 
-			int bestPlanCost = Integer.MAX_VALUE;
-			CostMetric curBest = null;
-			LogicalOperator optimalRightOp = null;
-			List<LogicalOperator> leftBestOrder = null;
+//			int bestPlanCost = Integer.MAX_VALUE;
+//			CostMetric curBest = null;
+//			LogicalOperator optimalRightOp = null;
+//			List<LogicalOperator> leftBestOrder = null;
 
-			for(LogicalOperator op : subsetsBySize.get(i)) {
-				HashSet<LogicalOperator> leftRelations = new HashSet<LogicalOperator>(subsetsBySize.get(i));
-				leftRelations.remove(op);
-				CostMetric lastBest = subsetCostMetrics.get(i - 1).get(leftRelations);
-				PlanCostCompute comp = new PlanCostCompute(lastBest, leftRelations, op);
-				comp.computePlanCost();
-				comp.computeJoinSize();
-				if (comp.getPlanCost() < bestPlanCost) {
-					bestPlanCost = comp.getPlanCost();
-					curBest = comp.getResultCostMetric();
-					optimalRightOp = op;
-					leftBestOrder = new LinkedList<LogicalOperator>(lastBest.bestJoinOrder);
+			for(HashSet<LogicalOperator> ops : subsetsBySize.get(i)) {
+				
+				int bestPlanCost = Integer.MAX_VALUE;
+				CostMetric curBest = null;
+				LogicalOperator optimalRightOp = null;
+				List<LogicalOperator> leftBestOrder = null;
+				
+				HashSet<LogicalOperator> leftRelations = new HashSet<LogicalOperator>(ops);
+				for(LogicalOperator op : ops) {
+//					HashSet<LogicalOperator> leftRelations = new HashSet<LogicalOperator>(subsetsBySize.get(i));
+					leftRelations.remove(op);
+					CostMetric lastBest = subsetCostMetrics.get(i - 1).get(leftRelations);
+					//				System.err.println(subsetsBySize);
+					//				System.out.println(subsetCostMetrics);
+					//				System.out.println(leftRelations);
+					PlanCostCompute comp = new PlanCostCompute(lastBest, leftRelations, op);
+					comp.computePlanCost();
+					comp.computeJoinSize();
+					if (comp.getPlanCost() < bestPlanCost) {
+						bestPlanCost = comp.getPlanCost();
+						curBest = comp.getResultCostMetric();
+						optimalRightOp = op;
+						leftBestOrder = new LinkedList<LogicalOperator>(lastBest.bestJoinOrder);
+					}
+					leftRelations.add(op);
 				}
+				
+				leftBestOrder.add(optimalRightOp);
+				curBest.bestJoinOrder = leftBestOrder;
+				if (subsetCostMetrics.size() == i) 
+					subsetCostMetrics.add(new HashMap<HashSet<LogicalOperator>, CostMetric>()); //curr level not yet initialized
+				subsetCostMetrics.get(i).put(ops, curBest);
+				
 			}
 
-			leftBestOrder.add(optimalRightOp);
-			curBest.bestJoinOrder = leftBestOrder;
-			if (subsetCostMetrics.size() == i) 
-				subsetCostMetrics.add(new HashMap<HashSet<LogicalOperator>, CostMetric>()); //curr level not yet initialized
-			subsetCostMetrics.get(i).put(subsetsBySize.get(i), curBest);
+//			leftBestOrder.add(optimalRightOp);
+//			curBest.bestJoinOrder = leftBestOrder;
+//			if (subsetCostMetrics.size() == i) 
+//				subsetCostMetrics.add(new HashMap<HashSet<LogicalOperator>, CostMetric>()); //curr level not yet initialized
+//			subsetCostMetrics.get(i).put(subsetsBySize.get(i), curBest);
 		}
 
 		finalOrder = subsetCostMetrics.get(allChildren.size()).get(new HashSet<LogicalOperator>(allChildren)).bestJoinOrder;
 	}
 
-	private List<HashSet<LogicalOperator>> enumerateSubsets(List<LogicalOperator> lst) {
-		List<HashSet<LogicalOperator>> subsetsBySize = new ArrayList<HashSet<LogicalOperator>>();
+	private List<List<HashSet<LogicalOperator>>> enumerateSubsets(List<LogicalOperator> lst) {
+		List<List<HashSet<LogicalOperator>>> subsetsBySize = new ArrayList<List<HashSet<LogicalOperator>>>();
 		for (int i = 0; i < lst.size() + 1; i++) {
 			subsetsBySize.add(null);
 		}
@@ -167,9 +186,13 @@ public class JoinOrderOptimizer {
 		return subsetsBySize;
 	}
 
-	private void enumerateSubsets(List<LogicalOperator> lst, HashSet<LogicalOperator> tmp, List<HashSet<LogicalOperator>> res, int currElemIndex) {
+	private void enumerateSubsets(List<LogicalOperator> lst, HashSet<LogicalOperator> tmp, List<List<HashSet<LogicalOperator>>> res, int currElemIndex) {
 		if (currElemIndex >= lst.size()) {
-			res.set(tmp.size(), (HashSet<LogicalOperator>) tmp.clone());
+			if (res.get(tmp.size()) == null) {
+				res.set(tmp.size(), new ArrayList<>());
+			} 
+			res.get(tmp.size()).add((HashSet<LogicalOperator>) tmp.clone());
+			//			res.set(tmp.size(), (HashSet<LogicalOperator>) tmp.clone());
 			return;
 		}
 		tmp.add(lst.get(currElemIndex));
@@ -234,8 +257,7 @@ public class JoinOrderOptimizer {
 					}
 				}
 			}
-			System.out.println(joinCondition);
-			
+
 		}
 
 		private String getLogicalScanOrSelectRef(LogicalOperator op) {

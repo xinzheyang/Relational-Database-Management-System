@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,11 +20,17 @@ import joinorderoptimizer.JoinOrderOptimizer;
 import logicaloperator.*;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.schema.Column;
 import physicaloperator.*;
 
 /**
  * @author xinzheyang A physical plan builder that uses visitor pattern to
  *         transform a logical operator into a physical operator
+ */
+/**
+ * @author sitianchen
+ *
  */
 public class PhysicalPlanBuilder {
 	private final String DASH="-";
@@ -104,6 +111,10 @@ public class PhysicalPlanBuilder {
 		operator = projectOperator;
 	}
 
+	/** Gets the reference of a scan or select operator.
+	 * @param op
+	 * @return
+	 */
 	private String getScanOrSelectRef(Operator op) {
 		String ref;
 		if (op instanceof ScanOperator) {
@@ -114,6 +125,10 @@ public class PhysicalPlanBuilder {
 		return ref;
 	}
 	
+	/** Gets reference of a logical scan or select operator.
+	 * @param op
+	 * @return
+	 */
 	private String getLogicalScanOrSelectRef(LogicalOperator op) {
 		String ref;
 		if (op instanceof LogicalScanOperator) {
@@ -179,7 +194,7 @@ public class PhysicalPlanBuilder {
 		return op;
 	}
 	
-	public Operator findPhysOperator(LogicalOperator op, List<Operator> lst) {
+	private Operator findPhysOperator(LogicalOperator op, List<Operator> lst) {
 		String opRef = getLogicalScanOrSelectRef(op);
 		for (Operator phys : lst) {
 			if (this.getScanOrSelectRef(phys).equals(opRef))
@@ -187,6 +202,38 @@ public class PhysicalPlanBuilder {
 		}
 		return null; //not found
 	}
+	
+	private Expression getIntermediateCondition(String leftRef, String rightRef, LogicalJoinOperator op) {
+		Expression cond = null;
+		ParseConjunctExpVisitor visitor = op.getVisitor();
+		//first extracts the join condition from union find
+		for (UnionElement union : op.getUnionElements()) {
+			List<Column> leftAttribs = union.getAttrByTable(leftRef);
+			List<Column> rightAttribs = union.getAttrByTable(rightRef);
+			for (Column leftAttrib : leftAttribs) {
+				for (Column rightAttrib : rightAttribs) {
+					Expression newEqual = new EqualsTo(leftAttrib, rightAttrib);
+					cond = cond == null ? newEqual : new AndExpression(cond, newEqual);
+				}
+			}
+		}
+		//then extracts the join condition for this join
+		if (visitor != null) {
+			HashSet<Expression> tempConditions = visitor.getJoinConditionSet(leftRef, rightRef); 
+			if (tempConditions != null) {
+				for(Expression tempCondition : tempConditions) {
+					//gets the join exp of every left child with the right child
+					if (tempCondition != null && !(tempCondition instanceof EqualsTo)) 
+						cond = cond == null ? tempCondition : new AndExpression(cond, tempCondition);
+					//AND them all together to get the final join condition
+				}
+			}
+		}
+		
+		return cond;
+		
+	}
+	
 
 	/**
 	 * @param op
@@ -215,7 +262,7 @@ public class PhysicalPlanBuilder {
 
 		// refactor PPB to left deep join tree
 		JoinOrderOptimizer opt = new JoinOrderOptimizer(op, op.getVisitor());
-		ParseConjunctExpVisitor visitor = op.getVisitor();
+//		ParseConjunctExpVisitor visitor = op.getVisitor();
 		opt.dpChooseBestPlan();
 		List<LogicalOperator> optOrder = opt.getBestOrder(); //best join order
 		List<Operator> physChildren = new LinkedList<Operator>(); //physical children
@@ -247,8 +294,10 @@ public class PhysicalPlanBuilder {
 		List<String> leftTableRefs = new LinkedList<String>();
 		leftTableRefs.add(getScanOrSelectRef(firstLeft));
 		leftTableRefs.add(getScanOrSelectRef(secondLeft));
+		
+		Expression firstCond = getIntermediateCondition(leftTableRefs.get(0), leftTableRefs.get(1), op);
 
-		Expression firstCond = visitor == null ? null : visitor.getJoinCondition(leftTableRefs.get(0), leftTableRefs.get(1));
+//		Expression firstCond = visitor == null ? null : visitor.getJoinCondition(leftTableRefs.get(0), leftTableRefs.get(1));
 		CheckAllEquityExpVisitor checkEquity = new CheckAllEquityExpVisitor();
 
 		left = createBestJoin(firstLeft, secondLeft, firstCond, checkEquity);
@@ -262,7 +311,7 @@ public class PhysicalPlanBuilder {
 //			counter=tmp;
 			String currRef = getScanOrSelectRef(currRight);
 			for (String leftRef: leftTableRefs) {
-				Expression tempCondition = visitor != null ? visitor.getJoinCondition(leftRef, currRef) : null;
+				Expression tempCondition = getIntermediateCondition(leftRef, currRef, op);
 				if (tempCondition != null)
 					condition = condition == null ? tempCondition: new AndExpression(condition, tempCondition);
 			}
