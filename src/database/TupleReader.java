@@ -81,9 +81,11 @@ public class TupleReader {
 			channel.position(pageIndex*PAGE_SIZE);
 			getNextPage();
 			int i=0;
-			while(i<index % maxTuples) {
-				getNextTuple();
-				i++;
+			if (maxTuples != 0) {
+				while(i<index % maxTuples) {
+					getNextTuple();
+					i++;
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

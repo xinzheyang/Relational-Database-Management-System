@@ -8,6 +8,9 @@ The logic of UnionFind is to use an array of indexes where each element represen
 We then use a UnionFindVisitor that constructs the UnionFind object according the spec.
 In DBSelectVisitor, where we build logical query plans, we implemented a method that builds selectionOperator using union find, by utilizing the information passed by the UnionFindVisitor, such as UnionElements, unused Joins and unused Selects.
 
+The choice of implementation for each logical selection operator
+- We implemented the selection operator optimization in the public void visit(LogicalSelectOperator op) in PhysicalPlanBuilder.java. We basically followed the instruction on the writeup. For the logical operator, we calculate the scan cost, and the index scan cost of each index that the relation has, in number of I/Os. Then we choose the best access path (which may be an index or a scan) and implement the selection.
+
 Choosing Best Join Order
 - The implementation can be found in the joinorderoptimizer package, with JoinOrderOptimizer.java containing the main class of all the algorithms. The class memoized all best results of subsets in a list of hash maps, and first initialize subset results with size 0, 1 and 2 as base cases. The order deciding algorithm implemented in dpChooseBestPlan() follows strictly the dynamic programming algorithm specified in the writeup. It uses methods from the private class PlanCostCompute in JoinOrderOptimizer.java to aid with plan cost and relation size calculation. Plan costs, relation sizes and calculated V-values are memoized in the class to avoid recomputation, and all are stored in instances of the class CostMetric.java. The DP algorithm then iteratively computes the optimal results for subsets of increasing sizes, until the inclusive set, and then it returns the final result.
 
