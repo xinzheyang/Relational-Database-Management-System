@@ -117,6 +117,9 @@ public class ScanOperator extends Operator {
 		
 	}
 	
+	/* (non-Javadoc)
+	 * @see physicaloperator.Operator#accept(visitor.PhysicalPlanWriter)
+	 */
 	public void accept(PhysicalPlanWriter write) {
 		write.visit(this);
 	}

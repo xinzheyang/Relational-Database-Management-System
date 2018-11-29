@@ -35,10 +35,16 @@ public abstract class JoinOperator extends Operator {
 		visitor = new EvaluateExpVisitor();
 	}
 	
+	/**
+	 * @return the left child of the operator
+	 */
 	public Operator getLeftChild() {
 		return leftChild;
 	}
 	
+	/**
+	 * @return the right child of the operator
+	 */
 	public Operator getRightChild() {
 		return rightChild;
 	}
@@ -62,6 +68,9 @@ public abstract class JoinOperator extends Operator {
 
 	}
 	
+	/**
+	 * @return the condition expression for this join
+	 */
 	public Expression getCondition() {
 		return joinCondition;
 	}

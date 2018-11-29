@@ -242,6 +242,9 @@ public class ExternalSortOperator extends SortOperator {
 		
 	}
 	
+	/* (non-Javadoc)
+	 * @see physicaloperator.Operator#accept(visitor.PhysicalPlanWriter)
+	 */
 	public void accept(PhysicalPlanWriter write) {
 		write.visit(this);
 	}

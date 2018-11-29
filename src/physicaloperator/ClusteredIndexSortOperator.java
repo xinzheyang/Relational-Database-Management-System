@@ -82,9 +82,11 @@ public class ClusteredIndexSortOperator extends Operator {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see physicaloperator.Operator#accept(visitor.PhysicalPlanWriter)
+	 */
 	@Override
 	public void accept(PhysicalPlanWriter write) {
-		// TODO Auto-generated method stub
 	}
 
 }

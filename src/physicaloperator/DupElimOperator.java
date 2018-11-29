@@ -48,6 +48,9 @@ public class DupElimOperator extends Operator {
 
 	}
 	
+	/**
+	 * @return the child of this operator
+	 */
 	public Operator getChildOp() {
 		return childOp;
 	}
@@ -58,6 +61,9 @@ public class DupElimOperator extends Operator {
 		
 	}
 	
+	/* (non-Javadoc)
+	 * @see physicaloperator.Operator#accept(visitor.PhysicalPlanWriter)
+	 */
 	public void accept(PhysicalPlanWriter write) {
 		write.visit(this);
 	}

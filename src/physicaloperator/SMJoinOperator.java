@@ -160,6 +160,9 @@ public class SMJoinOperator extends JoinOperator {
 		currRightPosition = 0;
 	}
 	
+	/* (non-Javadoc)
+	 * @see physicaloperator.Operator#accept(visitor.PhysicalPlanWriter)
+	 */
 	public void accept(PhysicalPlanWriter write) {
 		write.visit(this);
 	}

@@ -61,6 +61,9 @@ public class ProjectOperator extends Operator {
 		childOp.reset();
 	}
 	
+	/**
+	 * @return the child operator of this operator
+	 */
 	public Operator getChildOp() {
 		return childOp;
 	}
@@ -71,6 +74,9 @@ public class ProjectOperator extends Operator {
 		
 	}
 	
+	/* (non-Javadoc)
+	 * @see physicaloperator.Operator#accept(visitor.PhysicalPlanWriter)
+	 */
 	public void accept(PhysicalPlanWriter write) {
 		write.visit(this);
 	}

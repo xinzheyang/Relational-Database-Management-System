@@ -244,18 +244,31 @@ public class IndexScanOperator extends ScanOperator {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see physicaloperator.ScanOperator#accept(visitor.PhysicalPlanWriter)
+	 */
 	public void accept(PhysicalPlanWriter write) {
 		write.visit(this);
 	}
 	
+	/**
+	 * @return the minimum value of this index in the query condition
+	 */
 	public int getLowKey() {
 		return lowKey;
 	}
 	
+	/**
+	 * @return the maximum value for this index in the query condition
+	 */
 	public int getHighKey() {
 		return highKey;
 	}
 	
+
+	/**
+	 * @return the column name of this index
+	 */
 	public String getIndexName() {
 		return indexCol;
 	}

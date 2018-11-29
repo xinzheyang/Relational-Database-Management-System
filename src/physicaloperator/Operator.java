@@ -98,10 +98,13 @@ public abstract class Operator {
 
 	}
 	
+	/**
+	 * @param write the PhysicalPlanWrite object
+	 */
 	public abstract void accept(PhysicalPlanWriter write);
 	
 	/** Gets all column attributes of this operator in order.
-	 * @return
+	 * @return a list of ordered column attributes
 	 */
 	public String[] getColsInOrder() {
 		String[] colsInOrder = new String[this.columnIndexMap.size()];

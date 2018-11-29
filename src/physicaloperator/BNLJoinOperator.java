@@ -119,14 +119,11 @@ public class BNLJoinOperator extends JoinOperator {
 		rightTuple = rightChild.getNextTuple();
 	}
 	
+	/* (non-Javadoc)
+	 * @see physicaloperator.Operator#accept(visitor.PhysicalPlanWriter)
+	 */
 	public void accept(PhysicalPlanWriter write) {
 		write.visit(this);
 	}
 
-
-//	@Override
-//	public void reset(int index) {
-//		//no-op
-//		
-//	}
 }

@@ -88,10 +88,11 @@ public class TNLJoinOperator extends JoinOperator {
 		leftTuple = leftChild.getNextTuple();
 	}
 
+	/* (non-Javadoc)
+	 * @see physicaloperator.Operator#accept(visitor.PhysicalPlanWriter)
+	 */
 	@Override
 	public void accept(PhysicalPlanWriter write) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

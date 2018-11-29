@@ -6,7 +6,6 @@ package visitor;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Collections;
-
 import logicaloperator.LogicalOperator;
 import physicaloperator.*;
 
