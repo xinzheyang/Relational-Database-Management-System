@@ -39,11 +39,13 @@ public class QueryParser {
 	 */
 	public void parse() {
 		try {
+			BufferedWriter timeWriter = new BufferedWriter(new FileWriter("query_runtime.txt"));
 			CCJSqlParser parser = new CCJSqlParser(new FileReader(queriesFile));
 			Statement statement;
 			int count = 1;
 			while ((statement = parser.Statement()) != null) {
 				int localCount = count++;
+				long startTime = System.currentTimeMillis();
 				Operator operator = null;
 				try {
 					DBStatementVisitor dbStatementVisitor = new DBStatementVisitor();
@@ -91,7 +93,11 @@ public class QueryParser {
 					System.err.println("Exception occurred during dumping");
 					e2.printStackTrace();
 				}
+				timeWriter.write(localCount + ". " + "query" + localCount + ": " + (System.currentTimeMillis() - startTime) + "ms\n");
 			}
+			
+			timeWriter.close();
+			
 		}catch (Exception e) {
 			System.err.println("Exception occurred during parsing");
 			e.printStackTrace();
