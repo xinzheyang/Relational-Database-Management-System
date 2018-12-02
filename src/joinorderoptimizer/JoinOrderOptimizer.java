@@ -131,7 +131,7 @@ public class JoinOrderOptimizer {
 
 			for(HashSet<LogicalOperator> ops : subsetsBySize.get(i)) { //for all subsets of this size
 				//compute optimal for this subset
-				int bestPlanCost = Integer.MAX_VALUE;
+				long bestPlanCost = Long.MAX_VALUE;
 				CostMetric curBest = null;
 				LogicalOperator optimalRightOp = null;
 				List<LogicalOperator> leftBestOrder = null;
@@ -290,15 +290,14 @@ public class JoinOrderOptimizer {
 		 */
 		public void computeJoinSize() {
 
-			int rightRelationSize = -1;
+			long rightRelationSize = -1;
 			if (rightOp instanceof LogicalScanOperator) {
 				rightRelationSize = ((LogicalScanOperator) rightOp).getRelationSize();
 			} else if (rightOp instanceof LogicalSelectOperator) {
 				rightRelationSize = ((LogicalSelectOperator) rightOp).getRelationSize();
 			}
-			int leftRelationSize = leftRelations.relationSize;
-			int relationSize = leftRelationSize * rightRelationSize; //cross product relation size
-
+			long leftRelationSize = leftRelations.relationSize;
+			long relationSize = leftRelationSize * rightRelationSize; //cross product relation size
 			if (joinCondition != null) {//if there is join condition
 				//use UF to get all unions of table attributes joined on equality in the join condition.
 				//compute denominators on these unions (max of all v-values of union attributes).
@@ -307,7 +306,7 @@ public class JoinOrderOptimizer {
 				allUnions = findVisit.getUnionFind().getRootElementMap();
 				for (UnionElement union : allUnions) {
 					//compute max of all v-values on this union
-					relationSize = (int) Math.ceil(((double) relationSize) / ((double) computeMaxVValue(union)));
+					relationSize = (long) Math.ceil(((double) relationSize) / ((double) computeMaxVValue(union)));
 				}
 			}
 			costMetric.relationSize = Math.max(relationSize, 1); //clamp up relation size by 1
@@ -319,11 +318,11 @@ public class JoinOrderOptimizer {
 		 * @param union
 		 * @return the V-value computed from this union
 		 */
-		private int computeMaxVValue(UnionElement union) {
-			int min = Integer.MAX_VALUE;
-			int res = Integer.MIN_VALUE;
+		private long computeMaxVValue(UnionElement union) {
+			long min = Long.MAX_VALUE;
+			long res = Long.MIN_VALUE;
 			for (Column attrib : union.getAttributes()) {
-				int curVValue = computeVValue(attrib);
+				long curVValue = computeVValue(attrib);
 				assert curVValue != -1; //assert valid V-values
 				if (curVValue < min) {
 					min = curVValue;
@@ -332,6 +331,9 @@ public class JoinOrderOptimizer {
 					res = curVValue;
 				}
 			}
+//			System.out.println(leftChildren);
+//			System.out.println(rightOp);
+//			System.out.println(res);
 			costMetric.vValueMap.put(new HashSet<Column>(union.getAttributes()), min); //add to the new v value map for this join
 			return res;
 		}
@@ -340,9 +342,9 @@ public class JoinOrderOptimizer {
 		 * recompute V value from all left and right children operators.
 		 * @param attrib
 		 */
-		private int computeVValue(Column attrib) {
-			int result = -1;
-			int leftRelVValue = leftRelations.getVValue(attrib); //try checking existence in the left relations cost metric
+		private long computeVValue(Column attrib) {
+			long result = -1;
+			long leftRelVValue = leftRelations.getVValue(attrib); //try checking existence in the left relations cost metric
 			if (leftRelVValue != -1) { //found
 				result = Math.min(leftRelVValue, leftRelations.relationSize); //clamp down V-value by left relation size
 			} 
@@ -382,7 +384,7 @@ public class JoinOrderOptimizer {
 		/** Getter for this plan's plan cost
 		 * @return
 		 */
-		public int getPlanCost() {
+		public long getPlanCost() {
 			return costMetric.planCost;
 		}
 

@@ -17,22 +17,22 @@ import net.sf.jsqlparser.schema.Column;
  *
  */
 public class CostMetric {
-	public int planCost;
-	public int relationSize;
+	public long planCost;
+	public long relationSize;
 	public List<LogicalOperator> bestJoinOrder; //best order of the cost metric
-	public HashMap<HashSet<Column>, Integer> vValueMap; //mapping v-values of a set of united columns to their shared v-value
+	public HashMap<HashSet<Column>, Long> vValueMap; //mapping v-values of a set of united columns to their shared v-value
 	//to be used for memoizing v-values of intermediate joins
 	
 	public CostMetric(int bestPlanCost, int relationSize, List<LogicalOperator> bestJoinOrder) {
 		this.planCost = bestPlanCost;
 		this.relationSize = relationSize;
 		this.bestJoinOrder = bestJoinOrder;
-		vValueMap = new HashMap<HashSet<Column>, Integer>();
+		vValueMap = new HashMap<HashSet<Column>, Long>();
 	}
 	
 	public CostMetric() {
 		bestJoinOrder = new LinkedList<LogicalOperator>();
-		vValueMap = new HashMap<HashSet<Column>, Integer>();
+		vValueMap = new HashMap<HashSet<Column>, Long>();
 	}
 	
 	/** Gets the v-value of an attribute from this cost metric instance's
@@ -40,7 +40,7 @@ public class CostMetric {
 	 * @param attrib
 	 * @return
 	 */
-	public int getVValue(Column attrib) {
+	public long getVValue(Column attrib) {
 		for (HashSet<Column> key : vValueMap.keySet()) {
 			if (key.contains(attrib)) {
 				return vValueMap.get(key);
