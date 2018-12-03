@@ -147,9 +147,25 @@ public class DBCatalog {
 		return file.delete();
 	}
 	
+	private static boolean deletePartitionDir(File file) {
+		File[] allFiles = file.listFiles();
+		if (allFiles != null) {
+			for (File f: allFiles) {
+				deleteTempDir(f);
+			}
+		}
+		return file.delete();
+	}
+	
 	public static void resetTempDir() {
 		tempDirCount = 0;
 		File file = new File(tempDir);
+		deleteTempDir(file);
+	}
+	
+	public static void resetPartitionDir() {
+		partitionDirCount = 0;
+		File file = new File(partitionDir);
 		deleteTempDir(file);
 	}
 	
