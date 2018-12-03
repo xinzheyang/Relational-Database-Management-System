@@ -13,6 +13,8 @@ import net.sf.jsqlparser.expression.Expression;
 import visitor.EquiConjunctVisitor;
 import visitor.PhysicalPlanWriter;
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 import java.util.LinkedList;
 import java.util.ArrayList;
 /**
@@ -48,15 +50,15 @@ public class HashJoinOperator extends JoinOperator {
 		File rightDir = new File(rightPartPath);
 		rightDir.mkdirs();
 		currPartition = 0;
-		
+
 		//initialize join attribute indices
 		EquiConjunctVisitor equiVisit = new EquiConjunctVisitor(left, right);
 		this.joinCondition.accept(equiVisit);
 		ArrayList<String> leftAttribCols = equiVisit.getLeftCompareCols();
 		ArrayList<String> rightAttribCols = equiVisit.getRightCompareCols();
-		
+
 		assert leftAttribCols.size() == rightAttribCols.size();
-		
+
 		leftJoinAttribs = new int[leftAttribCols.size()];
 		rightJoinAttribs = new int[rightAttribCols.size()];
 		for(int i = 0; i < leftAttribCols.size(); i++) {
@@ -65,6 +67,7 @@ public class HashJoinOperator extends JoinOperator {
 		}
 		//initialize partitions
 		splitPhase();
+//		splitPhaseParallelized();
 
 	}
 
@@ -112,7 +115,7 @@ public class HashJoinOperator extends JoinOperator {
 			currProbeEntry = 0; //reset probe entry and tuple index
 			currProbeTupleIdx = 0;
 		}
-		
+
 		while (currRight != null && currProbeTupleIdx < currHashtable[currProbeEntry].size()) {//try probe with the curr right tuple
 			Tuple currLeft = currHashtable[currProbeEntry].get(currProbeTupleIdx);
 			if (areEqual(currLeft, currRight)) {//need to evaluate equality again
@@ -162,8 +165,8 @@ public class HashJoinOperator extends JoinOperator {
 				}
 			}
 		}
-		
-		
+
+
 		return null;
 
 	}
@@ -179,7 +182,7 @@ public class HashJoinOperator extends JoinOperator {
 			lWriters[i] = new TupleWriter(leftPartPath + File.separator + "partition" + i, this.leftChild);
 			lWriters[i].writeMetaData();
 		}
-		Tuple tupLeft = leftChild.getNextTuple();
+		Tuple tupLeft;
 		while((tupLeft = leftChild.getNextTuple()) != null) {
 			int partition = hash1(numOfPartitions, tupLeft, leftJoinAttribs); //hash to partition
 			lWriters[partition].setTuple(tupLeft);
@@ -206,6 +209,85 @@ public class HashJoinOperator extends JoinOperator {
 		}
 
 		for (TupleWriter tw : rWriters) { //finalize all right partition writers
+			tw.flushLastPage();
+			tw.close();
+		}
+
+	}
+
+	private void updateBuffer(Operator op, List<Tuple> buffer, int tupleLimit) {
+		buffer.clear();
+		int i = 0;
+		Tuple tuple;
+		while(i < tupleLimit && (tuple = op.getNextTuple()) != null) {
+			buffer.add(tuple);
+			i++;
+		}
+	}
+
+
+
+	/** Splits both left and right relations in to partitions by hashing on the join attributes
+	 * of tuples.
+	 */
+	private void splitPhaseParallelized() {
+		//partition left relation
+		TupleWriter[] lWriters = new TupleWriter[numOfPartitions]; //initialize writer of each partition 
+		for (int i = 0; i < numOfPartitions; i++) { //set left write buffers
+			lWriters[i] = new TupleWriter(leftPartPath + File.separator + "partition" + i, this.leftChild);
+			lWriters[i].writeMetaData();
+		}
+		int leftTupleLimit = PAGE_SIZE * this.bufferSize / (4 * leftChild.getColumnIndexMap().size());
+		List<Tuple> buffer = new LinkedList<Tuple>();
+		updateBuffer(leftChild, buffer, leftTupleLimit);
+		
+		while(!buffer.isEmpty()) { //parallelizing hash function generation
+			ConcurrentMap<Integer, List<Tuple>> partitions = buffer
+					.parallelStream()
+					.collect(Collectors.groupingByConcurrent(t -> hash1(numOfPartitions, t, leftJoinAttribs)));
+			//each correspond to one partition to be written to its
+			//corresponding tuple writer
+			for(Integer partIdx : partitions.keySet()) {
+				for (Tuple tup : partitions.get(partIdx)) {
+					lWriters[partIdx].setTuple(tup);
+					lWriters[partIdx].writeToBuffer();
+				}
+			}
+			updateBuffer(leftChild, buffer, leftTupleLimit);
+		}
+
+		for (TupleWriter tw : lWriters) { //finalize all left partition writers
+			tw.flushLastPage();
+			tw.close();
+		}
+
+		//partition right
+
+		TupleWriter[] rWriters = new TupleWriter[numOfPartitions]; //initialize writer of each partition 
+		for (int i = 0; i < numOfPartitions; i++) { //set right write buffers
+			rWriters[i] = new TupleWriter(rightPartPath + File.separator + "partition" + i, this.rightChild);
+			rWriters[i].writeMetaData();
+		}
+		int rigttTupleLimit = PAGE_SIZE * this.bufferSize / (4 * rightChild.getColumnIndexMap().size());
+		buffer.clear();
+		updateBuffer(rightChild, buffer, rigttTupleLimit);
+		
+		while(!buffer.isEmpty()) { //parallelizing hash function generation
+			ConcurrentMap<Integer, List<Tuple>> partitions = buffer
+					.parallelStream()
+					.collect(Collectors.groupingByConcurrent(t -> hash1(numOfPartitions, t, rightJoinAttribs)));
+			//each correspond to one partition to be written to its
+			//corresponding tuple writer
+			for(Integer partIdx : partitions.keySet()) {
+				for (Tuple tup : partitions.get(partIdx)) {
+					rWriters[partIdx].setTuple(tup);
+					rWriters[partIdx].writeToBuffer();
+				}
+			}
+			updateBuffer(rightChild, buffer, leftTupleLimit);
+		}
+
+		for (TupleWriter tw : rWriters) { //finalize all left partition writers
 			tw.flushLastPage();
 			tw.close();
 		}
@@ -255,7 +337,7 @@ public class HashJoinOperator extends JoinOperator {
 		write.visit(this);
 
 	}
-	
+
 	@Override
 	public void reset() {
 		currPartition = 0;
