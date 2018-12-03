@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import database.Tuple;
+import visitor.EvaluateExpVisitor;
 import visitor.PhysicalPlanWriter;
 import net.sf.jsqlparser.expression.Expression;
 
@@ -64,10 +65,11 @@ public class BNLJoinOperator extends JoinOperator {
 	private Tuple lambda(Tuple tup, Tuple right) {
 		Tuple combinedTuple = tup.merge(right);
 		if(joinCondition == null) return combinedTuple;
-		visitor.setCurrTuple(combinedTuple);
-		visitor.setOperator(this);
-		joinCondition.accept(visitor);
-		boolean result = visitor.getReturnBoolValue();
+		EvaluateExpVisitor evaluateExpVisitor = new EvaluateExpVisitor();
+		evaluateExpVisitor.setCurrTuple(combinedTuple);
+		evaluateExpVisitor.setOperator(this);
+		joinCondition.accept(evaluateExpVisitor);
+		boolean result = evaluateExpVisitor.getReturnBoolValue();
 		if(result) {
 			return combinedTuple;
 		} else {
