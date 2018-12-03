@@ -6,13 +6,11 @@ package physicaloperator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import database.Tuple;
-import visitor.EvaluateExpVisitor;
 import visitor.PhysicalPlanWriter;
 import net.sf.jsqlparser.expression.Expression;
 
@@ -88,8 +86,6 @@ public class BNLJoinOperator extends JoinOperator {
 				if (!matchedTuples.isEmpty()) {
 					return matchedTuples.pop();
 				} else {
-					
-					
 					
 					matchedTuples = buffer
 							.parallelStream()
