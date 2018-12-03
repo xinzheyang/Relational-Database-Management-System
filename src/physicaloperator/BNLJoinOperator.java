@@ -85,24 +85,22 @@ public class BNLJoinOperator extends JoinOperator {
 		//while there is another right tuple
 		while(!buffer.isEmpty()) {
 			while(rightTuple != null) {
-//				Iterator<Tuple> iterator = matchedTuples.iterator();
-//				if (iterator.hasNext()) {
-//					return iterator.next();
 				if (!matchedTuples.isEmpty()) {
 					return matchedTuples.pop();
 				} else {
+					
+					
+					
+					matchedTuples = buffer
+							.parallelStream()
+							.map(t -> lambda(t, rightTuple))
+							.filter(t -> t != null)
+							.collect(Collectors.toCollection(LinkedList::new));
 					//fetch the next right tuple
 					rightTuple = rightChild.getNextTuple();
-					if (rightTuple != null) {
-						matchedTuples = buffer
-								.parallelStream()
-								.map(t -> lambda(t, rightTuple))
-								.filter(t -> t != null)
-								.collect(Collectors.toCollection(LinkedList::new));
-						System.out.println(matchedTuples);
-					}
+					System.out.println(matchedTuples);
+					
 				}
-				
 			}
 			//finish one block, so get another, and starts from the first right child again
 			updateBuffer();
