@@ -93,9 +93,14 @@ public class BNLJoinOperator extends JoinOperator {
 				} else {
 					//fetch the next right tuple
 					rightTuple = rightChild.getNextTuple();
-					
-					matchedTuples = buffer.parallelStream().map(t -> lambda(t, rightTuple)).collect(Collectors.toCollection(LinkedList::new));
-					System.out.println(matchedTuples);
+					if (rightTuple != null) {
+						matchedTuples = buffer
+								.parallelStream()
+								.map(t -> lambda(t, rightTuple))
+								.filter(t -> t != null)
+								.collect(Collectors.toCollection(LinkedList::new));
+						System.out.println(matchedTuples);
+					}
 				}
 				
 			}
