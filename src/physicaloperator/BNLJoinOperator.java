@@ -6,6 +6,7 @@ package physicaloperator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,7 +27,8 @@ public class BNLJoinOperator extends JoinOperator {
 	private int buffer_size; //	the number of “pages” to devote to each block of the outer relation
 	private Tuple rightTuple;
 //	private int index;
-	List<Tuple> matchedTuples = new LinkedList<>();
+//	Iterator<Tuple> matchedTuples = new LinkedList<Tuple>().iterator();
+	LinkedList<Tuple> matchedTuples = new LinkedList<Tuple>();
 	
 	/**
 	 * @param left the left operator to be joined
@@ -83,12 +85,17 @@ public class BNLJoinOperator extends JoinOperator {
 		//while there is another right tuple
 		while(!buffer.isEmpty()) {
 			while(rightTuple != null) {
-				if (matchedTuples.iterator().hasNext()) {
-					return matchedTuples.iterator().next();
+//				Iterator<Tuple> iterator = matchedTuples.iterator();
+//				if (iterator.hasNext()) {
+//					return iterator.next();
+				if (!matchedTuples.isEmpty()) {
+					return matchedTuples.pop();
 				} else {
 					//fetch the next right tuple
 					rightTuple = rightChild.getNextTuple();
-					matchedTuples = buffer.parallelStream().map(t -> lambda(t, rightTuple)).collect(Collectors.toList());
+					
+					matchedTuples = buffer.parallelStream().map(t -> lambda(t, rightTuple)).collect(Collectors.toCollection(LinkedList::new));
+					System.out.println(matchedTuples);
 				}
 				
 			}
@@ -116,5 +123,19 @@ public class BNLJoinOperator extends JoinOperator {
 	public void accept(PhysicalPlanWriter write) {
 		write.visit(this);
 	}
-
+	
+//	private static String lam(String s) {
+//		return s.toUpperCase();
+//	}
+//	
+//	public static void main(String[] args) {
+//		List<String> buffer = new ArrayList<>();
+//		buffer.add("a");
+//		buffer.add("b");
+//		buffer.add("c");
+//		List<String> temp = buffer.parallelStream().map(s -> lam(s)).collect(Collectors.toList());
+//		Iterator<String> iterator = temp.iterator();
+//		System.out.println(iterator.next());
+//		System.out.println(iterator.next());
+//	}
 }
