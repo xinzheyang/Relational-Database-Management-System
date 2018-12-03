@@ -96,6 +96,9 @@ public class BNLJoinOperator extends JoinOperator {
 							.collect(Collectors.toCollection(LinkedList::new));
 					//fetch the next right tuple
 					rightTuple = rightChild.getNextTuple();
+					if(rightTuple != null && rightTuple.getColumnValue(0) == 1064) {
+						System.out.println(rightTuple);
+					}
 					
 				}
 			}
