@@ -131,5 +131,21 @@ public class PhysicalPlanWriter {
 	public void visit(InMemorySortOperator op) {
 
 	}
+	
+	public void visit(HashJoinOperator op) {
+		String ex = op.getCondition() == null ? "" : op.getCondition().toString();
+		try {
+			physicalWriter.write(String.join("", Collections.nCopies(counter, DASH))+
+					"HashJoin"+"["+ex+"]\n");
+			counter++;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		int tmp=counter;
+		op.getLeftChild().accept(this);
+		counter=tmp;
+		op.getRightChild().accept(this);
+		counter=tmp;
+	}
 
 }

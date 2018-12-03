@@ -5,6 +5,7 @@ package physicaloperator;
 
 import java.io.File;
 
+import database.DBCatalog;
 import database.Tuple;
 import database.TupleReader;
 import database.TupleWriter;
@@ -39,10 +40,11 @@ public class HashJoinOperator extends JoinOperator {
 
 	public HashJoinOperator(Operator left, Operator right, Expression condition) {
 		super(left, right, condition);
-		leftPartPath = "left_partitions";
+		String path = DBCatalog.getPartitionDir();
+		leftPartPath = path + File.separator + "left";
 		File leftDir = new File(leftPartPath);
 		leftDir.mkdirs();
-		rightPartPath = "right_partitions";
+		rightPartPath = path + File.separator + "right";
 		File rightDir = new File(rightPartPath);
 		rightDir.mkdirs();
 		currPartition = 0;
@@ -59,7 +61,7 @@ public class HashJoinOperator extends JoinOperator {
 		rightJoinAttribs = new int[rightAttribCols.size()];
 		for(int i = 0; i < leftAttribCols.size(); i++) {
 			leftJoinAttribs[i] = left.getColumnIndex(leftAttribCols.get(i));
-			rightJoinAttribs[i] = left.getColumnIndex(rightAttribCols.get(i));
+			rightJoinAttribs[i] = right.getColumnIndex(rightAttribCols.get(i));
 		}
 		//initialize partitions
 		splitPhase();
@@ -72,6 +74,8 @@ public class HashJoinOperator extends JoinOperator {
 	 * @return
 	 */
 	private boolean areEqual(Tuple left, Tuple right) {
+		assert left != null;
+		assert right != null;
 		for(int i = 0; i < leftJoinAttribs.length; i++) {
 			int l = leftJoinAttribs[i];
 			int r = rightJoinAttribs[i];
@@ -92,57 +96,69 @@ public class HashJoinOperator extends JoinOperator {
 
 		if (leftPartRead == null || rightPartRead == null) {//need to initialize readers
 			//need to initialize build phase
-			currPartition++;
 			if (currPartition >= numOfPartitions) return null;
 			leftPartRead = new TupleReader(leftPartPath + File.separator + "partition" + currPartition);
 			rightPartRead = new TupleReader(rightPartPath + File.separator + "partition" + currPartition);
 			currHashtable = (LinkedList<Tuple>[]) new LinkedList[htBuckets]; 
+			for(int i = 0; i < htBuckets; i++) {
+				currHashtable[i] = new LinkedList<Tuple>();
+			}
 			Tuple tupLeft;
 			while((tupLeft = leftPartRead.getNextTuple()) != null) {
 				int bucket = hash2(htBuckets, tupLeft, leftJoinAttribs);
+				if (currHashtable[bucket] == null) currHashtable[bucket] = new LinkedList<Tuple>();
 				currHashtable[bucket].add(tupLeft);
 			}
 			currProbeEntry = 0; //reset probe entry and tuple index
 			currProbeTupleIdx = 0;
 		}
 		
-		while (currProbeTupleIdx < currHashtable[currProbeEntry].size()) {//try probe with the curr right tuple
+		while (currRight != null && currProbeTupleIdx < currHashtable[currProbeEntry].size()) {//try probe with the curr right tuple
 			Tuple currLeft = currHashtable[currProbeEntry].get(currProbeTupleIdx);
-			if (areEqual(currLeft, currRight)) {
+			if (areEqual(currLeft, currRight)) {//need to evaluate equality again
 				currProbeTupleIdx++;
 				return currLeft.merge(currRight);
 			}
+			currProbeTupleIdx++;
 		}
 		while((currRight = rightPartRead.getNextTuple()) != null) { //need to get the next right tuple to probe
 			currProbeEntry = hash2(htBuckets, currRight, rightJoinAttribs); //new bucket number
+			currProbeTupleIdx = 0;
 			while (currProbeTupleIdx < currHashtable[currProbeEntry].size()) {
 				Tuple currLeft = currHashtable[currProbeEntry].get(currProbeTupleIdx);
 				if (areEqual(currLeft, currRight)) {
 					currProbeTupleIdx++;
 					return currLeft.merge(currRight);
 				}
+				currProbeTupleIdx++;
 			}
 		}
-		while(currPartition++ < numOfPartitions) {//need to build the next partition
+		while(++currPartition < numOfPartitions) {//need to build the next partition
 			//build phase
 			leftPartRead = new TupleReader(leftPartPath + File.separator + "partition" + currPartition);
 			rightPartRead = new TupleReader(rightPartPath + File.separator + "partition" + currPartition);
 			currHashtable = (LinkedList<Tuple>[]) new LinkedList[htBuckets]; //clear the hash table in memory
+			for(int i = 0; i < htBuckets; i++) {
+				currHashtable[i] = new LinkedList<Tuple>();
+			}
 			Tuple tupLeft;
 			while((tupLeft = leftPartRead.getNextTuple()) != null) {
 				int bucket = hash2(htBuckets, tupLeft, leftJoinAttribs);
+				if (currHashtable[bucket] == null) currHashtable[bucket] = new LinkedList<Tuple>();
 				currHashtable[bucket].add(tupLeft);
 			}
 			currProbeEntry = 0; //reset probe entry and tuple index
 			currProbeTupleIdx = 0;
 			while((currRight = rightPartRead.getNextTuple()) != null) { //gets the next right tuple
 				currProbeEntry = hash2(htBuckets, currRight, rightJoinAttribs); //new bucket number
+				currProbeTupleIdx = 0;
 				while (currProbeTupleIdx < currHashtable[currProbeEntry].size()) {//try find the equal tuple in the entry
 					Tuple currLeft = currHashtable[currProbeEntry].get(currProbeTupleIdx);
 					if (areEqual(currLeft, currRight)) {
 						currProbeTupleIdx++;
 						return currLeft.merge(currRight);
 					}
+					currProbeTupleIdx++;
 				}
 			}
 		}
@@ -160,9 +176,10 @@ public class HashJoinOperator extends JoinOperator {
 		//partition left relation
 		TupleWriter[] lWriters = new TupleWriter[numOfPartitions]; //initialize writer of each partition 
 		for (int i = 0; i < numOfPartitions; i++) { //set left write buffers
-			lWriters[i] = new TupleWriter(leftPartPath + File.separator + "partition" + i, this);
+			lWriters[i] = new TupleWriter(leftPartPath + File.separator + "partition" + i, this.leftChild);
+			lWriters[i].writeMetaData();
 		}
-		Tuple tupLeft;
+		Tuple tupLeft = leftChild.getNextTuple();
 		while((tupLeft = leftChild.getNextTuple()) != null) {
 			int partition = hash1(numOfPartitions, tupLeft, leftJoinAttribs); //hash to partition
 			lWriters[partition].setTuple(tupLeft);
@@ -178,10 +195,11 @@ public class HashJoinOperator extends JoinOperator {
 
 		TupleWriter[] rWriters = new TupleWriter[numOfPartitions]; //initialize writer of each partition 
 		for (int i = 0; i < numOfPartitions; i++) { //set right write buffers
-			rWriters[i] = new TupleWriter(rightPartPath + File.separator + "partition" + i, this);
+			rWriters[i] = new TupleWriter(rightPartPath + File.separator + "partition" + i, this.rightChild);
+			rWriters[i].writeMetaData();
 		}
 		Tuple tupRight;
-		while((tupRight = leftChild.getNextTuple()) != null) {
+		while((tupRight = rightChild.getNextTuple()) != null) {
 			int partition = hash1(numOfPartitions, tupRight, rightJoinAttribs); //hash to partition
 			rWriters[partition].setTuple(tupRight);
 			rWriters[partition].writeToBuffer();
@@ -211,21 +229,6 @@ public class HashJoinOperator extends JoinOperator {
 		return result % base;
 	}
 
-	private void joinPhase() {
-		//for now, assume main memory size is large enough to fit every partition 
-		//so we don't have to recurse
-		for (int i = 0; i < numOfPartitions; i++) {
-			//build phase for one left partition
-			TupleReader readPart = new TupleReader(leftPartPath + File.separator + "partition" + i);
-			Tuple tupLeft;
-			List<Tuple>[] hashtable = (LinkedList<Tuple>[]) new LinkedList[htBuckets]; 
-			while((tupLeft = readPart.getNextTuple()) != null) {
-				int bucket = hash2(htBuckets, tupLeft, leftJoinAttribs);
-				hashtable[bucket].add(tupLeft);
-			}
-			//probe phase for one left partition
-		}
-	}
 
 	/**A java hashCode(int[]) like hash function for tuples considering the
 	 * join attributes of this tuple, mod by number of buckets in the hash
@@ -249,8 +252,19 @@ public class HashJoinOperator extends JoinOperator {
 	 */
 	@Override
 	public void accept(PhysicalPlanWriter write) {
-		// TODO Auto-generated method stub
+		write.visit(this);
 
+	}
+	
+	@Override
+	public void reset() {
+		currPartition = 0;
+		leftPartRead = null;
+		rightPartRead = null;
+		currHashtable = null;
+		currProbeTupleIdx = 0;
+		currProbeEntry = 0;
+		currRight = null;
 	}
 
 }

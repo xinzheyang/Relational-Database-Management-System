@@ -149,6 +149,16 @@ public class PhysicalPlanBuilder {
 		SortOperator rightSort = getSortOperator(right, sortOrderRight);
 		return new SMJoinOperator(leftSort, rightSort, cond);
 	}
+	
+	/** Creates a Hash Join operator from the left and right operator along with the join condition.
+	 * @param left
+	 * @param right
+	 * @param cond
+	 * @return
+	 */
+	private HashJoinOperator createHashJoin(Operator left, Operator right, Expression cond) {
+		return new HashJoinOperator(left, right, cond);
+	}
 
 	/** Creates a BNLJ operator from the left and right operator along with the join condition.
 	 * @param left
@@ -173,7 +183,9 @@ public class PhysicalPlanBuilder {
 		if (cond != null) {
 			cond.accept(checkEquity);
 			if (checkEquity.isAllEquity()) {
-				op = createSMJ(left, right, cond);
+				op = createHashJoin(left, right, cond);
+//				op = createSMJ(left, right, cond);
+//				op = createBNLJ(left, right, cond);
 			}
 			else {
 				op = createBNLJ(left, right, cond);

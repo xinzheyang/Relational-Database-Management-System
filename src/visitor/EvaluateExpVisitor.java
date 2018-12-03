@@ -245,7 +245,7 @@ public class EvaluateExpVisitor implements ExpressionVisitor {
 			returnLongValue = currTuple.getColumnValue(colIndex);
 			
 		} catch(NullPointerException e) { 
-			System.out.println("column name non-existent or tuple is null, please check your input");
+			System.err.println("column name non-existent or tuple is null, please check your input");
 		}
 	}
 

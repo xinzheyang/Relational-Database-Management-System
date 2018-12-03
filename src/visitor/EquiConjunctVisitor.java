@@ -232,14 +232,14 @@ public class EquiConjunctVisitor implements ExpressionVisitor {
 			//			if (isLeft) {
 			String attrib = tableColumn.getWholeColumnName();
 			if (leftOp.getColumnIndexMap().containsKey(tableColumn.getWholeColumnName())) {
-				if (!leftCompareCols.contains(attrib)) {//prevent duplicates
+//				if (!leftCompareCols.contains(attrib)) {//prevent duplicates
 					leftCompareCols.add(tableColumn.getWholeColumnName());
-				}
+//				}
 			}
 			else {
-				if (!rightCompareCols.contains(attrib)) {
+//				if (!rightCompareCols.contains(attrib)) {
 					rightCompareCols.add(tableColumn.getWholeColumnName());
-				}
+//				}
 			}
 		}
 

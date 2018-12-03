@@ -73,10 +73,11 @@ public class SMJoinOperator extends JoinOperator {
 	@Override
 	public Tuple getNextTuple() {
 		if (isNull) return null;
-
+		
 		if (tLeft != null && tRight == null) {
 			rightChild.reset(jumpBackToPartition);
 			tRight = rightChild.getNextTuple();
+			if (tRight == null) return null; //if still fail to get next tuple
 			currRightPosition = jumpBackToPartition;
 			tLeft = leftChild.getNextTuple();
 		}

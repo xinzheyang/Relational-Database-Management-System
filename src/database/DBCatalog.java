@@ -31,6 +31,8 @@ public class DBCatalog {
 	private static String outputDir; //path to the directory where the output files to be written are
 	private static String tempDir; //path to the directory where the temp files for external sort to be written are
 	private static int tempDirCount = 0; // a self incrementing counter inside tempDir
+	private static String partitionDir = "partitions";
+	private static int partitionDirCount = 0;
 	private static DBCatalog catalog = null; //singleton object for global reference
 	private static String[] joinMethod;
 	private static String[] sortMethod;
@@ -125,6 +127,10 @@ public class DBCatalog {
 	
 	public static String getTempDir() {
 		return tempDir + File.separator + "temp" + tempDirCount++;
+	}
+	
+	public static String getPartitionDir() {
+		return partitionDir + File.separator + "partition" + partitionDirCount++;
 	}
 	
 	public static void setTempDir(String tempDir) {
