@@ -6,6 +6,9 @@ package physicaloperator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import database.Tuple;
 import visitor.EvaluateExpVisitor;
@@ -22,7 +25,8 @@ public class BNLJoinOperator extends JoinOperator {
 	private ArrayList<Tuple> buffer;
 	private int buffer_size; //	the number of “pages” to devote to each block of the outer relation
 	private Tuple rightTuple;
-	private int index;
+//	private int index;
+	List<Tuple> matchedTuples = new LinkedList<>();
 	
 	/**
 	 * @param left the left operator to be joined
@@ -34,19 +38,11 @@ public class BNLJoinOperator extends JoinOperator {
 		super(left,right,condition);
 		buffer_size = size;
 		buffer = new ArrayList<>();
-		index = 0;
+//		index = 0;
 		rightTuple = rightChild.getNextTuple();
 	}
 	
-//	/**
-//	 * Initializes the BNLJoin operator without condition given
-//	 * @param left the left operator to be joined
-//	 * @param right the right operator to be joined
-//	 */
-//	public BNLJoinOperator(Operator left, Operator right, int size) {
-//		this(left, right, null, size);
-//	}
-	
+
 	/**
 	 * Clear the previous elements in the buffer and fill it with new tuples from the 
 	 * outer relation
@@ -54,8 +50,6 @@ public class BNLJoinOperator extends JoinOperator {
 	public void updateBuffer() {
 		buffer.clear();
 		int numTuples = 4096 * buffer_size / (4 * leftChild.getColumnIndexMap().size());
-//		System.out.println(numTuples);
-//		int numTuples = 1;
 		int i=0;
 		while(i< numTuples) {
 			Tuple left = leftChild.getNextTuple();
@@ -67,7 +61,19 @@ public class BNLJoinOperator extends JoinOperator {
 //		System.out.println("size is " + buffer.size());
 	}
 	
-
+	private Tuple lambda(Tuple tup, Tuple right) {
+		Tuple combinedTuple = tup.merge(right);
+		if(joinCondition == null) return combinedTuple;
+		visitor.setCurrTuple(combinedTuple);
+		visitor.setOperator(this);
+		joinCondition.accept(visitor);
+		boolean result = visitor.getReturnBoolValue();
+		if(result) {
+			return combinedTuple;
+		} else {
+			return null;
+		}
+	}
 	/* (non-Javadoc)
 	 * @see database.Operator#getNextTuple()
 	 */
@@ -77,29 +83,14 @@ public class BNLJoinOperator extends JoinOperator {
 		//while there is another right tuple
 		while(!buffer.isEmpty()) {
 			while(rightTuple != null) {
-				//while the end of the buffer is not reached
-				while(index < buffer.size()) {
-					//combine the two tuples and check if they pass the result;
-//					System.out.println(index);
-					Tuple combinedTuple = buffer.get(index).merge(rightTuple);
-					index++;
-//					if(combinedTuple.getColValues()[0]==179) {
-//						System.out.println(Arrays.toString(combinedTuple.getColValues()));
-//						System.out.println("179");
-//					}
-					if(joinCondition == null) return combinedTuple;
-					visitor.setCurrTuple(combinedTuple);
-					visitor.setOperator(this);
-					joinCondition.accept(visitor);
-					boolean result = visitor.getReturnBoolValue();
-					if(result) {
-//						System.out.println(Arrays.toString(combinedTuple.getColValues()));
-						return combinedTuple;
-					}
+				if (matchedTuples.iterator().hasNext()) {
+					return matchedTuples.iterator().next();
+				} else {
+					//fetch the next right tuple
+					rightTuple = rightChild.getNextTuple();
+					matchedTuples = buffer.parallelStream().map(t -> lambda(t, rightTuple)).collect(Collectors.toList());
 				}
-				index = 0;
-				//fetch the next right tuple
-				rightTuple = rightChild.getNextTuple();
+				
 			}
 			//finish one block, so get another, and starts from the first right child again
 			updateBuffer();
