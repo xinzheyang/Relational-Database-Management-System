@@ -118,6 +118,7 @@ public class BNLJoinOperator extends JoinOperator {
 	@Override
 	public void reset() {
 		super.reset();
+		matchedTuples.clear();
 		buffer.clear();
 		rightTuple = rightChild.getNextTuple();
 	}
