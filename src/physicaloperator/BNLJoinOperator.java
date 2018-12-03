@@ -83,6 +83,9 @@ public class BNLJoinOperator extends JoinOperator {
 	public Tuple getNextTuple() {
 		if(buffer.isEmpty()) updateBuffer();
 		//while there is another right tuple
+		if (!matchedTuples.isEmpty()) {
+			return matchedTuples.pop();
+		} 
 		while(!buffer.isEmpty()) {
 			while(rightTuple != null) {
 				if (!matchedTuples.isEmpty()) {
@@ -96,10 +99,9 @@ public class BNLJoinOperator extends JoinOperator {
 							.collect(Collectors.toCollection(LinkedList::new));
 					//fetch the next right tuple
 					rightTuple = rightChild.getNextTuple();
-					if(rightTuple != null && rightTuple.getColumnValue(0) == 1064) {
-						System.out.println(rightTuple);
+					if (!matchedTuples.isEmpty()) {
+						return matchedTuples.pop();
 					}
-					
 				}
 			}
 			//finish one block, so get another, and starts from the first right child again
@@ -126,19 +128,4 @@ public class BNLJoinOperator extends JoinOperator {
 	public void accept(PhysicalPlanWriter write) {
 		write.visit(this);
 	}
-	
-//	private static String lam(String s) {
-//		return s.toUpperCase();
-//	}
-//	
-//	public static void main(String[] args) {
-//		List<String> buffer = new ArrayList<>();
-//		buffer.add("a");
-//		buffer.add("b");
-//		buffer.add("c");
-//		List<String> temp = buffer.parallelStream().map(s -> lam(s)).collect(Collectors.toList());
-//		Iterator<String> iterator = temp.iterator();
-//		System.out.println(iterator.next());
-//		System.out.println(iterator.next());
-//	}
 }
