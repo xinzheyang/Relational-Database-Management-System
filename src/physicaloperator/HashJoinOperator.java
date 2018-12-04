@@ -5,6 +5,7 @@ package physicaloperator;
 
 import java.io.File;
 
+
 import database.DBCatalog;
 import database.Tuple;
 import database.TupleReader;
@@ -17,13 +18,14 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 import java.util.LinkedList;
 import java.util.ArrayList;
-/**
+
+/** This class implements a hash join operator for equality joins.
  * @author sitianchen
  *
  */
 public class HashJoinOperator extends JoinOperator {
 	private final int mainMemBuffers = 12; //hard-code number of main memory buffers
-	private final int bufferSize = 10;
+	private final int bufferSize = 50;
 	private final int htBuckets = mainMemBuffers - 2; //hard-code number of buckets in hash table 
 	private final int numOfPartitions = mainMemBuffers - 1; //hard-codes number of partitions
 	private String leftPartPath;
@@ -215,6 +217,11 @@ public class HashJoinOperator extends JoinOperator {
 
 	}
 
+	/** Helper for splitPhaseParallelized(), used to update a tuple buffer.
+	 * @param op
+	 * @param buffer
+	 * @param tupleLimit
+	 */
 	private void updateBuffer(Operator op, List<Tuple> buffer, int tupleLimit) {
 		buffer.clear();
 		int i = 0;

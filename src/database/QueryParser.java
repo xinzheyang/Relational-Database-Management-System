@@ -39,7 +39,7 @@ public class QueryParser {
 	 */
 	public void parse() {
 		try {
-			BufferedWriter timeWriter = new BufferedWriter(new FileWriter("query_runtime.txt"));
+//			BufferedWriter timeWriter = new BufferedWriter(new FileWriter("query_runtime.txt"));
 			CCJSqlParser parser = new CCJSqlParser(new FileReader(queriesFile));
 			Statement statement;
 			int count = 1;
@@ -70,6 +70,7 @@ public class QueryParser {
 						file.createNewFile();
 					}
 					DBCatalog.resetTempDir();
+					DBCatalog.resetPartitionDir();
 					continue;
 				}
 				DBCatalog.resetTempDir();
@@ -93,10 +94,10 @@ public class QueryParser {
 					System.err.println("Exception occurred during dumping");
 					e2.printStackTrace();
 				}
-				timeWriter.write(localCount + ". " + "query" + localCount + ": " + (System.currentTimeMillis() - startTime) + "ms\n");
+//				timeWriter.write(localCount + ". " + "query" + localCount + ": " + (System.currentTimeMillis() - startTime) + "ms\n");
 			}
 			
-			timeWriter.close();
+//			timeWriter.close();
 			
 		}catch (Exception e) {
 			System.err.println("Exception occurred during parsing");
